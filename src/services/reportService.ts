@@ -15,6 +15,9 @@ import {
   ItemMovementFilterDto,
   StockReportFilterDto,
   TransactionDto,
+  ProjectSheetDto,
+  TreasuryReportDto,
+  EmployeeCustodyReportDto,
 } from "../types/reports";
 import {
   InvoiceDto,
@@ -240,4 +243,56 @@ export const reportService = {
 
     return apiClient.getBlob("/api/reports/transactions/export", params);
   },
+
+  getProjectSheet: async (
+    projectId: string,
+    fromDate?: string,
+    toDate?: string
+  ) => {
+    const params: any = { projectId };
+    if (fromDate) params.fromDate = fromDate;
+    if (toDate) params.toDate = toDate;
+    return apiClient.get<ProjectSheetDto>("/api/reports/project-sheet", params);
+  },
+
+  getTreasuryReport: async (
+    fromDate?: string,
+    toDate?: string,
+    financialAccountId?: string
+  ) => {
+    const params: any = {};
+    if (fromDate) params.fromDate = fromDate;
+    if (toDate) params.toDate = toDate;
+    if (financialAccountId) params.financialAccountId = financialAccountId;
+    return apiClient.get<TreasuryReportDto>("/api/reports/treasury", params);
+  },
+
+  getSupplierLedger: async (
+    supplierId: string,
+    fromDate?: string,
+    toDate?: string
+  ) => {
+    const params: any = { supplierId };
+    if (fromDate) params.fromDate = fromDate;
+    if (toDate) params.toDate = toDate;
+    return apiClient.get<AccountStatementDto>(
+      "/api/reports/supplier-ledger",
+      params
+    );
+  },
+
+  getEmployeeCustodyReport: async (
+    employeeId: string,
+    fromDate?: string,
+    toDate?: string
+  ) => {
+    const params: any = { employeeId };
+    if (fromDate) params.fromDate = fromDate;
+    if (toDate) params.toDate = toDate;
+    return apiClient.get<EmployeeCustodyReportDto>(
+      "/api/reports/employee-custody",
+      params
+    );
+  },
 };
+

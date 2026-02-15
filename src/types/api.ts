@@ -374,6 +374,9 @@ export interface CreateExpenseDto {
   notes?: string;
   file?: File;
   branchId?: string;
+  projectId?: string;
+  supplierId?: string;
+  category?: string;
 }
 
 export interface UpdateExpenseDto {
@@ -383,6 +386,9 @@ export interface UpdateExpenseDto {
   file?: File;
   removeFile?: boolean;
   branchId?: string;
+  projectId?: string;
+  supplierId?: string;
+  category?: string;
 }
 
 export interface ExpenseFilterDto {
@@ -454,9 +460,91 @@ export interface NotificationDto {
   notificationType: string;
 }
 
-export interface NotificationFilterDto {
-  isRead?: boolean;
-  notificationType?: string;
-  fromDate?: Date;
-  toDate?: Date;
+// Project related DTOs
+export interface ProjectDto {
+  id: string;
+  name: string;
+  description?: string;
+  clientName?: string;
+  startDate?: string;
+  endDate?: string;
+  status: ProjectStatus;
+  budget?: number;
+  totalIncome: number;
+  totalExpenses: number;
+  netProfit: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateProjectDto {
+  name: string;
+  description?: string;
+  clientName?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: ProjectStatus;
+  budget?: number;
+}
+
+export interface UpdateProjectDto {
+  name?: string;
+  description?: string;
+  clientName?: string;
+  startDate?: string;
+  endDate?: string;
+  status?: ProjectStatus;
+  budget?: number;
+}
+
+export enum ProjectStatus {
+  NotStarted = "NotStarted",
+  Active = "Active",
+  Completed = "Completed",
+  OnHold = "OnHold",
+  Cancelled = "Cancelled",
+}
+
+export interface ProjectFilterDto {
+  name?: string;
+  status?: ProjectStatus;
+  clientName?: string;
+}
+
+// Financial Account related DTOs
+export interface FinancialAccountDto {
+  id: string;
+  name: string;
+  type: FinancialAccountType;
+  accountNumber?: string;
+  employeeId?: string;
+  employeeName?: string;
+  balance: number;
+  currency: string;
+  createdAt: string;
+}
+
+export interface CreateFinancialAccountDto {
+  name: string;
+  type: FinancialAccountType;
+  accountNumber?: string;
+  employeeId?: string;
+  initialBalance?: number;
+  currency?: string;
+}
+
+export interface UpdateFinancialAccountDto {
+  name?: string;
+  accountNumber?: string;
+}
+
+export enum FinancialAccountType {
+  Bank = "Bank",
+  Cash = "Cash",
+  Custody = "Custody",
+}
+
+export interface FinancialAccountFilterDto {
+  name?: string;
+  type?: FinancialAccountType;
 }

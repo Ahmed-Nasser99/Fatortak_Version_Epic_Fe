@@ -12,10 +12,16 @@ import Dashboard from "./pages/Dashboard";
 import SellInvoices from "./pages/SellInvoices";
 import BuyInvoices from "./pages/BuyInvoices";
 import Clients from "./pages/Clients";
+import Projects from "./pages/Projects";
 import Suppliers from "./pages/Suppliers";
+import FinancialAccounts from "./pages/FinancialAccounts";
 import Items from "./pages/Items";
 import Expenses from "./pages/Expenses";
 import Reports from "./pages/Reports";
+import ProjectSheetReport from "./pages/Reports/ProjectSheetReport";
+import TreasuryReport from "./pages/Reports/TreasuryReport";
+import SupplierLedgerReport from "./pages/Reports/SupplierLedgerReport";
+import EmployeeCustodyReport from "./pages/Reports/EmployeeCustodyReport";
 import Team from "./pages/Team";
 import Settings from "./pages/Settings";
 import UserProfile from "./pages/UserProfile";
@@ -118,7 +124,9 @@ function AppContent() {
           <Route path="sell-invoices" element={<SellInvoices />} />
           <Route path="buy-invoices" element={<BuyInvoices />} />
           <Route path="clients" element={<Clients />} />
+          <Route path="projects" element={<Projects />} />
           <Route path="suppliers" element={<Suppliers />} />
+          <Route path="financial-accounts" element={<FinancialAccounts />} />
           <Route path="items" element={<Items />} />
           <Route path="expenses" element={<Expenses />} />
           <Route path="reports" element={<Reports />} />
@@ -151,6 +159,11 @@ function AppContent() {
             element={<ItemProfitabilityReport />}
           />
 
+          <Route path="reports" element={<Reports />} />
+          <Route path="reports/project-sheet" element={<ProjectSheetReport />} />
+          <Route path="reports/treasury" element={<TreasuryReport />} />
+          <Route path="reports/supplier-ledger" element={<SupplierLedgerReport />} />
+          <Route path="reports/employee-custody" element={<EmployeeCustodyReport />} />
           <Route path="team" element={<Team />} />
           <Route path="settings" element={<Settings />} />
           <Route path="employees" element={<Employees />} />

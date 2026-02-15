@@ -170,3 +170,60 @@ export const useLowStockReport = (pagination: PaginationDto) => {
     staleTime: 0,
   });
 };
+
+export const useProjectSheetReport = (
+  projectId: string,
+  fromDate?: string,
+  toDate?: string
+) => {
+  return useQuery({
+    queryKey: ["project-sheet", projectId, fromDate, toDate],
+    queryFn: () => reportService.getProjectSheet(projectId, fromDate, toDate),
+    enabled: !!projectId,
+    gcTime: 0,
+    staleTime: 0,
+  });
+};
+
+export const useTreasuryReport = (
+  fromDate?: string,
+  toDate?: string,
+  financialAccountId?: string
+) => {
+  return useQuery({
+    queryKey: ["treasury-report", fromDate, toDate, financialAccountId],
+    queryFn: () =>
+      reportService.getTreasuryReport(fromDate, toDate, financialAccountId),
+    gcTime: 0,
+    staleTime: 0,
+  });
+};
+
+export const useSupplierLedgerReport = (
+  supplierId: string,
+  fromDate?: string,
+  toDate?: string
+) => {
+  return useQuery({
+    queryKey: ["supplier-ledger", supplierId, fromDate, toDate],
+    queryFn: () => reportService.getSupplierLedger(supplierId, fromDate, toDate),
+    enabled: !!supplierId,
+    gcTime: 0,
+    staleTime: 0,
+  });
+};
+
+export const useEmployeeCustodyReport = (
+  employeeId: string,
+  fromDate?: string,
+  toDate?: string
+) => {
+  return useQuery({
+    queryKey: ["employee-custody-report", employeeId, fromDate, toDate],
+    queryFn: () =>
+      reportService.getEmployeeCustodyReport(employeeId, fromDate, toDate),
+    enabled: !!employeeId,
+    gcTime: 0,
+    staleTime: 0,
+  });
+};

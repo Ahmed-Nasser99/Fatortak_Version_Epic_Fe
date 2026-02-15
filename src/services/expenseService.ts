@@ -36,6 +36,9 @@ export const expenseService = {
     formData.append("total", data.total.toString());
     if (data.notes) formData.append("notes", data.notes);
     if (data.file) formData.append("file", data.file);
+    if (data.projectId) formData.append("projectId", data.projectId);
+    if (data.supplierId) formData.append("supplierId", data.supplierId);
+    if (data.category) formData.append("category", data.category);
 
     return apiClient.post<ExpenseDto>("/api/expenses", formData);
   },
@@ -48,6 +51,9 @@ export const expenseService = {
     if (data.total !== undefined) formData.append("total", data.total.toString());
     if (data.notes !== undefined) formData.append("notes", data.notes);
     if (data.file) formData.append("file", data.file);
+    if (data.projectId !== undefined) formData.append("projectId", data.projectId);
+    if (data.supplierId !== undefined) formData.append("supplierId", data.supplierId);
+    if (data.category !== undefined) formData.append("category", data.category);
     if (data.removeFile) formData.append("removeFile", "true");
 
     return apiClient.put<ExpenseDto>(`/api/expenses/update/${id}`, formData);

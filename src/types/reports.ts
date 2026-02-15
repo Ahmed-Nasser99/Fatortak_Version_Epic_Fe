@@ -135,16 +135,54 @@ export interface ItemProfitabilityFilterDto {
   topCount?: number;
 }
 
+// New Report DTOs
+export interface ProjectSheetDto {
+  projectId: string;
+  projectName: string;
+  totalIncome: number;
+  totalExpenses: number;
+  netProfit: number;
+  totalReceivables: number;
+  transactions: TransactionDto[];
+}
+
+export interface TreasuryReportDto {
+  totalBalance: number;
+  accounts: any[]; // FinancialAccountDto[] but circular dependency might be an issue if strict. We can use any or define a subset.
+  transactions: TransactionDto[];
+}
+
+export interface EmployeeCustodyReportDto {
+  employeeId: string;
+  employeeName: string;
+  currentBalance: number;
+  totalReceived: number;
+  totalSpent: number;
+  transactions: TransactionDto[];
+}
+
 export interface TransactionDto {
   id: string;
   transactionDate: string;
+  date?: string;
   type: string;
   amount: number;
   direction: string;
   referenceId?: string;
+  reference?: string;
   referenceType: string;
   description: string;
   paymentMethod: string;
-  createdBy: string;
-  createdAt: string;
+  createdBy?: string;
+  createdAt?: string;
+
+  // New fields
+  projectId?: string;
+  projectName?: string;
+  financialAccountId?: string;
+  financialAccountName?: string;
+  counterpartyAccountId?: string;
+  counterpartyAccountName?: string;
+  attachmentUrl?: string;
+  category?: string;
 }

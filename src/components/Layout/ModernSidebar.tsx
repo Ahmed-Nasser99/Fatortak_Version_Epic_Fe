@@ -34,6 +34,9 @@ import {
   TrendingUp,
   ClipboardList,
   Package2,
+  FolderKanban,
+  Wallet,
+  Landmark,
 } from "lucide-react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useAuth } from "../../contexts/AuthContext";
@@ -107,7 +110,9 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       path: "/sell-invoices",
     },
     { name: t("expenses") || "Expenses", icon: DollarSign, path: "/expenses" },
+    { name: t("financialAccounts") || "Financial Accounts", icon: Wallet, path: "/financial-accounts" },
     { name: t("clients") || "Clients", icon: Users, path: "/clients" },
+    { name: t("projects") || "Projects", icon: FolderKanban, path: "/projects" },
     { name: t("suppliers") || "Suppliers", icon: Truck, path: "/suppliers" },
     { name: t("items") || "Items", icon: Package, path: "/items" },
     {
@@ -148,6 +153,21 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
         //   icon: BarChart3,
         // },
         {
+          name: t("projectSheetReport") || "Project Sheet",
+          path: "/reports/project-sheet",
+          icon: FileText,
+        },
+        {
+          name: t("treasuryReport") || "Treasury Report",
+          path: "/reports/treasury",
+          icon: Landmark,
+        },
+        {
+          name: t("employeeCustodyReport") || "Employee Custody",
+          path: "/reports/employee-custody",
+          icon: Users,
+        },
+        {
           name: t("salesInvoicesReport") || "Sales Invoices",
           path: "/reports/salesInvoices",
           icon: Receipt,
@@ -163,8 +183,8 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           icon: Users,
         },
         {
-          name: t("supplierAccountStatementReport") || "Supplier Statement",
-          path: "/reports/supplierAccountStatement",
+          name: t("supplierAccountStatementReport") || "Supplier Ledger",
+          path: "/reports/supplier-ledger",
           icon: Truck,
         },
         {
