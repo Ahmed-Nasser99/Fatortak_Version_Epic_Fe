@@ -59,3 +59,16 @@ export const useDeleteProject = () => {
     },
   });
 };
+
+export const useUpdateProjectStatus = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: any }) =>
+      projectService.updateProjectStatus(id, status),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", id] });
+    },
+  });
+};

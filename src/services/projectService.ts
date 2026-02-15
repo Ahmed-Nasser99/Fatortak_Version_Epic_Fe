@@ -47,4 +47,9 @@ export const projectService = {
   deleteProject: async (id: string) => {
     return apiClient.delete<boolean>(`/api/projects/${id}`);
   },
+
+  // Update project status
+  updateProjectStatus: async (id: string, status: any) => {
+    return apiClient.patch<ProjectDto>(`/api/projects/${id}/status`, { status });
+  },
 };

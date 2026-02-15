@@ -17,6 +17,7 @@ import { useLanguage } from "../contexts/LanguageContext";
 import {
   useProjects,
   useDeleteProject,
+  useUpdateProjectStatus,
 } from "../hooks/useProjects";
 import { PaginationDto, ProjectFilterDto, ProjectStatus } from "../types/api";
 import { toast } from "react-toastify";
@@ -26,6 +27,13 @@ import {
   Card,
   CardContent,
 } from "../components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../components/ui/select";
 import ProjectModal from "../components/modals/ProjectModal";
 import EnhancedDeleteDialog from "../components/ui/enhanced-delete-dialog";
 // import { useRoleAccess } from "@/hooks/useRoleAccess"; // Assuming role access is needed later
@@ -56,6 +64,7 @@ const Projects: React.FC = () => {
     refetch,
   } = useProjects(pagination, filters);
 
+  const updateStatusMutation = useUpdateProjectStatus();
   const deleteProjectMutation = useDeleteProject();
 
   const projects = projectsResponse?.success
@@ -68,8 +77,8 @@ const Projects: React.FC = () => {
 
   const stats = {
       total: totalCount,
-      active: projects.filter(p => p.status === ProjectStatus.Active).length,
-      completed: projects.filter(p => p.status === ProjectStatus.Completed).length,
+      active: projects.filter((p: any) => p.status === ProjectStatus.Active).length,
+      completed: projects.filter((p: any) => p.status === ProjectStatus.Completed).length,
   };
 
   const handleNewProject = () => {
@@ -112,22 +121,44 @@ const Projects: React.FC = () => {
     setPagination((prev) => ({ ...prev, pageNumber: newPage }));
   };
 
-  const getStatusBadge = (status: ProjectStatus) => {
+  const handleStatusChange = (projectId: string, newStatus: ProjectStatus) => {
+      updateStatusMutation.mutate({ id: projectId, status: newStatus }, {
+          onSuccess: () => {
+              toast.success(isRTL ? "تم تحديث الحالة" : "Status updated");
+          },
+          onError: () => {
+              toast.error(isRTL ? "فشل تحديث الحالة" : "Failed to update status");
+          }
+      });
+  };
+
+  const getStatusColor = (status: ProjectStatus) => {
       switch (status) {
           case ProjectStatus.Active:
-              return <Badge className="bg-emerald-100 text-emerald-800 border-emerald-200">{isRTL ? "نشط" : "Active"}</Badge>;
+              return "bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200";
           case ProjectStatus.Completed:
-              return <Badge className="bg-blue-100 text-blue-800 border-blue-200">{isRTL ? "مكتمل" : "Completed"}</Badge>;
+              return "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200";
             case ProjectStatus.NotStarted:
-                return <Badge className="bg-gray-100 text-gray-800 border-gray-200">{isRTL ? "لم يبدأ" : "Not Started"}</Badge>;
+                return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200";
             case ProjectStatus.OnHold:
-                return <Badge className="bg-yellow-100 text-yellow-800 border-yellow-200">{isRTL ? "معلق" : "On Hold"}</Badge>;
+                return "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200";
             case ProjectStatus.Cancelled:
-                return <Badge className="bg-red-100 text-red-800 border-red-200">{isRTL ? "ملغى" : "Cancelled"}</Badge>;
+                return "bg-red-100 text-red-800 border-red-200 hover:bg-red-200";
           default:
-              return <Badge variant="secondary">{status}</Badge>;
+              return "bg-secondary text-secondary-foreground hover:bg-secondary/80";
       }
   };
+
+  const getStatusLabel = (status: ProjectStatus) => {
+       switch (status) {
+          case ProjectStatus.Active: return isRTL ? "نشط" : "Active";
+          case ProjectStatus.Completed: return isRTL ? "مكتمل" : "Completed";
+          case ProjectStatus.NotStarted: return isRTL ? "لم يبدأ" : "Not Started";
+          case ProjectStatus.OnHold: return isRTL ? "معلق" : "On Hold";
+          case ProjectStatus.Cancelled: return isRTL ? "ملغى" : "Cancelled";
+          default: return status;
+       }
+  }
 
   if (error) {
     return (
@@ -281,7 +312,26 @@ const Projects: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-sm">{project.customerName || "-"}</td>
                         <td className="px-6 py-4 text-sm font-medium">{project.totalBudget ? formatNumber(project.totalBudget) : "-"}</td>
-                        <td className="px-6 py-4">{getStatusBadge(project.status)}</td>
+                        <td className="px-6 py-4">
+                            <div className="w-[140px]">
+                                <Select
+                                    value={project.status}
+                                    onValueChange={(value) => handleStatusChange(project.id, value as ProjectStatus)}
+                                    disabled={updateStatusMutation.isPending}
+                                >
+                                    <SelectTrigger className={`h-8 ${getStatusColor(project.status)} border-2 font-medium`}>
+                                        <SelectValue>{getStatusLabel(project.status)}</SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.values(ProjectStatus).map((status) => (
+                                            <SelectItem key={status} value={status}>
+                                                {getStatusLabel(status)}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
                             <div className="flex flex-col">
                                 {project.startDate && <span>{isRTL ? "من: " : "From: "}{formatDate(project.startDate)}</span>}
@@ -324,7 +374,24 @@ const Projects: React.FC = () => {
                                 <h3 className="font-bold">{project.name}</h3>
                                 <p className="text-sm text-muted-foreground">{project.customerName}</p>
                             </div>
-                            {getStatusBadge(project.status)}
+                            <div className="w-[130px]">
+                                <Select
+                                    value={project.status}
+                                    onValueChange={(value) => handleStatusChange(project.id, value as ProjectStatus)}
+                                    disabled={updateStatusMutation.isPending}
+                                >
+                                    <SelectTrigger className={`h-8 ${getStatusColor(project.status)} border-2 font-medium`}>
+                                        <SelectValue>{getStatusLabel(project.status)}</SelectValue>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {Object.values(ProjectStatus).map((status) => (
+                                            <SelectItem key={status} value={status}>
+                                                {getStatusLabel(status)}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                         <div className="flex justify-between text-sm">
                              <span>{isRTL ? "الميزانية: " : "Budget: "}{project.totalBudget ? formatNumber(project.totalBudget) : "-"}</span>
