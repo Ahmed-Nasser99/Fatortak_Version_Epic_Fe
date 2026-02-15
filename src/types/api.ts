@@ -465,7 +465,8 @@ export interface ProjectDto {
   id: string;
   name: string;
   description?: string;
-  clientName?: string;
+  customerId?: string;
+  customerName?: string;
   startDate?: string;
   endDate?: string;
   status: ProjectStatus;
@@ -480,7 +481,7 @@ export interface ProjectDto {
 export interface CreateProjectDto {
   name: string;
   description?: string;
-  clientName?: string;
+  customerId?: string;
   startDate?: string;
   endDate?: string;
   status?: ProjectStatus;
@@ -490,7 +491,7 @@ export interface CreateProjectDto {
 export interface UpdateProjectDto {
   name?: string;
   description?: string;
-  clientName?: string;
+  customerId?: string;
   startDate?: string;
   endDate?: string;
   status?: ProjectStatus;

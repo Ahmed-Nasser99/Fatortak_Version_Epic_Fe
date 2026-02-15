@@ -279,7 +279,7 @@ const Projects: React.FC = () => {
                           <div className="font-semibold">{project.name}</div>
                           <div className="text-sm text-muted-foreground">{project.description}</div>
                         </td>
-                        <td className="px-6 py-4 text-sm">{project.clientName || "-"}</td>
+                        <td className="px-6 py-4 text-sm">{project.customerName || "-"}</td>
                         <td className="px-6 py-4 text-sm font-medium">{project.budget ? formatNumber(project.budget) : "-"}</td>
                         <td className="px-6 py-4">{getStatusBadge(project.status)}</td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
@@ -322,7 +322,7 @@ const Projects: React.FC = () => {
                         <div className="flex justify-between items-start">
                             <div>
                                 <h3 className="font-bold">{project.name}</h3>
-                                <p className="text-sm text-muted-foreground">{project.clientName}</p>
+                                <p className="text-sm text-muted-foreground">{project.customerName}</p>
                             </div>
                             {getStatusBadge(project.status)}
                         </div>

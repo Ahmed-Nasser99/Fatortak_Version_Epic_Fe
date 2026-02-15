@@ -4,6 +4,7 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import { useCreateProject, useUpdateProject } from "../../hooks/useProjects";
 import { ProjectDto, CreateProjectDto, ProjectStatus } from "../../types/api";
 import { toast } from "react-toastify";
+import ClientSelector from "../ui/ClientSelector";
 
 interface ProjectModalProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
   const [formData, setFormData] = useState<CreateProjectDto>({
     name: project?.name || "",
     description: project?.description || "",
-    clientName: project?.clientName || "",
+    customerId: project?.customerId || undefined,
     startDate: project?.startDate ? project.startDate.split("T")[0] : "",
     endDate: project?.endDate ? project.endDate.split("T")[0] : "",
     status: project?.status || ProjectStatus.NotStarted,
@@ -83,7 +84,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     setFormData({
       name: "",
       description: "",
-      clientName: "",
+      customerId: undefined,
       startDate: "",
       endDate: "",
       status: ProjectStatus.NotStarted,
@@ -148,21 +149,17 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               )}
             </div>
 
-            {/* Client Name */}
+            {/* Client Selector */}
              <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {isRTL ? "اسم العميل" : "Client Name"}
+                {isRTL ? "العميل" : "Client"}
               </label>
-              <input
-                type="text"
-                value={formData.clientName || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, clientName: e.target.value })
+              <ClientSelector
+                value={formData.customerId || ""}
+                onChange={(value) =>
+                  setFormData({ ...formData, customerId: value })
                 }
-                className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
-                  isRTL ? "text-right" : "text-left"
-                }`}
-                placeholder={isRTL ? "اسم العميل" : "Client Name"}
+                placeholder={isRTL ? "اختر العميل" : "Select Client"}
               />
             </div>
 
