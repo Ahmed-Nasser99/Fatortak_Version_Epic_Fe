@@ -470,7 +470,7 @@ export interface ProjectDto {
   startDate?: string;
   endDate?: string;
   status: ProjectStatus;
-  budget?: number;
+  totalBudget?: number;
   totalIncome: number;
   totalExpenses: number;
   netProfit: number;

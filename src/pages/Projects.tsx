@@ -280,7 +280,7 @@ const Projects: React.FC = () => {
                           <div className="text-sm text-muted-foreground">{project.description}</div>
                         </td>
                         <td className="px-6 py-4 text-sm">{project.customerName || "-"}</td>
-                        <td className="px-6 py-4 text-sm font-medium">{project.budget ? formatNumber(project.budget) : "-"}</td>
+                        <td className="px-6 py-4 text-sm font-medium">{project.totalBudget ? formatNumber(project.totalBudget) : "-"}</td>
                         <td className="px-6 py-4">{getStatusBadge(project.status)}</td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
                             <div className="flex flex-col">

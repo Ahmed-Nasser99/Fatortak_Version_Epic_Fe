@@ -190,7 +190,7 @@ class ApiClient {
     const isFormData = data instanceof FormData;
 
     return this.request<T>(endpoint, {
-      method: "POST",
+      method: "PUT",
       body: isFormData ? data : data ? JSON.stringify(data) : undefined,
     });
   }
@@ -198,7 +198,7 @@ class ApiClient {
   // PATCH request
   async patch<T>(endpoint: string, data?: any): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, {
-      method: "POST",
+      method: "PATCH",
       body: data ? JSON.stringify(data) : undefined,
     });
   }
@@ -206,7 +206,7 @@ class ApiClient {
   // DELETE request
   async delete<T>(endpoint: string): Promise<ServiceResult<T>> {
     return this.request<T>(endpoint, {
-      method: "POST",
+      method: "DELETE",
     });
   }
 

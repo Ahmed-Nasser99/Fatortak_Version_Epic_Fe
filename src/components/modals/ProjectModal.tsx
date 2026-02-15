@@ -32,8 +32,32 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     startDate: project?.startDate ? project.startDate.split("T")[0] : "",
     endDate: project?.endDate ? project.endDate.split("T")[0] : "",
     status: project?.status || ProjectStatus.NotStarted,
-    budget: project?.budget || 0,
+    budget: project?.totalBudget || 0,
   });
+
+  React.useEffect(() => {
+    if (project) {
+      setFormData({
+        name: project.name || "",
+        description: project.description || "",
+        customerId: project.customerId || undefined,
+        startDate: project.startDate ? project.startDate.split("T")[0] : "",
+        endDate: project.endDate ? project.endDate.split("T")[0] : "",
+        status: project.status || ProjectStatus.NotStarted,
+        budget: project.totalBudget || 0,
+      });
+    } else {
+        setFormData({
+            name: "",
+            description: "",
+            customerId: undefined,
+            startDate: "",
+            endDate: "",
+            status: ProjectStatus.NotStarted,
+            budget: 0,
+          });
+    }
+  }, [project, isOpen]);
 
   const [errors, setErrors] = useState<Record<string, string>>({});
 
