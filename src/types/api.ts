@@ -532,6 +532,10 @@ export interface CreateFinancialAccountDto {
   employeeId?: string;
   initialBalance?: number;
   currency?: string;
+  bankName?: string;
+  iban?: string;
+  swift?: string;
+  description?: string;
 }
 
 export interface UpdateFinancialAccountDto {

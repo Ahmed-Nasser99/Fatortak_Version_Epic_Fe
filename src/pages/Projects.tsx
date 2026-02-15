@@ -327,7 +327,7 @@ const Projects: React.FC = () => {
                             {getStatusBadge(project.status)}
                         </div>
                         <div className="flex justify-between text-sm">
-                             <span>{isRTL ? "الميزانية: " : "Budget: "}{project.budget ? formatNumber(project.budget) : "-"}</span>
+                             <span>{isRTL ? "الميزانية: " : "Budget: "}{project.totalBudget ? formatNumber(project.totalBudget) : "-"}</span>
                         </div>
                          <div className="flex gap-2 justify-end">
                             <Button variant="outline" size="sm" onClick={() => handleEditProject(project)}>

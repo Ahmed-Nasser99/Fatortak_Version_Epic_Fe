@@ -17,14 +17,15 @@ import {
   useFinancialAccounts,
   useDeleteFinancialAccount,
 } from "../hooks/useFinancialAccounts";
-import { PaginationDto, FinancialAccountFilterDto, FinancialAccountType } from "../types/api";
+import {
+  PaginationDto,
+  FinancialAccountFilterDto,
+  FinancialAccountType,
+} from "../types/api";
 import { toast } from "react-toastify";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import {
-  Card,
-  CardContent,
-} from "../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import FinancialAccountModal from "../components/modals/FinancialAccountModal";
 import EnhancedDeleteDialog from "../components/ui/enhanced-delete-dialog";
 import { formatNumber } from "@/Helpers/localization";
@@ -58,15 +59,15 @@ const FinancialAccounts: React.FC = () => {
   const accounts = accountsResponse?.success
     ? accountsResponse.data?.data || []
     : [];
-  
+
   const totalCount = accountsResponse?.success
     ? accountsResponse.data?.totalCount || 0
     : 0;
 
   // Calculate generic stats based on loaded data (for now)
   const stats = {
-      total: totalCount,
-      totalBalance: accounts.reduce((acc, curr) => acc + (curr.balance || 0), 0),
+    total: totalCount,
+    totalBalance: accounts.reduce((acc, curr) => acc + (curr.balance || 0), 0),
   };
 
   const handleNewAccount = () => {
@@ -91,17 +92,13 @@ const FinancialAccounts: React.FC = () => {
 
       if (result.success) {
         toast.success(
-          isRTL
-            ? "تم حذف الحساب بنجاح"
-            : "Account deleted successfully"
+          isRTL ? "تم حذف الحساب بنجاح" : "Account deleted successfully",
         );
         setDeleteAccountId(null);
         refetch();
       }
     } catch (error) {
-      toast.error(
-        isRTL ? "فشل في حذف الحساب" : "Failed to delete account"
-      );
+      toast.error(isRTL ? "فشل في حذف الحساب" : "Failed to delete account");
     }
   };
 
@@ -109,32 +106,43 @@ const FinancialAccounts: React.FC = () => {
     setPagination((prev) => ({ ...prev, pageNumber: newPage }));
   };
 
-    const getAccountTypeIcon = (type: FinancialAccountType) => {
-        switch (type) {
-            case FinancialAccountType.Bank:
-                return <Landmark className="w-4 h-4" />;
-            case FinancialAccountType.Cash:
-                return <Banknote className="w-4 h-4" />;
-            case FinancialAccountType.Custody:
-                return <Wallet className="w-4 h-4" />;
-            default:
-                return <Building className="w-4 h-4" />;
-        }
-    };
-
-    const getAccountTypeBadge = (type: FinancialAccountType) => {
-         switch (type) {
-            case FinancialAccountType.Bank:
-                return <Badge className="bg-blue-100 text-blue-800 border-blue-200 flex items-center gap-1">{getAccountTypeIcon(type)} {isRTL ? "بنك" : "Bank"}</Badge>;
-            case FinancialAccountType.Cash:
-                return <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">{getAccountTypeIcon(type)} {isRTL ? "خزينة" : "Cash"}</Badge>;
-            case FinancialAccountType.Custody:
-                return <Badge className="bg-purple-100 text-purple-800 border-purple-200 flex items-center gap-1">{getAccountTypeIcon(type)} {isRTL ? "عهدة" : "Custody"}</Badge>;
-            default:
-                return <Badge variant="secondary">{type}</Badge>;
-        }
+  const getAccountTypeIcon = (type: FinancialAccountType) => {
+    switch (type) {
+      case FinancialAccountType.Bank:
+        return <Landmark className="w-4 h-4" />;
+      case FinancialAccountType.Cash:
+        return <Banknote className="w-4 h-4" />;
+      case FinancialAccountType.Custody:
+        return <Wallet className="w-4 h-4" />;
+      default:
+        return <Building className="w-4 h-4" />;
     }
+  };
 
+  const getAccountTypeBadge = (type: FinancialAccountType) => {
+    switch (type) {
+      case FinancialAccountType.Bank:
+        return (
+          <Badge className="bg-blue-100 text-blue-800 border-blue-200 flex items-center gap-1">
+            {getAccountTypeIcon(type)} {isRTL ? "بنك" : "Bank"}
+          </Badge>
+        );
+      case FinancialAccountType.Cash:
+        return (
+          <Badge className="bg-green-100 text-green-800 border-green-200 flex items-center gap-1">
+            {getAccountTypeIcon(type)} {isRTL ? "خزينة" : "Cash"}
+          </Badge>
+        );
+      case FinancialAccountType.Custody:
+        return (
+          <Badge className="bg-purple-100 text-purple-800 border-purple-200 flex items-center gap-1">
+            {getAccountTypeIcon(type)} {isRTL ? "عهدة" : "Custody"}
+          </Badge>
+        );
+      default:
+        return <Badge variant="secondary">{type}</Badge>;
+    }
+  };
 
   if (error) {
     return (
@@ -148,7 +156,7 @@ const FinancialAccounts: React.FC = () => {
               <h2 className="text-xl font-semibold text-destructive mb-2">
                 {isRTL ? "خطأ في تحميل الحسابات" : "Error Loading Accounts"}
               </h2>
-               <Button onClick={() => refetch()} className="w-full">
+              <Button onClick={() => refetch()} className="w-full">
                 {isRTL ? "إعادة المحاولة" : "Retry"}
               </Button>
             </CardContent>
@@ -196,18 +204,22 @@ const FinancialAccounts: React.FC = () => {
           </div>
         </div>
 
-         {/* Stats Grid - Simplified as we don't need complex stats yet */}
+        {/* Stats Grid - Simplified as we don't need complex stats yet */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-sm text-blue-600 font-medium">{isRTL ? "إجمالي الحسابات" : "Total Accounts"}</p>
-                        <p className="text-2xl font-bold text-blue-900">{formatNumber(stats.total)}</p>
-                    </div>
-                    <CreditCard className="w-8 h-8 text-blue-600 opacity-50" />
-                </CardContent>
-            </Card>
-            {/* 
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-300">
+            <CardContent className="p-4 flex items-center justify-between">
+              <div>
+                <p className="text-sm text-blue-600 font-medium">
+                  {isRTL ? "إجمالي الحسابات" : "Total Accounts"}
+                </p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {formatNumber(stats.total)}
+                </p>
+              </div>
+              <CreditCard className="w-8 h-8 text-blue-600 opacity-50" />
+            </CardContent>
+          </Card>
+          {/* 
             <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 hover:shadow-lg transition-all duration-300">
                 <CardContent className="p-4 flex items-center justify-between">
                     <div>
@@ -219,7 +231,6 @@ const FinancialAccounts: React.FC = () => {
             </Card>
              */}
         </div>
-
 
         {/* Search */}
         <Card className="bg-card/60 backdrop-blur-sm border shadow-sm">
@@ -253,42 +264,80 @@ const FinancialAccounts: React.FC = () => {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b bg-muted/30">
-                      <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
+                      <th
+                        className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}
+                      >
                         {isRTL ? "الحساب" : "Account"}
                       </th>
-                      <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
+                      <th
+                        className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}
+                      >
                         {isRTL ? "النوع" : "Type"}
                       </th>
-                      <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
-                         {isRTL ? "تفاصيل البنك" : "Bank Details"}
+                      <th
+                        className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}
+                      >
+                        {isRTL ? "تفاصيل البنك" : "Bank Details"}
                       </th>
-                        <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
-                         {isRTL ? "الرصيد" : "Balance"}
+                      <th
+                        className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}
+                      >
+                        {isRTL ? "الرصيد" : "Balance"}
                       </th>
-                      <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
+                      <th
+                        className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}
+                      >
                         {isRTL ? "إجراءات" : "Actions"}
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
                     {accounts.map((account: any) => (
-                      <tr key={account.id} className="hover:bg-muted/20 transition-colors">
+                      <tr
+                        key={account.id}
+                        className="hover:bg-muted/20 transition-colors"
+                      >
                         <td className="px-6 py-4">
                           <div className="font-semibold">{account.name}</div>
-                          <div className="text-sm text-muted-foreground">{account.description}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {account.description}
+                          </div>
                         </td>
-                        <td className="px-6 py-4">{getAccountTypeBadge(account.accountType)}</td>
+                        <td className="px-6 py-4">
+                          {getAccountTypeBadge(account.type)}
+                        </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
-                            {account.accountType === FinancialAccountType.Bank ? (
-                                <div className="flex flex-col">
-                                    {account.bankName && <span><span className="font-medium">{isRTL ? "البنك: " : "Bank: "}</span>{account.bankName}</span>}
-                                    {account.accountNumber && <span><span className="font-medium">{isRTL ? "رقم الحساب: " : "Acc#: "}</span>{account.accountNumber}</span>}
-                                    {account.iban && <span><span className="font-medium">IBAN: </span>{account.iban}</span>}
-                                </div>
-                            ) : "-"}
+                          {account.type === FinancialAccountType.Bank ? (
+                            <div className="flex flex-col">
+                              {account.bankName && (
+                                <span>
+                                  <span className="font-medium">
+                                    {isRTL ? "البنك: " : "Bank: "}
+                                  </span>
+                                  {account.bankName}
+                                </span>
+                              )}
+                              {account.accountNumber && (
+                                <span>
+                                  <span className="font-medium">
+                                    {isRTL ? "رقم الحساب: " : "Acc#: "}
+                                  </span>
+                                  {account.accountNumber}
+                                </span>
+                              )}
+                              {account.iban && (
+                                <span>
+                                  <span className="font-medium">IBAN: </span>
+                                  {account.iban}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            "-"
+                          )}
                         </td>
                         <td className="px-6 py-4 text-sm font-bold text-emerald-600">
-                             {formatNumber(account.balance)} {account.currency}
+                          {formatNumber(account.balance)} {account.currency}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-1">
@@ -318,43 +367,56 @@ const FinancialAccounts: React.FC = () => {
             </div>
 
             {/* Mobile View */}
-             <div className="lg:hidden divide-y divide-border/50">
-                {accounts.map((account: any) => (
-                    <div key={account.id} className="p-4 space-y-3">
-                        <div className="flex justify-between items-start">
-                            <div>
-                                <h3 className="font-bold">{account.name}</h3>
-                                <p className="text-sm text-muted-foreground">{getAccountTypeBadge(account.accountType)}</p>
-                            </div>
-                             <div className="font-bold text-emerald-600">
-                                {formatNumber(account.balance)} {account.currency}
-                            </div>
-                        </div>
-                        {account.accountType === FinancialAccountType.Bank && (
-                             <div className="text-sm text-muted-foreground">
-                                {account.bankName && <div>{account.bankName}</div>}
-                                {account.accountNumber && <div>{account.accountNumber}</div>}
-                             </div>
-                        )}
-                         <div className="flex gap-2 justify-end">
-                            <Button variant="outline" size="sm" onClick={() => handleEditAccount(account)}>
-                                <Edit className="w-3 h-3" />
-                            </Button>
-                             <Button variant="outline" size="sm" onClick={() => handleDeleteAccount(account.id)} className="text-destructive">
-                                <Trash2 className="w-3 h-3" />
-                            </Button>
-                        </div>
+            <div className="lg:hidden divide-y divide-border/50">
+              {accounts.map((account: any) => (
+                <div key={account.id} className="p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold">{account.name}</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {getAccountTypeBadge(account.type)}
+                      </p>
                     </div>
-                ))}
-             </div>
+                    <div className="font-bold text-emerald-600">
+                      {formatNumber(account.balance)} {account.currency}
+                    </div>
+                  </div>
+                  {account.type === FinancialAccountType.Bank && (
+                    <div className="text-sm text-muted-foreground">
+                      {account.bankName && <div>{account.bankName}</div>}
+                      {account.accountNumber && (
+                        <div>{account.accountNumber}</div>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex gap-2 justify-end">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditAccount(account)}
+                    >
+                      <Edit className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteAccount(account.id)}
+                      className="text-destructive"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-              {/* Pagination */}
+            {/* Pagination */}
             <div className="border-t bg-muted/20 px-6 py-4">
-               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-sm text-muted-foreground">
-                      {isRTL
-                        ? `عرض ${formatNumber(accounts.length)} من ${formatNumber(totalCount)} حسابات`
-                        : `Showing ${formatNumber(accounts.length)} of ${formatNumber(totalCount)} accounts`}
+                  {isRTL
+                    ? `عرض ${formatNumber(accounts.length)} من ${formatNumber(totalCount)} حسابات`
+                    : `Showing ${formatNumber(accounts.length)} of ${formatNumber(totalCount)} accounts`}
                 </div>
                 <div className="flex space-x-2">
                   <Button
@@ -379,7 +441,7 @@ const FinancialAccounts: React.FC = () => {
           </Card>
         )}
 
-         {/* Empty State */}
+        {/* Empty State */}
         {!isLoading && accounts.length === 0 && (
           <Card className="bg-card/60 backdrop-blur-sm">
             <CardContent className="p-12 text-center">
@@ -406,7 +468,7 @@ const FinancialAccounts: React.FC = () => {
         account={editAccount}
         onClose={() => setIsModalOpen(false)}
         onSuccess={() => {
-            refetch();
+          refetch();
         }}
       />
 
@@ -415,7 +477,11 @@ const FinancialAccounts: React.FC = () => {
         onClose={() => setDeleteAccountId(null)}
         onConfirm={handleConfirmDelete}
         title={isRTL ? "حذف الحساب" : "Delete Account"}
-        description={isRTL ? "هل أنت متأكد من حذف هذا الحساب؟" : "Are you sure you want to delete this account?"}
+        description={
+          isRTL
+            ? "هل أنت متأكد من حذف هذا الحساب؟"
+            : "Are you sure you want to delete this account?"
+        }
         itemName={accounts.find((a: any) => a.id === deleteAccountId)?.name}
         isLoading={deleteAccountMutation.isPending}
       />

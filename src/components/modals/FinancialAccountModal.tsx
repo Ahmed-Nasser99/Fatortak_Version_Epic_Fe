@@ -33,7 +33,7 @@ const FinancialAccountModal: React.FC<FinancialAccountModalProps> = ({
 
   const [formData, setFormData] = useState<CreateFinancialAccountDto>({
     name: account?.name || "",
-    accountType: account?.accountType || FinancialAccountType.Bank,
+    type: account?.type || FinancialAccountType.Bank,
     accountNumber: account?.accountNumber || "",
     bankName: account?.bankName || "",
     iban: account?.iban || "",
@@ -52,7 +52,7 @@ const FinancialAccountModal: React.FC<FinancialAccountModalProps> = ({
       if (account) {
           setFormData({
             name: account.name,
-            accountType: account.accountType,
+            type: account.type,
             accountNumber: account.accountNumber || "",
             bankName: account.bankName || "",
             iban: account.iban || "",
@@ -64,7 +64,7 @@ const FinancialAccountModal: React.FC<FinancialAccountModalProps> = ({
       } else {
         setFormData({
             name: "",
-            accountType: FinancialAccountType.Bank,
+            type: FinancialAccountType.Bank,
             accountNumber: "",
             bankName: "",
             iban: "",
@@ -167,10 +167,10 @@ const FinancialAccountModal: React.FC<FinancialAccountModalProps> = ({
                       <label key={type} className={`inline-flex items-center cursor-pointer ${isRTL ? "ml-4" : "mr-4"}`}>
                           <input
                               type="radio"
-                              name="accountType"
+                              name="type"
                               value={type}
-                              checked={formData.accountType === type}
-                              onChange={() => setFormData({...formData, accountType: type})}
+                              checked={formData.type === type}
+                              onChange={() => setFormData({...formData, type: type})}
                               className="form-radio text-purple-600"
                           />
                           <span className="ml-2 mr-2">{type}</span>
@@ -205,7 +205,7 @@ const FinancialAccountModal: React.FC<FinancialAccountModalProps> = ({
             </div>
 
             {/* Bank Fields (Condition: Only if Bank) */}
-            {formData.accountType === FinancialAccountType.Bank && (
+            {formData.type === FinancialAccountType.Bank && (
                 <>
                     <div>
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
