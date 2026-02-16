@@ -50,6 +50,6 @@ export const projectService = {
 
   // Update project status
   updateProjectStatus: async (id: string, status: any) => {
-    return apiClient.patch<ProjectDto>(`/api/projects/${id}/status`, { status });
+    return apiClient.post<ProjectDto>(`/api/projects/${id}/status`, { status });
   },
 };

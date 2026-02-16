@@ -121,15 +121,24 @@ const Projects: React.FC = () => {
     setPagination((prev) => ({ ...prev, pageNumber: newPage }));
   };
 
-  const handleStatusChange = (projectId: string, newStatus: ProjectStatus) => {
-      updateStatusMutation.mutate({ id: projectId, status: newStatus }, {
-          onSuccess: () => {
-              toast.success(isRTL ? "تم تحديث الحالة" : "Status updated");
-          },
-          onError: () => {
-              toast.error(isRTL ? "فشل تحديث الحالة" : "Failed to update status");
-          }
+  const handleStatusChange = async (projectId: string, newStatus: ProjectStatus) => {
+    try {
+      const result = await updateStatusMutation.mutateAsync({
+        id: projectId,
+        status: newStatus,
       });
+
+      if (result.success) {
+        toast.success(isRTL ? "تم تحديث الحالة" : "Status updated");
+      } else {
+        toast.error(
+          result.errorMessage ||
+            (isRTL ? "فشل تحديث الحالة" : "Failed to update status")
+        );
+      }
+    } catch (error) {
+      toast.error(isRTL ? "فشل تحديث الحالة" : "Failed to update status");
+    }
   };
 
   const getStatusColor = (status: ProjectStatus) => {
