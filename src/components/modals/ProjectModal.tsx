@@ -35,35 +35,34 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     customerId: Yup.string()
       .required(isRTL ? "العميل مطلوب" : "Client is required")
       .nullable(),
-    startDate: Yup.date().nullable(),
-    endDate: Yup.date()
-      .nullable()
-      .min(
-        Yup.ref("startDate"),
-        isRTL
-          ? "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء"
-          : "End Date must be after Start Date"
-      ),
-    status: Yup.string(),
-    budget: Yup.number()
-      .min(0, isRTL ? "الميزانية يجب أن تكون موجبة" : "Budget must be positive")
-      .nullable(),
+    startDate: Yup.mixed().nullable(),
+    endDate: Yup.mixed().nullable(),
+    status: Yup.string().nullable(),
+    budget: Yup.number().nullable(),
   });
 
   const formik = useFormik<CreateProjectDto>({
     initialValues: {
       name: project?.name || "",
       description: project?.description || "",
-      customerId: project?.customerId || undefined,
+      customerId: project?.customerId || "",
       startDate: project?.startDate ? project.startDate.split("T")[0] : "",
       endDate: project?.endDate ? project.endDate.split("T")[0] : "",
       status: project?.status || ProjectStatus.Active,
-      budget: project?.totalBudget || undefined,
+      budget: project?.totalBudget || "",
     },
     enableReinitialize: true,
     validationSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (formValues) => {
       try {
+        // Sanitize data
+        const values = {
+          ...formValues,
+          startDate: formValues.startDate || null,
+          endDate: formValues.endDate || null,
+          budget: formValues.budget === "" || formValues.budget === undefined || formValues.budget === null ? null : Number(formValues.budget),
+        };
+
         let result;
         if (isEditing && project) {
           result = await updateProjectMutation.mutateAsync({
@@ -285,8 +284,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               disabled={
                 createProjectMutation.isPending ||
                 updateProjectMutation.isPending ||
-                !formik.isValid ||
-                !formik.dirty
+                !formik.isValid
               }
               className={`flex items-center space-x-2 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 ${
                 isRTL ? "flex-row-reverse space-x-reverse" : ""

@@ -40,12 +40,12 @@ export const projectService = {
 
   // Update project
   updateProject: async (id: string, data: UpdateProjectDto) => {
-    return apiClient.put<ProjectDto>(`/api/projects/${id}`, data);
+    return apiClient.post<ProjectDto>(`/api/projects/${id}/update`, data);
   },
 
   // Delete project
   deleteProject: async (id: string) => {
-    return apiClient.delete<boolean>(`/api/projects/${id}`);
+    return apiClient.post<boolean>(`/api/projects/${id}/delete`, {});
   },
 
   // Update project status
