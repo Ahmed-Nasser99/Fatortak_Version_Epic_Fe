@@ -187,13 +187,12 @@ export const useProjectSheetReport = (
 
 export const useTreasuryReport = (
   fromDate?: string,
-  toDate?: string,
-  financialAccountId?: string
+  toDate?: string
 ) => {
   return useQuery({
-    queryKey: ["treasury-report", fromDate, toDate, financialAccountId],
+    queryKey: ["treasury-report", fromDate, toDate],
     queryFn: () =>
-      reportService.getTreasuryReport(fromDate, toDate, financialAccountId),
+      reportService.getTreasuryReport(fromDate, toDate),
     gcTime: 0,
     staleTime: 0,
   });
@@ -213,17 +212,3 @@ export const useSupplierLedgerReport = (
   });
 };
 
-export const useEmployeeCustodyReport = (
-  employeeId: string,
-  fromDate?: string,
-  toDate?: string
-) => {
-  return useQuery({
-    queryKey: ["employee-custody-report", employeeId, fromDate, toDate],
-    queryFn: () =>
-      reportService.getEmployeeCustodyReport(employeeId, fromDate, toDate),
-    enabled: !!employeeId,
-    gcTime: 0,
-    staleTime: 0,
-  });
-};

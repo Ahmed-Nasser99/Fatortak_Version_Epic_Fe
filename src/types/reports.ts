@@ -148,18 +148,10 @@ export interface ProjectSheetDto {
 
 export interface TreasuryReportDto {
   totalBalance: number;
-  accounts: any[]; // FinancialAccountDto[] but circular dependency might be an issue if strict. We can use any or define a subset.
+  accounts: any[];
   transactions: TransactionDto[];
 }
 
-export interface EmployeeCustodyReportDto {
-  employeeId: string;
-  employeeName: string;
-  currentBalance: number;
-  totalReceived: number;
-  totalSpent: number;
-  transactions: TransactionDto[];
-}
 
 export interface TransactionDto {
   id: string;
@@ -179,10 +171,6 @@ export interface TransactionDto {
   // New fields
   projectId?: string;
   projectName?: string;
-  financialAccountId?: string;
-  financialAccountName?: string;
-  counterpartyAccountId?: string;
-  counterpartyAccountName?: string;
   attachmentUrl?: string;
   category?: string;
 }

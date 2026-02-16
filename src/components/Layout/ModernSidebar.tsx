@@ -37,6 +37,9 @@ import {
   FolderKanban,
   Wallet,
   Landmark,
+  // Accounting Icons
+  BookOpen,
+  Calculator,
 } from "lucide-react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useAuth } from "../../contexts/AuthContext";
@@ -81,6 +84,15 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
     if (pathname.includes("/invoice-templates/")) {
       setOpenSubmenus((prev) => ({ ...prev, invoiceTemplates: true }));
     }
+
+    // Automatically open Accounting submenu if any accounting route is active
+    if (
+      pathname.includes("/chart-of-accounts") ||
+      pathname.includes("/journal-entries") ||
+      pathname.includes("/financial-reports")
+    ) {
+      setOpenSubmenus((prev) => ({ ...prev, "/accounting": true }));
+    }
   }, [pathname]);
 
   // Prevent background scroll on mobile when open
@@ -110,9 +122,34 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       path: "/sell-invoices",
     },
     { name: t("expenses") || "Expenses", icon: DollarSign, path: "/expenses" },
-    { name: t("financialAccounts") || "Financial Accounts", icon: Wallet, path: "/financial-accounts" },
+    {
+      name: isRTL ? "المحاسبة" : "Accounting",
+      icon: Calculator,
+      path: "/accounting",
+      subItems: [
+        {
+          name: isRTL ? "دليل الحسابات" : "Chart of Accounts",
+          path: "/chart-of-accounts",
+          icon: BookOpen,
+        },
+        {
+          name: isRTL ? "قيود اليومية" : "Journal Entries",
+          path: "/journal-entries",
+          icon: FileText,
+        },
+        {
+          name: isRTL ? "التقارير المالية" : "Financial Reports",
+          path: "/financial-reports",
+          icon: BarChart3,
+        },
+      ],
+    },
     { name: t("clients") || "Clients", icon: Users, path: "/clients" },
-    { name: t("projects") || "Projects", icon: FolderKanban, path: "/projects" },
+    {
+      name: t("projects") || "Projects",
+      icon: FolderKanban,
+      path: "/projects",
+    },
     { name: t("suppliers") || "Suppliers", icon: Truck, path: "/suppliers" },
     { name: t("items") || "Items", icon: Package, path: "/items" },
     {
@@ -120,9 +157,21 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       icon: UserCog,
       path: "/hr",
       subItems: [
-        { name: t("employees") || "Employees", path: "/employees", icon: Users },
-        { name: t("departments") || "Departments", path: "/departments", icon: Building2 },
-        { name: t("attendances") || "Attendances", path: "/attendances", icon: CalendarCheck },
+        {
+          name: t("employees") || "Employees",
+          path: "/employees",
+          icon: Users,
+        },
+        {
+          name: t("departments") || "Departments",
+          path: "/departments",
+          icon: Building2,
+        },
+        {
+          name: t("attendances") || "Attendances",
+          path: "/attendances",
+          icon: CalendarCheck,
+        },
         { name: t("payroll") || "Payroll", path: "/payroll", icon: DollarSign },
         {
           name: t("reports") || "Reports",

@@ -14,14 +14,12 @@ import BuyInvoices from "./pages/BuyInvoices";
 import Clients from "./pages/Clients";
 import Projects from "./pages/Projects";
 import Suppliers from "./pages/Suppliers";
-import FinancialAccounts from "./pages/FinancialAccounts";
 import Items from "./pages/Items";
 import Expenses from "./pages/Expenses";
 import Reports from "./pages/Reports";
 import ProjectSheetReport from "./pages/Reports/ProjectSheetReport";
 import TreasuryReport from "./pages/Reports/TreasuryReport";
 import SupplierLedgerReport from "./pages/Reports/SupplierLedgerReport";
-import EmployeeCustodyReport from "./pages/Reports/EmployeeCustodyReport";
 import Team from "./pages/Team";
 import Settings from "./pages/Settings";
 import UserProfile from "./pages/UserProfile";
@@ -59,6 +57,9 @@ import TransactionReport from "./pages/Reports/TransactionReport";
 import CurrentStockReport from "./pages/Reports/CurrentStockReport";
 import ItemMovementReport from "./pages/Reports/ItemMovementReport";
 import ItemProfitabilityReport from "./pages/Reports/ItemProfitabilityReport";
+import ChartOfAccounts from "./pages/ChartOfAccounts";
+import JournalEntries from "./pages/JournalEntries";
+import FinancialReports from "./pages/FinancialReports";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -126,7 +127,9 @@ function AppContent() {
           <Route path="clients" element={<Clients />} />
           <Route path="projects" element={<Projects />} />
           <Route path="suppliers" element={<Suppliers />} />
-          <Route path="financial-accounts" element={<FinancialAccounts />} />
+          <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
+          <Route path="journal-entries" element={<JournalEntries />} />
+          <Route path="financial-reports" element={<FinancialReports />} />
           <Route path="items" element={<Items />} />
           <Route path="expenses" element={<Expenses />} />
           <Route path="reports" element={<Reports />} />
@@ -163,7 +166,6 @@ function AppContent() {
           <Route path="reports/project-sheet" element={<ProjectSheetReport />} />
           <Route path="reports/treasury" element={<TreasuryReport />} />
           <Route path="reports/supplier-ledger" element={<SupplierLedgerReport />} />
-          <Route path="reports/employee-custody" element={<EmployeeCustodyReport />} />
           <Route path="team" element={<Team />} />
           <Route path="settings" element={<Settings />} />
           <Route path="employees" element={<Employees />} />

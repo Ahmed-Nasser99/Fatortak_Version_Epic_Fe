@@ -15,7 +15,6 @@ import { toast } from "react-toastify";
 import BranchSelector from "../ui/BranchSelector";
 import { useMainBranch } from "../../hooks/useBranches";
 import ProjectSelector from "../ui/ProjectSelector";
-import FinancialAccountSelector from "../ui/FinancialAccountSelector";
 
 interface ExpenseModalProps {
   isOpen: boolean;
@@ -41,7 +40,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
     notes: "",
     branchId: "",
     projectId: "",
-    financialAccountId: "",
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -63,7 +61,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         notes: expense.notes || "",
         branchId: expense.branchId || "",
         projectId: expense.projectId || "",
-        financialAccountId: expense.financialAccountId || "",
       });
       setExistingFile(
         expense.fileUrl && expense.fileName
@@ -79,7 +76,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         notes: "",
         branchId: mainBranchResult?.data?.id || "",
         projectId: "",
-        financialAccountId: "",
       });
       setExistingFile(null);
       setSelectedFile(null);
@@ -120,7 +116,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
           notes: formData.notes,
           file: selectedFile || undefined,
           removeFile: removeFile,
-          financialAccountId: formData.financialAccountId || undefined,
         };
         const result = await updateExpenseMutation.mutateAsync({
           id: expense.id,
@@ -294,16 +289,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
               <ProjectSelector
                 value={formData.projectId || ""}
                 onChange={(value) => handleInputChange("projectId", value)}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {isRTL ? "الحساب المالي" : "Financial Account"} *
-              </label>
-              <FinancialAccountSelector
-                value={formData.financialAccountId || ""}
-                onChange={(value) => handleInputChange("financialAccountId", value)}
-                placeholder={isRTL ? "اختر الحساب للدفع" : "Select account to pay from"}
               />
             </div>
           </div>

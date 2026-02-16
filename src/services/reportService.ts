@@ -257,13 +257,11 @@ export const reportService = {
 
   getTreasuryReport: async (
     fromDate?: string,
-    toDate?: string,
-    financialAccountId?: string
+    toDate?: string
   ) => {
     const params: any = {};
     if (fromDate) params.fromDate = fromDate;
     if (toDate) params.toDate = toDate;
-    if (financialAccountId) params.financialAccountId = financialAccountId;
     return apiClient.get<TreasuryReportDto>("/api/reports/treasury", params);
   },
 
@@ -281,18 +279,5 @@ export const reportService = {
     );
   },
 
-  getEmployeeCustodyReport: async (
-    employeeId: string,
-    fromDate?: string,
-    toDate?: string
-  ) => {
-    const params: any = { employeeId };
-    if (fromDate) params.fromDate = fromDate;
-    if (toDate) params.toDate = toDate;
-    return apiClient.get<EmployeeCustodyReportDto>(
-      "/api/reports/employee-custody",
-      params
-    );
-  },
 };
 

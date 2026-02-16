@@ -25,20 +25,17 @@ import {
   Filter,
 } from "lucide-react";
 import { formatNumber, formatDate } from "../../Helpers/localization";
-import FinancialAccountSelector from "../../components/ui/FinancialAccountSelector";
 import { Input } from "../../components/ui/input";
 import { Badge } from "../../components/ui/badge";
 
 const TreasuryReport: React.FC = () => {
   const { t, isRTL } = useLanguage();
-  const [selectedAccountId, setSelectedAccountId] = useState<string>("all");
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
 
   const { data: reportData, isLoading, error } = useTreasuryReport(
     fromDate || undefined,
-    toDate || undefined,
-    selectedAccountId === "all" ? undefined : selectedAccountId
+    toDate || undefined
   );
 
   const report = reportData?.data;
@@ -70,16 +67,6 @@ const TreasuryReport: React.FC = () => {
       <Card>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div className="space-y-2">
-              <label className="text-sm font-medium">
-                {isRTL ? "الحساب" : "Account"}
-              </label>
-              <FinancialAccountSelector
-                value={selectedAccountId}
-                onChange={setSelectedAccountId}
-                allowAll
-              />
-            </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">
                 {isRTL ? "من تاريخ" : "From Date"}
@@ -125,25 +112,6 @@ const TreasuryReport: React.FC = () => {
               </CardContent>
             </Card>
 
-           {/* Accounts List (if viewing all or multiple) */}
-           {(!selectedAccountId || selectedAccountId === 'all') && report.accounts && report.accounts.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {report.accounts.map((acc: any) => (
-                        <Card key={acc.id} className="hover:shadow-md transition-shadow">
-                            <CardContent className="p-4 flex items-center justify-between">
-                                <div>
-                                    <p className="font-semibold text-lg">{acc.name}</p>
-                                    <p className="text-xs text-muted-foreground">{acc.accountType}</p>
-                                </div>
-                                <div className="text-right">
-                                     <p className="font-bold text-xl text-primary">{formatNumber(acc.balance)}</p>
-                                     <p className="text-xs text-muted-foreground">{acc.currency}</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </div>
-           )}
 
 
           {/* Transactions Table */}
@@ -157,7 +125,6 @@ const TreasuryReport: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead className={`text-${isRTL ? "right" : "left"}`}>{isRTL ? "التاريخ" : "Date"}</TableHead>
-                    <TableHead className={`text-${isRTL ? "right" : "left"}`}>{isRTL ? "الحساب" : "Account"}</TableHead>
                     <TableHead className={`text-${isRTL ? "right" : "left"}`}>{isRTL ? "الوصف" : "Description"}</TableHead>
                     <TableHead className={`text-${isRTL ? "right" : "left"}`}>{isRTL ? "النوع" : "Type"}</TableHead>
                     <TableHead className={`text-${isRTL ? "right" : "left"}`}>{isRTL ? "المبلغ" : "Amount"}</TableHead>
@@ -174,7 +141,6 @@ const TreasuryReport: React.FC = () => {
                     report.transactions.map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>{formatDate(transaction.transactionDate)}</TableCell>
-                        <TableCell>{transaction.financialAccountName || "-"}</TableCell>
                         <TableCell>{transaction.description}</TableCell>
                         <TableCell>
                            <Badge variant={transaction.direction === "In" ? "default" : "destructive"} className="flex w-fit items-center gap-1">

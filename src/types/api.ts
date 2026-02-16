@@ -47,18 +47,8 @@ export interface InvoiceCreateDto {
   invoiceType?: string;
   branchId?: string;
   projectId?: string;
-  financialAccountId?: string;
 }
 
-export interface TransferDto {
-  fromAccountId: string;
-  toAccountId: string;
-  amount: number;
-  date: string;
-  description?: string;
-  branchId?: string;
-  projectId?: string;
-}
 
 export interface InvoiceUpdateDto {
   customerName?: string;
@@ -379,7 +369,6 @@ export interface ExpenseDto {
   updatedAt?: Date;
   branchId?: string;
   projectId?: string;
-  financialAccountId?: string;
 }
 
 export interface CreateExpenseDto {
@@ -390,7 +379,6 @@ export interface CreateExpenseDto {
   branchId?: string;
   projectId?: string;
   category?: string;
-  financialAccountId?: string;
 }
 
 export interface UpdateExpenseDto {
@@ -402,7 +390,6 @@ export interface UpdateExpenseDto {
   branchId?: string;
   projectId?: string;
   category?: string;
-  financialAccountId?: string;
 }
 
 export interface ExpenseFilterDto {
@@ -526,44 +513,214 @@ export interface ProjectFilterDto {
   clientName?: string;
 }
 
-// Financial Account related DTOs
-export interface FinancialAccountDto {
+
+// Accounting Module Types
+export enum AccountType {
+  Asset = 1,
+  Liability = 2,
+  Equity = 3,
+  Revenue = 4,
+  Expense = 5,
+}
+
+export enum JournalEntryReferenceType {
+  Manual = 1,
+  Invoice = 2,
+  Expense = 3,
+  Payment = 4,
+  PurchaseInvoice = 5,
+  Reversing = 6,
+  Inventory = 7,
+  Payroll = 8,
+}
+
+export interface AccountDto {
   id: string;
+  tenantId: string;
+  accountCode: string;
   name: string;
-  type: FinancialAccountType;
-  accountNumber?: string;
-  employeeId?: string;
-  employeeName?: string;
-  balance: number;
-  currency: string;
-  createdAt: string;
-}
-
-export interface CreateFinancialAccountDto {
-  name: string;
-  type: FinancialAccountType;
-  accountNumber?: string;
-  employeeId?: string;
-  initialBalance?: number;
-  currency?: string;
-  bankName?: string;
-  iban?: string;
-  swift?: string;
+  accountType: AccountType;
+  accountTypeName: string;
+  parentAccountId?: string;
+  parentAccountName?: string;
+  level: number;
+  isActive: boolean;
+  isPostable: boolean;
   description?: string;
+  createdAt: string;
+  updatedAt?: string;
+  childAccounts?: AccountDto[];
+  balance?: number;
 }
 
-export interface UpdateFinancialAccountDto {
+export interface AccountCreateDto {
+  accountCode: string;
+  name: string;
+  accountType: AccountType;
+  parentAccountId?: string;
+  description?: string;
+  isActive?: boolean;
+  isPostable?: boolean;
+}
+
+export interface AccountUpdateDto {
   name?: string;
-  accountNumber?: string;
+  description?: string;
+  isActive?: boolean;
 }
 
-export enum FinancialAccountType {
-  Bank = "Bank",
-  Cash = "Cash",
-  Custody = "Custody",
-}
-
-export interface FinancialAccountFilterDto {
+export interface AccountFilterDto {
+  accountCode?: string;
   name?: string;
-  type?: FinancialAccountType;
+  accountType?: AccountType;
+  parentAccountId?: string;
+  isActive?: boolean;
+  isPostable?: boolean;
+  includeInactive?: boolean;
+}
+
+export interface JournalEntryLineDto {
+  id: string;
+  journalEntryId: string;
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  debit: number;
+  credit: number;
+  description?: string;
+  reference?: string;
+}
+
+export interface JournalEntryDto {
+  id: string;
+  tenantId: string;
+  entryNumber: string;
+  date: string;
+  referenceType: JournalEntryReferenceType;
+  referenceTypeName: string;
+  referenceId?: string;
+  description?: string;
+  isPosted: boolean;
+  postedAt?: string;
+  createdBy?: string;
+  postedBy?: string;
+  createdAt: string;
+  updatedAt?: string;
+  reversingEntryId?: string;
+  lines: JournalEntryLineDto[];
+  totalDebit: number;
+  totalCredit: number;
+}
+
+export interface JournalEntryLineCreateDto {
+  accountId: string;
+  debit: number;
+  credit: number;
+  description?: string;
+  reference?: string;
+}
+
+export interface JournalEntryCreateDto {
+  date: string;
+  description?: string;
+  lines: JournalEntryLineCreateDto[];
+}
+
+export interface JournalEntryFilterDto {
+  fromDate?: string;
+  toDate?: string;
+  referenceType?: JournalEntryReferenceType;
+  referenceId?: string;
+  isPosted?: boolean;
+  accountId?: string;
+  entryNumber?: string;
+}
+
+export interface AccountBalanceDto {
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  debitTotal: number;
+  creditTotal: number;
+  balance: number;
+  asOfDate?: string;
+}
+
+export interface TrialBalanceItemDto {
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  debitTotal: number;
+  creditTotal: number;
+  balance: number;
+}
+
+export interface TrialBalanceDto {
+  items: TrialBalanceItemDto[];
+  totalDebit: number;
+  totalCredit: number;
+  isBalanced: boolean;
+  asOfDate?: string;
+}
+
+export interface LedgerEntryDto {
+  journalEntryId: string;
+  entryNumber: string;
+  date: string;
+  description?: string;
+  debit: number;
+  credit: number;
+  runningBalance: number;
+  reference?: string;
+}
+
+export interface LedgerDto {
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  fromDate?: string;
+  toDate?: string;
+  entries: LedgerEntryDto[];
+  openingBalance: number;
+  closingBalance: number;
+}
+
+export interface ProfitAndLossItemDto {
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  amount: number;
+}
+
+export interface ProfitAndLossDto {
+  fromDate: string;
+  toDate: string;
+  revenueItems: ProfitAndLossItemDto[];
+  expenseItems: ProfitAndLossItemDto[];
+  totalRevenue: number;
+  totalExpenses: number;
+  netIncome: number;
+}
+
+export interface BalanceSheetItemDto {
+  accountId: string;
+  accountCode: string;
+  accountName: string;
+  balance: number;
+}
+
+export interface BalanceSheetDto {
+  asOfDate: string;
+  assets: BalanceSheetItemDto[];
+  liabilities: BalanceSheetItemDto[];
+  equity: BalanceSheetItemDto[];
+  totalAssets: number;
+  totalLiabilities: number;
+  totalEquity: number;
+  isBalanced: boolean;
+}
+
+export interface PostPaymentDto {
+  invoiceId: string;
+  amount: number;
 }

@@ -38,7 +38,6 @@ export const expenseService = {
     if (data.file) formData.append("file", data.file);
     if (data.projectId) formData.append("projectId", data.projectId);
     if (data.category) formData.append("category", data.category);
-    if (data.financialAccountId) formData.append("financialAccountId", data.financialAccountId);
 
     return apiClient.post<ExpenseDto>("/api/expenses", formData);
   },
@@ -53,7 +52,6 @@ export const expenseService = {
     if (data.file) formData.append("file", data.file);
     if (data.projectId !== undefined) formData.append("projectId", data.projectId);
     if (data.category !== undefined) formData.append("category", data.category);
-    if (data.financialAccountId !== undefined) formData.append("financialAccountId", data.financialAccountId);
     if (data.removeFile) formData.append("removeFile", "true");
 
     return apiClient.post<ExpenseDto>(`/api/expenses/update/${id}`, formData);
