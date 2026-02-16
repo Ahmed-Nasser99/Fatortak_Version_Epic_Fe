@@ -37,8 +37,8 @@ export const expenseService = {
     if (data.notes) formData.append("notes", data.notes);
     if (data.file) formData.append("file", data.file);
     if (data.projectId) formData.append("projectId", data.projectId);
-    if (data.supplierId) formData.append("supplierId", data.supplierId);
     if (data.category) formData.append("category", data.category);
+    if (data.financialAccountId) formData.append("financialAccountId", data.financialAccountId);
 
     return apiClient.post<ExpenseDto>("/api/expenses", formData);
   },
@@ -52,11 +52,11 @@ export const expenseService = {
     if (data.notes !== undefined) formData.append("notes", data.notes);
     if (data.file) formData.append("file", data.file);
     if (data.projectId !== undefined) formData.append("projectId", data.projectId);
-    if (data.supplierId !== undefined) formData.append("supplierId", data.supplierId);
     if (data.category !== undefined) formData.append("category", data.category);
+    if (data.financialAccountId !== undefined) formData.append("financialAccountId", data.financialAccountId);
     if (data.removeFile) formData.append("removeFile", "true");
 
-    return apiClient.put<ExpenseDto>(`/api/expenses/update/${id}`, formData);
+    return apiClient.post<ExpenseDto>(`/api/expenses/update/${id}`, formData);
   },
 
   // Delete expense

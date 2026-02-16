@@ -15,7 +15,6 @@ import { toast } from "react-toastify";
 import BranchSelector from "../ui/BranchSelector";
 import { useMainBranch } from "../../hooks/useBranches";
 import ProjectSelector from "../ui/ProjectSelector";
-import SupplierSelector from "../ui/SupplierSelector";
 import FinancialAccountSelector from "../ui/FinancialAccountSelector";
 
 interface ExpenseModalProps {
@@ -42,7 +41,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
     notes: "",
     branchId: "",
     projectId: "",
-    supplierId: "",
     financialAccountId: "",
   });
 
@@ -65,7 +63,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         notes: expense.notes || "",
         branchId: expense.branchId || "",
         projectId: expense.projectId || "",
-        supplierId: expense.supplierId || "",
         financialAccountId: expense.financialAccountId || "",
       });
       setExistingFile(
@@ -82,7 +79,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         notes: "",
         branchId: mainBranchResult?.data?.id || "",
         projectId: "",
-        supplierId: "",
         financialAccountId: "",
       });
       setExistingFile(null);
@@ -298,15 +294,6 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
               <ProjectSelector
                 value={formData.projectId || ""}
                 onChange={(value) => handleInputChange("projectId", value)}
-              />
-            </div>
-             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {isRTL ? "المورد" : "Supplier"}
-              </label>
-              <SupplierSelector
-                value={formData.supplierId || ""}
-                onChange={(value) => handleInputChange("supplierId", value)}
               />
             </div>
             <div>

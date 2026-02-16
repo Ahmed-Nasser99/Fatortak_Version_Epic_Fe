@@ -47,6 +47,7 @@ export interface InvoiceCreateDto {
   invoiceType?: string;
   branchId?: string;
   projectId?: string;
+  financialAccountId?: string;
 }
 
 export interface TransferDto {
@@ -378,7 +379,6 @@ export interface ExpenseDto {
   updatedAt?: Date;
   branchId?: string;
   projectId?: string;
-  supplierId?: string;
   financialAccountId?: string;
 }
 
@@ -389,7 +389,6 @@ export interface CreateExpenseDto {
   file?: File;
   branchId?: string;
   projectId?: string;
-  supplierId?: string;
   category?: string;
   financialAccountId?: string;
 }
@@ -402,7 +401,6 @@ export interface UpdateExpenseDto {
   removeFile?: boolean;
   branchId?: string;
   projectId?: string;
-  supplierId?: string;
   category?: string;
   financialAccountId?: string;
 }
