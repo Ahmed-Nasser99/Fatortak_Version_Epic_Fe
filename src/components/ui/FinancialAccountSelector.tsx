@@ -14,7 +14,6 @@ interface FinancialAccountSelectorProps {
   onChange: (value: string) => void;
   className?: string;
   placeholder?: string;
-  allowAll?: boolean;
 }
 
 const FinancialAccountSelector: React.FC<FinancialAccountSelectorProps> = ({
@@ -22,9 +21,9 @@ const FinancialAccountSelector: React.FC<FinancialAccountSelectorProps> = ({
   onChange,
   className,
   placeholder,
-  allowAll = false,
 }) => {
   const { t, isRTL } = useLanguage();
+  
   const { data: accountsResponse, isLoading } = useFinancialAccounts({
     pageNumber: 1,
     pageSize: 100,
@@ -40,14 +39,9 @@ const FinancialAccountSelector: React.FC<FinancialAccountSelectorProps> = ({
         <SelectValue placeholder={placeholder || (isRTL ? "اختر الحساب" : "Select Account")} />
       </SelectTrigger>
       <SelectContent>
-        {allowAll && (
-            <SelectItem value="all">
-                {isRTL ? "كل الحسابات" : "All Accounts"}
-            </SelectItem>
-        )}
-        {accounts.map((account: any) => (
+        {accounts.map((account) => (
           <SelectItem key={account.id} value={account.id}>
-            {account.name} ({account.currency})
+            {account.name} ({account.type})
           </SelectItem>
         ))}
         {accounts.length === 0 && !isLoading && (

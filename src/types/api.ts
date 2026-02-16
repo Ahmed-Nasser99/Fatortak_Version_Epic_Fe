@@ -49,6 +49,16 @@ export interface InvoiceCreateDto {
   projectId?: string;
 }
 
+export interface TransferDto {
+  fromAccountId: string;
+  toAccountId: string;
+  amount: number;
+  date: string;
+  description?: string;
+  branchId?: string;
+  projectId?: string;
+}
+
 export interface InvoiceUpdateDto {
   customerName?: string;
   customerEmail?: string;
@@ -369,6 +379,7 @@ export interface ExpenseDto {
   branchId?: string;
   projectId?: string;
   supplierId?: string;
+  financialAccountId?: string;
 }
 
 export interface CreateExpenseDto {
@@ -380,6 +391,7 @@ export interface CreateExpenseDto {
   projectId?: string;
   supplierId?: string;
   category?: string;
+  financialAccountId?: string;
 }
 
 export interface UpdateExpenseDto {
@@ -392,6 +404,7 @@ export interface UpdateExpenseDto {
   projectId?: string;
   supplierId?: string;
   category?: string;
+  financialAccountId?: string;
 }
 
 export interface ExpenseFilterDto {

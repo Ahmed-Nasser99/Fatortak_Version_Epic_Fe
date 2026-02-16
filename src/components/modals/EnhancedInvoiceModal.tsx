@@ -27,6 +27,8 @@ import BranchSelector from "../ui/BranchSelector";
 import { useMainBranch } from "../../hooks/useBranches";
 import { formatNumber, formatDate, parseLocalDate } from "@/Helpers/localization";
 import { DatePicker } from "../ui/date-picker";
+import ProjectSelector from "../ui/ProjectSelector";
+import FinancialAccountSelector from "../ui/FinancialAccountSelector";
 
 interface InvoiceItem {
   id: string;
@@ -71,6 +73,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     status: "Draft" as string,
     invoiceType: isSell ? "Sell" : "Buy",
     branchId: "",
+    projectId: "",
+    financialAccountId: "",
   });
 
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
@@ -364,6 +368,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         status: invoiceData.status,
         invoiceType: isSell ? "Sell" : "Buy",
         branchId: invoiceData.branchId,
+        projectId: invoiceData.projectId,
+        financialAccountId: invoiceData.financialAccountId || undefined,
         items: invoiceItems.map((item) => ({
           ...item,
           discount: item.discount / 100,
@@ -398,6 +404,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
           status: "Draft",
           invoiceType: isSell ? "Sell" : "Buy",
           branchId: mainBranchResult?.data?.id || "",
+          projectId: "",
+          financialAccountId: "",
         });
         setInvoiceItems([]);
         setSelectedCustomer(null);
@@ -530,6 +538,29 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                     label={isRTL ? "الفرع" : "Branch"}
                   />
                 </div>
+                <div className="lg:col-span-1">
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    {isRTL ? "المشروع" : "Project"}
+                  </label>
+                  <ProjectSelector
+                    value={invoiceData.projectId}
+                    onChange={(value) => setInvoiceData(prev => ({ ...prev, projectId: value }))}
+                    className="w-full"
+                  />
+                </div>
+                {(invoiceData.status === "Paid" || invoiceData.status === "PartialPaid") && (
+                  <div className="lg:col-span-1">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      {isRTL ? "الحساب المالي" : "Financial Account"} *
+                    </label>
+                    <FinancialAccountSelector
+                      value={invoiceData.financialAccountId}
+                      onChange={(value) => setInvoiceData(prev => ({ ...prev, financialAccountId: value }))}
+                      className="w-full"
+                      placeholder={isSell ? (isRTL ? "حساب التحصيل" : "Collection Account") : (isRTL ? "حساب الدفع" : "Payment Account")}
+                    />
+                  </div>
+                )}
               </div>
             </div>
 

@@ -29,11 +29,14 @@ import { Card, CardContent } from "../components/ui/card";
 import FinancialAccountModal from "../components/modals/FinancialAccountModal";
 import EnhancedDeleteDialog from "../components/ui/enhanced-delete-dialog";
 import { formatNumber } from "@/Helpers/localization";
+import TransferModal from "../components/modals/TransferModal";
+import { ArrowRightLeft } from "lucide-react";
 
 const FinancialAccounts: React.FC = () => {
   const { t, isRTL } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [editAccount, setEditAccount] = useState<any>(null);
   const [deleteAccountId, setDeleteAccountId] = useState<string | null>(null);
 
@@ -192,15 +195,25 @@ const FinancialAccounts: React.FC = () => {
               </div>
             </div>
 
-            <Button
-              onClick={handleNewAccount}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-2 border-white/30 hover:border-white/50 px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              <span className="font-semibold">
-                {isRTL ? "حساب جديد" : "New Account"}
-              </span>
-            </Button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                onClick={() => setIsTransferModalOpen(true)}
+                variant="outline"
+                className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-white/30 px-6 py-3 rounded-xl shadow-lg transition-all"
+              >
+                <ArrowRightLeft className="w-5 h-5 mr-2" />
+                <span>{isRTL ? "تحويل أموال" : "Transfer Funds"}</span>
+              </Button>
+              <Button
+                onClick={handleNewAccount}
+                className="bg-white text-indigo-600 hover:bg-gray-100 px-6 py-3 rounded-xl shadow-lg transition-all font-bold"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                <span>
+                  {isRTL ? "حساب جديد" : "New Account"}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -484,6 +497,15 @@ const FinancialAccounts: React.FC = () => {
         }
         itemName={accounts.find((a: any) => a.id === deleteAccountId)?.name}
         isLoading={deleteAccountMutation.isPending}
+      />
+
+      <TransferModal
+        isOpen={isTransferModalOpen}
+        onClose={() => setIsTransferModalOpen(false)}
+        onSuccess={() => {
+          setIsTransferModalOpen(false);
+          refetch();
+        }}
       />
     </div>
   );
