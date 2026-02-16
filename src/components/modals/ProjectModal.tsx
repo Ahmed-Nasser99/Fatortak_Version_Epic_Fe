@@ -32,10 +32,10 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       isRTL ? "اسم المشروع مطلوب" : "Project Name is required"
     ),
     description: Yup.string(),
-    customerId: Yup.string().nullable(),
-    startDate: Yup.date().required(
-      isRTL ? "تاريخ البدء مطلوب" : "Start Date is required"
-    ),
+    customerId: Yup.string()
+      .required(isRTL ? "العميل مطلوب" : "Client is required")
+      .nullable(),
+    startDate: Yup.date().nullable(),
     endDate: Yup.date()
       .nullable()
       .min(
@@ -44,7 +44,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
           ? "تاريخ الانتهاء يجب أن يكون بعد تاريخ البدء"
           : "End Date must be after Start Date"
       ),
-    status: Yup.string().required(isRTL ? "الحالة مطلوبة" : "Status is required"),
+    status: Yup.string(),
     budget: Yup.number()
       .min(0, isRTL ? "الميزانية يجب أن تكون موجبة" : "Budget must be positive")
       .nullable(),
@@ -57,8 +57,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       customerId: project?.customerId || undefined,
       startDate: project?.startDate ? project.startDate.split("T")[0] : "",
       endDate: project?.endDate ? project.endDate.split("T")[0] : "",
-      status: project?.status || ProjectStatus.NotStarted,
-      budget: project?.totalBudget || 0,
+      status: project?.status || ProjectStatus.Active,
+      budget: project?.totalBudget || undefined,
     },
     enableReinitialize: true,
     validationSchema,
@@ -165,7 +165,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
             {/* Client Selector */}
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {isRTL ? "العميل" : "Client"}
+                {isRTL ? "العميل" : "Client"} *
               </label>
               <ClientSelector
                 value={formik.values.customerId || ""}

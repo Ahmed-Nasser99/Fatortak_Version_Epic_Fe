@@ -46,6 +46,7 @@ export interface InvoiceCreateDto {
   currency: string;
   invoiceType?: string;
   branchId?: string;
+  projectId?: string;
 }
 
 export interface InvoiceUpdateDto {
@@ -366,6 +367,8 @@ export interface ExpenseDto {
   createdAt: Date;
   updatedAt?: Date;
   branchId?: string;
+  projectId?: string;
+  supplierId?: string;
 }
 
 export interface CreateExpenseDto {
