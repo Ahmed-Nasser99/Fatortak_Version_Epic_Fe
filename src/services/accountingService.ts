@@ -61,11 +61,11 @@ export const accountingService = {
   },
 
   updateAccount: async (id: string, data: AccountUpdateDto) => {
-    return apiClient.put<AccountDto>(`/api/accounting/accounts/${id}`, data);
+    return apiClient.post<AccountDto>(`/api/accounting/accounts/${id}/update`, data);
   },
 
   deleteAccount: async (id: string) => {
-    return apiClient.delete<boolean>(`/api/accounting/accounts/${id}`);
+    return apiClient.post<boolean>(`/api/accounting/accounts/${id}/delete`, {});
   },
 
   // Journal Entry Management
@@ -87,6 +87,7 @@ export const accountingService = {
       if (filters.isPosted !== undefined) params.isPosted = filters.isPosted;
       if (filters.accountId) params.accountId = filters.accountId;
       if (filters.entryNumber) params.entryNumber = filters.entryNumber;
+      if (filters.projectId) params.projectId = filters.projectId;
     }
 
     return apiClient.get<PagedResponseDto<JournalEntryDto>>(

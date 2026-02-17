@@ -611,6 +611,8 @@ export interface JournalEntryDto {
   createdAt: string;
   updatedAt?: string;
   reversingEntryId?: string;
+  projectId?: string;
+  projectName?: string;
   lines: JournalEntryLineDto[];
   totalDebit: number;
   totalCredit: number;
@@ -638,6 +640,7 @@ export interface JournalEntryFilterDto {
   isPosted?: boolean;
   accountId?: string;
   entryNumber?: string;
+  projectId?: string;
 }
 
 export interface AccountBalanceDto {

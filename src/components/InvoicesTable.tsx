@@ -51,6 +51,8 @@ const InvoicesTable: React.FC<InvoicesTableProps> = ({ data, type, onView, onEdi
         return 'bg-gradient-to-r from-red-100 to-rose-100 text-red-800 border-red-200 dark:from-red-900/30 dark:to-rose-900/30 dark:text-red-400 dark:border-red-700';
       case 'draft':
         return 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border-gray-200 dark:from-gray-800 dark:to-slate-800 dark:text-gray-400 dark:border-gray-600';
+      case 'cancelled':
+        return 'bg-gradient-to-r from-orange-100 to-amber-100 text-orange-800 border-orange-200 dark:from-orange-900/30 dark:to-orange-800/30 dark:text-orange-400 dark:border-orange-700';
       default:
         return 'bg-gradient-to-r from-gray-100 to-slate-100 text-gray-800 border-gray-200 dark:from-gray-800 dark:to-slate-800 dark:text-gray-400 dark:border-gray-600';
     }
@@ -66,6 +68,8 @@ const InvoicesTable: React.FC<InvoicesTableProps> = ({ data, type, onView, onEdi
         return isRTL ? 'متأخر' : 'Overdue';
       case 'draft':
         return isRTL ? 'مسودة' : 'Draft';
+      case 'cancelled':
+        return isRTL ? 'ملغي' : 'Cancelled';
       default:
         return status;
     }
@@ -178,13 +182,18 @@ const InvoicesTable: React.FC<InvoicesTableProps> = ({ data, type, onView, onEdi
                         <Eye className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2 text-blue-600" />
                         <span className="font-medium">{t('view') || (isRTL ? 'عرض' : 'View')}</span>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => onEdit(invoice)} className="rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/20">
+                      <DropdownMenuItem 
+                        onClick={() => onEdit(invoice)} 
+                        disabled={invoice.status.toLowerCase() === 'cancelled'}
+                        className={`rounded-lg hover:bg-yellow-50 dark:hover:bg-yellow-900/20 ${invoice.status.toLowerCase() === 'cancelled' ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
                         <Edit className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2 text-yellow-600" />
                         <span className="font-medium">{t('edit') || (isRTL ? 'تعديل' : 'Edit')}</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         onClick={() => onDelete(invoice.id)}
-                        className="rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
+                        disabled={invoice.status.toLowerCase() === 'cancelled'}
+                        className={`rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 ${invoice.status.toLowerCase() === 'cancelled' ? 'opacity-50 cursor-not-allowed' : ''}`}
                       >
                         <Trash2 className="w-4 h-4 mr-2 rtl:mr-0 rtl:ml-2" />
                         <span className="font-medium">{t('delete') || (isRTL ? 'حذف' : 'Delete')}</span>
