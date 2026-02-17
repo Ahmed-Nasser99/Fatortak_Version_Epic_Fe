@@ -671,6 +671,13 @@ const BuyInvoices: React.FC = () => {
                           isRTL ? "right" : "left"
                         } text-sm font-semibold text-muted-foreground`}
                       >
+                        {isRTL ? "المشروع" : "Project"}
+                      </th>
+                      <th
+                        className={`px-6 py-4 text-${
+                          isRTL ? "right" : "left"
+                        } text-sm font-semibold text-muted-foreground`}
+                      >
                         {t("amount")}
                       </th>
                       <th
@@ -725,6 +732,13 @@ const BuyInvoices: React.FC = () => {
                               <Users className="w-4 h-4 text-muted-foreground" />
                             </div>
                             <span>{invoice.customerName}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center space-x-2 text-sm">
+                            <span className="text-muted-foreground">
+                              {invoice.projectName || "-"}
+                            </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">

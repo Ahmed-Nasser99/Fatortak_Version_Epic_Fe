@@ -15,6 +15,9 @@ export interface InvoiceDto {
   updatedAt?: string;
   discount?: number;
   branchId?: string;
+  projectId?: string;
+  projectName?: string;
+  customerId?: string;
 }
 
 export interface PagedResponseDto<T> {
@@ -546,6 +549,7 @@ export interface AccountDto {
   level: number;
   isActive: boolean;
   isPostable: boolean;
+  isSystem: boolean;
   description?: string;
   createdAt: string;
   updatedAt?: string;

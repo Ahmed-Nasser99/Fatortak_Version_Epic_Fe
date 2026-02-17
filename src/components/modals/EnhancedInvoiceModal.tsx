@@ -367,7 +367,6 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         invoiceType: isSell ? "Sell" : "Buy",
         branchId: invoiceData.branchId,
         projectId: invoiceData.projectId,
-        projectId: invoiceData.projectId,
         items: invoiceItems.map((item) => ({
           ...item,
           discount: item.discount / 100,
@@ -402,7 +401,6 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
           status: "Draft",
           invoiceType: isSell ? "Sell" : "Buy",
           branchId: mainBranchResult?.data?.id || "",
-          projectId: "",
           projectId: "",
         });
         setInvoiceItems([]);

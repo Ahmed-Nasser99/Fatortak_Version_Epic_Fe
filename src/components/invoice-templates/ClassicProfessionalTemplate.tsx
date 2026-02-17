@@ -132,6 +132,12 @@ const ClassicProfessionalTemplate: React.FC<TemplateProps> = ({
               <span className="font-semibold">{t("dueDate")}:</span>{" "}
               {formatDate(invoice.dueDate)}
             </p>
+            {invoice.projectName && (
+              <p className="text-gray-700 dark:text-gray-300 text-sm mt-1">
+                <span className="font-semibold">{isRTL ? "المشروع" : "Project"}:</span>{" "}
+                {invoice.projectName}
+              </p>
+            )}
           </div>
         </div>
 

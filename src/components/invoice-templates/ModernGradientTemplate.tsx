@@ -142,6 +142,16 @@ const ModernGradientTemplate: React.FC<TemplateProps> = ({
                 {formatDate(invoice.dueDate)}
               </div>
             </div>
+            {invoice.projectName && (
+              <div>
+                <div className="text-xs text-gray-500 uppercase mb-1">
+                  {isRTL ? "المشروع" : "Project"}
+                </div>
+                <div className="font-semibold text-gray-900 dark:text-white">
+                  {invoice.projectName}
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>

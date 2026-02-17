@@ -88,7 +88,7 @@ const ChartOfAccounts: React.FC = () => {
   const deleteAccountMutation = useDeleteAccount();
 
   const accounts = accountsResponse?.data?.data || [];
-  const hierarchy = hierarchyResponse?.data?.data || [];
+  const hierarchy = hierarchyResponse?.data || [];
 
   const accountTypeColors: Record<AccountType, string> = {
     [AccountType.Asset]: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200",
@@ -112,6 +112,7 @@ const ChartOfAccounts: React.FC = () => {
 
   const handleCreateAccount = () => {
     setSelectedAccount(null);
+    setFormDataForNewAccount(null);
     setIsCreateModalOpen(true);
   };
 
@@ -139,75 +140,116 @@ const ChartOfAccounts: React.FC = () => {
     }
   };
 
+  const handleAddChild = (parentAccount: AccountDto) => {
+    setSelectedAccount(null); // Reset for new account
+    // Pre-populate parent ID for the modal
+    // We might need to update CreateAccountModal to accept a defaultParentId
+    setFormDataForNewAccount({
+        parentAccountId: parentAccount.id,
+        accountType: parentAccount.accountType,
+        accountCode: "", // Let it be generated or entered
+        name: "",
+        isActive: true,
+        isPostable: true,
+        description: ""
+    });
+    setIsCreateModalOpen(true);
+  };
+
+  // State to pass to the modal
+  const [formDataForNewAccount, setFormDataForNewAccount] = useState<AccountCreateDto | null>(null);
+
   const renderAccountTree = (accountList: AccountDto[], level: number = 0) => {
     return accountList.map((account) => {
       const hasChildren = account.childAccounts && account.childAccounts.length > 0;
       const isExpanded = expandedAccounts.has(account.id);
 
       return (
-        <div key={account.id} className="mb-1">
+        <div key={account.id} className="group">
           <div
-            className={`flex items-center gap-2 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800 ${
-              level > 0 ? "ml-4" : ""
+            className={`flex items-center gap-2 p-2 rounded-lg transition-all duration-200 hover:bg-white hover:shadow-sm dark:hover:bg-gray-800 border border-transparent hover:border-gray-200 dark:hover:border-gray-700 ${
+              level > 0 ? "" : "font-semibold bg-gray-50/50 dark:bg-gray-900/30"
             }`}
-            style={{ paddingLeft: `${level * 1.5}rem` }}
+            style={{ marginLeft: `${level * 1.5}rem` }}
           >
-            {hasChildren && (
-              <button
-                onClick={() => toggleExpand(account.id)}
-                className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
-              >
-                {isExpanded ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronRight className="w-4 h-4" />
-                )}
-              </button>
-            )}
-            {!hasChildren && <div className="w-6" />}
+            <div className="flex items-center gap-1 min-w-[32px]">
+              {hasChildren ? (
+                <button
+                  onClick={() => toggleExpand(account.id)}
+                  className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded transition-colors"
+                >
+                  {isExpanded ? (
+                    <ChevronDown className="w-4 h-4 text-gray-600" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4 text-gray-600" />
+                  )}
+                </button>
+              ) : (
+                <div className="w-6 h-6 flex items-center justify-center">
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-300 dark:bg-gray-600" />
+                </div>
+              )}
+            </div>
+
             <div className="flex-1 flex items-center gap-3">
-              <span className="font-mono text-sm text-gray-600 dark:text-gray-400">
+              <span className="font-mono text-xs px-1.5 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-gray-600 dark:text-gray-400">
                 {account.accountCode}
               </span>
-              <span className="flex-1">{account.name}</span>
-              <Badge
-                className={accountTypeColors[account.accountType]}
-              >
-                {account.accountTypeName}
-              </Badge>
-              {account.isPostable && (
-                <Badge variant="outline" className="text-xs">
-                  Postable
-                </Badge>
-              )}
-              {account.balance !== undefined && (
-                <span className="font-semibold">
-                  {formatCurrency(account.balance)}
-                </span>
-              )}
-              <div className="flex gap-1">
+              <span className="flex-1 truncate text-sm lg:text-base">
+                {account.name}
+              </span>
+              
+              <div className="hidden sm:flex items-center gap-2">
+                {account.isPostable && (
+                  <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider opacity-60">
+                    {isRTL ? "قابل للترحيل" : "Postable"}
+                  </Badge>
+                )}
+                {account.balance !== undefined && (
+                  <span className={`text-sm font-medium ${account.balance < 0 ? 'text-red-500' : 'text-emerald-600'}`}>
+                    {formatCurrency(account.balance)}
+                  </span>
+                )}
+              </div>
+
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
+                  className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+                  onClick={() => handleAddChild(account)}
+                  title={isRTL ? "إضافة حساب فرعي" : "Add Sub-account"}
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8"
                   onClick={() => handleEditAccount(account)}
                 >
                   <Edit className="w-4 h-4" />
                 </Button>
-                {!hasChildren && (
+                {!account.isSystem && (
                   <Button
                     variant="ghost"
-                    size="sm"
+                    size="icon"
+                    className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
                     onClick={() => handleDeleteAccount(account.id)}
                   >
-                    <Trash2 className="w-4 h-4 text-red-500" />
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 )}
               </div>
             </div>
           </div>
           {hasChildren && isExpanded && account.childAccounts && (
-            <div className="ml-4">
-              {renderAccountTree(account.childAccounts, level + 1)}
+            <div className="relative">
+                {/* Connecting Line */}
+                <div className="absolute left-[11px] top-0 bottom-0 w-px bg-gray-200 dark:bg-gray-700 ml-[-0px]" style={{ marginLeft: `${level * 1.5}rem` }} />
+                <div className="">
+                {renderAccountTree(account.childAccounts, level + 1)}
+                </div>
             </div>
           )}
         </div>
@@ -215,158 +257,135 @@ const ChartOfAccounts: React.FC = () => {
     });
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header */}
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                  <BookOpen className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-                </div>
-                <div>
-                  <CardTitle className="text-2xl">
-                    {isRTL ? "دليل الحسابات" : "Chart of Accounts"}
-                  </CardTitle>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {isRTL
-                      ? "إدارة الحسابات المحاسبية"
-                      : "Manage your accounting accounts"}
-                  </p>
-                </div>
-              </div>
-              <Button onClick={handleCreateAccount}>
-                <Plus className="w-4 h-4 mr-2" />
-                {isRTL ? "إضافة حساب" : "Add Account"}
-              </Button>
-            </div>
-          </CardHeader>
-        </Card>
+  const groupedHierarchy = hierarchy.reduce((acc, account) => {
+    // Handle both numeric and string values for accountType
+    let typeValue = account.accountType as any;
+    if (typeof typeValue === "string") {
+      typeValue = (AccountType as any)[typeValue];
+    }
+    
+    if (!acc[typeValue]) acc[typeValue] = [];
+    acc[typeValue].push(account);
+    return acc;
+  }, {} as Record<number, AccountDto[]>);
 
-        {/* Filters */}
-        <Card>
+  const accountTypeNames: Record<number, string> = {
+    [AccountType.Asset]: isRTL ? "الأصول" : "Assets",
+    [AccountType.Liability]: isRTL ? "الخصوم" : "Liabilities",
+    [AccountType.Equity]: isRTL ? "حقوق الملكية" : "Equity",
+    [AccountType.Revenue]: isRTL ? "الإيرادات" : "Revenue",
+    [AccountType.Expense]: isRTL ? "المصروفات" : "Expenses",
+  };
+
+  return (
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto space-y-8">
+        {/* Header Section */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
+                {isRTL ? "دليل الحسابات" : "Chart of Accounts"}
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400">
+                {isRTL
+                    ? "هنا يمكنك إدارة شجرة الحسابات المحاسبية الخاصة بك"
+                    : "Manage your complex accounting structures with ease."}
+            </p>
+          </div>
+          <Button 
+            onClick={handleCreateAccount}
+            className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20 px-6"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            {isRTL ? "إضافة حساب رئيسي" : "Add Root Account"}
+          </Button>
+        </div>
+
+        {/* Global Search and Filter */}
+        <Card className="border-none shadow-sm overflow-hidden bg-white/50 backdrop-blur-sm dark:bg-slate-900/50">
           <CardContent className="p-4">
-            <div className="flex gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <Input
-                    placeholder={
-                      isRTL ? "بحث عن حساب..." : "Search accounts..."
-                    }
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  className="pl-10 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700"
+                  placeholder={isRTL ? "بحث في شجرة الحسابات..." : "Search accounts tree..."}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
               <Select
                 value={selectedAccountType}
-                onValueChange={(value) =>
-                  setSelectedAccountType(value as AccountType | "all")
-                }
+                onValueChange={(val) => setSelectedAccountType(val as any)}
               >
-                <SelectTrigger className="w-48">
-                  <SelectValue
-                    placeholder={
-                      isRTL ? "نوع الحساب" : "Account Type"
-                    }
-                  />
+                <SelectTrigger className="w-full md:w-56 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                  <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">
-                    {isRTL ? "جميع الأنواع" : "All Types"}
-                  </SelectItem>
-                  <SelectItem value={AccountType.Asset.toString()}>
-                    Asset
-                  </SelectItem>
-                  <SelectItem value={AccountType.Liability.toString()}>
-                    Liability
-                  </SelectItem>
-                  <SelectItem value={AccountType.Equity.toString()}>
-                    Equity
-                  </SelectItem>
-                  <SelectItem value={AccountType.Revenue.toString()}>
-                    Revenue
-                  </SelectItem>
-                  <SelectItem value={AccountType.Expense.toString()}>
-                    Expense
-                  </SelectItem>
+                  <SelectItem value="all">{isRTL ? "كل الأنواع" : "All Types"}</SelectItem>
+                  {Object.entries(accountTypeNames).map(([val, name]) => (
+                    <SelectItem key={val} value={val}>{name}</SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
           </CardContent>
         </Card>
 
-        {/* Accounts List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>
-              {isRTL ? "قائمة الحسابات" : "Accounts List"}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-              </div>
+        {/* Dynamic Tree List */}
+        <div className="grid gap-8">
+             {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-20 gap-4">
+                    <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
+                    <p className="text-sm font-medium text-slate-500">
+                        {isRTL ? "جاري تحميل البيانات..." : "Loading accounting data..."}
+                    </p>
+                </div>
             ) : (
-              <div className="space-y-1">
-                {hierarchy.length > 0
-                  ? renderAccountTree(hierarchy)
-                  : accounts.length > 0
-                  ? accounts.map((account) => (
-                      <div
-                        key={account.id}
-                        className="flex items-center gap-3 p-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
-                      >
-                        <span className="font-mono text-sm text-gray-600 dark:text-gray-400 w-20">
-                          {account.accountCode}
-                        </span>
-                        <span className="flex-1">{account.name}</span>
-                        <Badge
-                          className={accountTypeColors[account.accountType]}
-                        >
-                          {account.accountTypeName}
-                        </Badge>
-                        <div className="flex gap-1">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEditAccount(account)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteAccount(account.id)}
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
+              groupedHierarchy &&
+                Object.entries(groupedHierarchy)
+                  .filter(
+                    ([type]) =>
+                      selectedAccountType === "all" ||
+                      selectedAccountType === Number(type)
+                  )
+                  .map(([type, accounts]) => (
+                    <div key={type} className="space-y-4">
+                        <div className="flex items-center gap-3 px-1">
+                            <div className={`w-1 h-6 rounded-full ${
+                                type === AccountType.Asset.toString() ? 'bg-blue-500' :
+                                type === AccountType.Liability.toString() ? 'bg-red-500' :
+                                type === AccountType.Equity.toString() ? 'bg-emerald-500' :
+                                type === AccountType.Revenue.toString() ? 'bg-purple-500' : 'bg-orange-500'
+                            }`} />
+                            <h2 className="text-sm font-bold uppercase tracking-widest text-slate-500 dark:text-slate-400">
+                                {accountTypeNames[parseInt(type)]}
+                            </h2>
+                            <Badge variant="secondary" className="ml-auto rounded-full px-2.5">
+                                {accounts.length}
+                            </Badge>
                         </div>
-                      </div>
-                    ))
-                  : (
-                      <div className="text-center py-12 text-gray-500">
-                        {isRTL
-                          ? "لا توجد حسابات"
-                          : "No accounts found"}
-                      </div>
-                    )}
-              </div>
+                        <Card className="border-none shadow-sm ring-1 ring-slate-200 dark:ring-slate-800">
+                            <CardContent className="p-2 md:p-4 space-y-1">
+                                {renderAccountTree(accounts)}
+                            </CardContent>
+                        </Card>
+                    </div>
+                ))
             )}
-          </CardContent>
-        </Card>
+        </div>
 
         {/* Create Account Modal */}
         <CreateAccountModal
           isOpen={isCreateModalOpen}
-          onClose={() => setIsCreateModalOpen(false)}
+          onClose={() => {
+            setIsCreateModalOpen(false);
+            setFormDataForNewAccount(null);
+          }}
+          initialData={formDataForNewAccount}
           onSuccess={() => {
             setIsCreateModalOpen(false);
+            setFormDataForNewAccount(null);
             refetch();
           }}
         />
@@ -397,12 +416,14 @@ interface CreateAccountModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: AccountCreateDto | null;
 }
 
 const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
+  initialData
 }) => {
   const { isRTL } = useLanguage();
   const createAccountMutation = useCreateAccount();
@@ -415,20 +436,27 @@ const CreateAccountModal: React.FC<CreateAccountModalProps> = ({
     isPostable: false,
   });
 
+  React.useEffect(() => {
+    if (initialData) {
+        setFormData(initialData);
+    } else {
+        setFormData({
+            accountCode: "",
+            name: "",
+            accountType: AccountType.Asset,
+            description: "",
+            isActive: true,
+            isPostable: false,
+        });
+    }
+  }, [initialData, isOpen]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       const result = await createAccountMutation.mutateAsync(formData);
       if (result.success) {
         onSuccess();
-        setFormData({
-          accountCode: "",
-          name: "",
-          accountType: AccountType.Asset,
-          description: "",
-          isActive: true,
-          isPostable: false,
-        });
       }
     } catch (error: any) {
       // Error handled by mutation
