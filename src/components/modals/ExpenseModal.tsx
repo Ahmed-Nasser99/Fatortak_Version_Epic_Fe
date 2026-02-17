@@ -15,6 +15,7 @@ import { toast } from "react-toastify";
 import BranchSelector from "../ui/BranchSelector";
 import { useMainBranch } from "../../hooks/useBranches";
 import ProjectSelector from "../ui/ProjectSelector";
+import AccountSelector from "../ui/AccountSelector";
 
 interface ExpenseModalProps {
   isOpen: boolean;
@@ -40,6 +41,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
     notes: "",
     branchId: "",
     projectId: "",
+    accountId: "",
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -61,6 +63,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         notes: expense.notes || "",
         branchId: expense.branchId || "",
         projectId: expense.projectId || "",
+        accountId: expense.accountId || "",
       });
       setExistingFile(
         expense.fileUrl && expense.fileName
@@ -76,6 +79,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         notes: "",
         branchId: mainBranchResult?.data?.id || "",
         projectId: "",
+        accountId: "",
       });
       setExistingFile(null);
       setSelectedFile(null);
@@ -116,6 +120,9 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
           notes: formData.notes,
           file: selectedFile || undefined,
           removeFile: removeFile,
+          accountId: formData.accountId,
+          branchId: formData.branchId,
+          projectId: formData.projectId,
         };
         const result = await updateExpenseMutation.mutateAsync({
           id: expense.id,
@@ -289,6 +296,15 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
               <ProjectSelector
                 value={formData.projectId || ""}
                 onChange={(value) => handleInputChange("projectId", value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {isRTL ? "الحساب" : "Account"} *
+              </label>
+              <AccountSelector
+                value={formData.accountId || ""}
+                onChange={(value) => handleInputChange("accountId", value)}
               />
             </div>
           </div>
