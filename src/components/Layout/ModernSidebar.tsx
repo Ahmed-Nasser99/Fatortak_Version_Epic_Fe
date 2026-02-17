@@ -40,6 +40,7 @@ import {
   // Accounting Icons
   BookOpen,
   Calculator,
+  Tag,
 } from "lucide-react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useAuth } from "../../contexts/AuthContext";
@@ -88,6 +89,7 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
     // Automatically open Accounting submenu if any accounting route is active
     if (
       pathname.includes("/chart-of-accounts") ||
+      pathname.includes("/expense-categories") ||
       pathname.includes("/journal-entries") ||
       pathname.includes("/financial-reports")
     ) {
@@ -131,6 +133,11 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           name: isRTL ? "دليل الحسابات" : "Chart of Accounts",
           path: "/chart-of-accounts",
           icon: BookOpen,
+        },
+        {
+          name: isRTL ? "تصنيفات المصاريف" : "Expense Categories",
+          path: "/expense-categories",
+          icon: Tag,
         },
         {
           name: isRTL ? "قيود اليومية" : "Journal Entries",

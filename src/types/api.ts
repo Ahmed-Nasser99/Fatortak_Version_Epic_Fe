@@ -372,8 +372,10 @@ export interface ExpenseDto {
   updatedAt?: Date;
   branchId?: string;
   projectId?: string;
-  accountId?: string;
-  accountName?: string;
+  categoryId?: string;
+  categoryName?: string;
+  paymentAccountId?: string;
+  paymentAccountName?: string;
 }
 
 export interface CreateExpenseDto {
@@ -383,8 +385,8 @@ export interface CreateExpenseDto {
   file?: File;
   branchId?: string;
   projectId?: string;
-  accountId?: string;
-  category?: string;
+  categoryId?: string;
+  paymentAccountId?: string;
 }
 
 export interface UpdateExpenseDto {
@@ -395,8 +397,26 @@ export interface UpdateExpenseDto {
   removeFile?: boolean;
   branchId?: string;
   projectId?: string;
+  categoryId?: string;
+  paymentAccountId?: string;
+}
+
+export interface ExpenseCategoryDto {
+  id: string;
+  name: string;
+  accountId: string;
+  accountName?: string;
+  accountCode?: string;
+}
+
+export interface CreateExpenseCategoryDto {
+  name: string;
+  accountId: string;
+}
+
+export interface UpdateExpenseCategoryDto {
+  name?: string;
   accountId?: string;
-  category?: string;
 }
 
 export interface ExpenseFilterDto {

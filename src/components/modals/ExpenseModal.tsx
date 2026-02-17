@@ -15,7 +15,8 @@ import { toast } from "react-toastify";
 import BranchSelector from "../ui/BranchSelector";
 import { useMainBranch } from "../../hooks/useBranches";
 import ProjectSelector from "../ui/ProjectSelector";
-import AccountSelector from "../ui/AccountSelector";
+import CategorySelector from "../ui/CategorySelector";
+import DataSourceSelector from "../ui/DataSourceSelector";
 
 interface ExpenseModalProps {
   isOpen: boolean;
@@ -41,7 +42,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
     notes: "",
     branchId: "",
     projectId: "",
-    accountId: "",
+    categoryId: "",
+    paymentAccountId: "",
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -63,7 +65,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         notes: expense.notes || "",
         branchId: expense.branchId || "",
         projectId: expense.projectId || "",
-        accountId: expense.accountId || "",
+        categoryId: expense.categoryId || "",
+        paymentAccountId: expense.paymentAccountId || "",
       });
       setExistingFile(
         expense.fileUrl && expense.fileName
@@ -79,7 +82,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         notes: "",
         branchId: mainBranchResult?.data?.id || "",
         projectId: "",
-        accountId: "",
+        categoryId: "",
+        paymentAccountId: "",
       });
       setExistingFile(null);
       setSelectedFile(null);
@@ -120,7 +124,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
           notes: formData.notes,
           file: selectedFile || undefined,
           removeFile: removeFile,
-          accountId: formData.accountId,
+          categoryId: formData.categoryId,
+          paymentAccountId: formData.paymentAccountId,
           branchId: formData.branchId,
           projectId: formData.projectId,
         };
@@ -298,14 +303,25 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
                 onChange={(value) => handleInputChange("projectId", value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {isRTL ? "الحساب" : "Account"} *
-              </label>
-              <AccountSelector
-                value={formData.accountId || ""}
-                onChange={(value) => handleInputChange("accountId", value)}
-              />
+            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {isRTL ? "التصنيف" : "Category"} *
+                </label>
+                <CategorySelector
+                  value={formData.categoryId || ""}
+                  onChange={(value) => handleInputChange("categoryId", value)}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {isRTL ? "مصدر الدفع" : "Payment Source"} *
+                </label>
+                <DataSourceSelector
+                  value={formData.paymentAccountId || ""}
+                  onChange={(value) => handleInputChange("paymentAccountId", value)}
+                />
+              </div>
             </div>
           </div>
 

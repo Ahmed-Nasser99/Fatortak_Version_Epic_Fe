@@ -425,8 +425,16 @@ const Expenses: React.FC = () => {
 
                     <CardContent className="pt-0 pb-5">
                       <div className={isRTL ? "text-right" : "text-left"}>
+                        <div className="flex flex-wrap gap-2 mb-3">
+                          <Badge variant="secondary" className="bg-orange-50 text-orange-700 border-orange-200">
+                            {expense.categoryName}
+                          </Badge>
+                          <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider opacity-70">
+                            {expense.paymentAccountName}
+                          </Badge>
+                        </div>
                         {expense.notes && (
-                          <p className="text-lg text-gray-600 dark:text-gray-400 line-clamp-3 mb-3">
+                          <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-3 mb-3">
                             {expense.notes}
                           </p>
                         )}
@@ -466,6 +474,20 @@ const Expenses: React.FC = () => {
                           } text-sm font-bold text-gray-900 dark:text-white`}
                         >
                           {isRTL ? "المبلغ" : "Amount"}
+                        </th>
+                        <th
+                          className={`px-6 py-4 ${
+                            isRTL ? "text-right" : "text-left"
+                          } text-sm font-bold text-gray-900 dark:text-white`}
+                        >
+                          {isRTL ? "التصنيف" : "Category"}
+                        </th>
+                        <th
+                          className={`px-6 py-4 ${
+                            isRTL ? "text-right" : "text-left"
+                          } text-sm font-bold text-gray-900 dark:text-white`}
+                        >
+                          {isRTL ? "مصدر الدفع" : "Payment Source"}
                         </th>
                         <th
                           className={`px-6 py-4 ${
@@ -519,6 +541,24 @@ const Expenses: React.FC = () => {
                             <span className="text-lg font-bold text-blue-600 dark:text-blue-400">
                               {formatNumber(expense.total)}{" "}
                               {isRTL ? "ج.م" : "EGP"}
+                            </span>
+                          </td>
+                          <td
+                            className={`px-6 py-4 ${
+                              isRTL ? "text-right" : "text-left"
+                            } `}
+                          >
+                            <Badge variant="secondary" className="bg-orange-50 text-orange-700 border-orange-200">
+                              {expense.categoryName}
+                            </Badge>
+                          </td>
+                          <td
+                            className={`px-6 py-4 ${
+                              isRTL ? "text-right" : "text-left"
+                            } `}
+                          >
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              {expense.paymentAccountName}
                             </span>
                           </td>
                           <td

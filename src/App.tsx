@@ -60,6 +60,7 @@ import ItemProfitabilityReport from "./pages/Reports/ItemProfitabilityReport";
 import ChartOfAccounts from "./pages/ChartOfAccounts";
 import JournalEntries from "./pages/JournalEntries";
 import FinancialReports from "./pages/FinancialReports";
+import ExpenseCategories from "./pages/ExpenseCategories";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -128,6 +129,7 @@ function AppContent() {
           <Route path="projects" element={<Projects />} />
           <Route path="suppliers" element={<Suppliers />} />
           <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
+          <Route path="expense-categories" element={<ExpenseCategories />} />
           <Route path="journal-entries" element={<JournalEntries />} />
           <Route path="financial-reports" element={<FinancialReports />} />
           <Route path="items" element={<Items />} />
