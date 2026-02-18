@@ -777,3 +777,8 @@ export interface ReplenishCustodyByAccountDto {
   sourceAccountId?: string;
   description?: string;
 }
+
+export interface CreateCustodyAccountDto {
+  name: string;
+  description?: string;
+}

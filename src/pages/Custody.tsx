@@ -15,6 +15,7 @@ import {
   useGiveCustodyByAccount,
   useReturnCustodyByAccount,
   useReplenishCustodyByAccount,
+  useCreateCustodyAccount,
   useAccounts,
 } from "../hooks/useAccounting";
 import { Button } from "../components/ui/button";
@@ -52,12 +53,17 @@ const Custody: React.FC = () => {
   const [isGiveModalOpen, setIsGiveModalOpen] = useState(false);
   const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
   const [isReplenishModalOpen, setIsReplenishModalOpen] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   // Form states
   const [amount, setAmount] = useState<string>("");
   const [sourceAccountId, setSourceAccountId] = useState<string>("");
   const [destinationAccountId, setDestinationAccountId] = useState<string>("");
   const [description, setDescription] = useState<string>("");
+
+  // Create account form state
+  const [newAccountName, setNewAccountName] = useState("");
+  const [newAccountDescription, setNewAccountDescription] = useState("");
 
   // Fetch all accounts to filter custody accounts and for source/destination selection
   const { data: accountsResponse, isLoading: accountsLoading } = useAccounts(
@@ -87,6 +93,7 @@ const Custody: React.FC = () => {
   const giveCustodyMutation = useGiveCustodyByAccount();
   const returnCustodyMutation = useReturnCustodyByAccount();
   const replenishCustodyMutation = useReplenishCustodyByAccount();
+  const createAccountMutation = useCreateCustodyAccount();
 
   const resetForm = () => {
     setAmount("");
@@ -149,6 +156,23 @@ const Custody: React.FC = () => {
     } catch (error) {}
   };
 
+  const handleCreateAccount = async () => {
+    if (!newAccountName) {
+      toast.error(isRTL ? "يرجى إدخال اسم الموظف" : "Please enter employee name");
+      return;
+    }
+
+    try {
+      await createAccountMutation.mutateAsync({
+        name: newAccountName,
+        description: newAccountDescription,
+      });
+      setIsCreateModalOpen(false);
+      setNewAccountName("");
+      setNewAccountDescription("");
+    } catch (error) {}
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6">
       <div className="max-w-7xl mx-auto space-y-6" dir={isRTL ? "rtl" : "ltr"}>
@@ -169,6 +193,17 @@ const Custody: React.FC = () => {
                     : "Manage employee custodies and financial operations via accounts"}
                 </p>
               </div>
+            </div>
+            <div className="flex gap-4">
+              <Button
+                variant="secondary"
+                size="lg"
+                className="bg-white/10 hover:bg-white/20 text-white border-white/20 px-8 rounded-2xl backdrop-blur-sm transition-all duration-300"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                <Plus className="w-5 h-5 mr-2 ml-2" />
+                {isRTL ? "إضافة موظف جديد" : "Add New Employee"}
+              </Button>
             </div>
           </div>
         </div>
@@ -525,6 +560,61 @@ const Custody: React.FC = () => {
               >
                 {replenishCustodyMutation.isPending && <Loader2 className="w-4 h-4 animate-spin mr-2" />}
                 {isRTL ? "إتمام العملية" : "Complete Operation"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Create Account Modal */}
+        <Dialog open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-blue-600" />
+                {isRTL ? "إضافة موظف جديد" : "Add New Employee"}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="grid gap-6 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="create-account-name" className="items-center flex gap-1">
+                  {isRTL ? "اسم الموظف" : "Employee Name"}
+                  <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="create-account-name"
+                  value={newAccountName}
+                  onChange={(e) => setNewAccountName(e.target.value)}
+                  placeholder={isRTL ? "مثال: أحمد محمد" : "e.g. John Doe"}
+                  className="rounded-xl"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="create-account-description">{isRTL ? "ملاحظات" : "Description"}</Label>
+                <Input
+                  id="create-account-description"
+                  value={newAccountDescription}
+                  onChange={(e) => setNewAccountDescription(e.target.value)}
+                  placeholder={isRTL ? "أي تفاصيل إضافية..." : "Any additional details..."}
+                  className="rounded-xl"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="rounded-xl"
+              >
+                {isRTL ? "إلغاء" : "Cancel"}
+              </Button>
+              <Button
+                onClick={handleCreateAccount}
+                disabled={createAccountMutation.isPending}
+                className="bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-lg shadow-blue-500/20"
+              >
+                {createAccountMutation.isPending && (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                )}
+                {isRTL ? "إضافة" : "Add"}
               </Button>
             </DialogFooter>
           </DialogContent>

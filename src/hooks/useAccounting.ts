@@ -11,6 +11,7 @@ import {
   GiveCustodyByAccountDto,
   ReturnCustodyByAccountDto,
   ReplenishCustodyByAccountDto,
+  CreateCustodyAccountDto,
 } from "../types/api";
 import { toast } from "sonner";
 
@@ -315,6 +316,22 @@ export const useReplenishCustodyByAccount = () => {
     },
     onError: (error: any) => {
       toast.error(error.message || "Failed to replenish custody");
+    },
+  });
+};
+
+export const useCreateCustodyAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: CreateCustodyAccountDto) =>
+      accountingService.createCustodyAccount(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      toast.success("Custody account created successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to create custody account");
     },
   });
 };

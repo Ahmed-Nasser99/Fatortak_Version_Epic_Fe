@@ -18,6 +18,7 @@ import {
   GiveCustodyByAccountDto,
   ReturnCustodyByAccountDto,
   ReplenishCustodyByAccountDto,
+  CreateCustodyAccountDto,
 } from "../types/api";
 
 export const accountingService = {
@@ -226,6 +227,10 @@ export const accountingService = {
       "/api/accounting/custody/replenish-by-account",
       data
     );
+  },
+
+  createCustodyAccount: async (data: CreateCustodyAccountDto) => {
+    return apiClient.post<AccountDto>("/api/accounting/custody/accounts", data);
   },
 };
 
