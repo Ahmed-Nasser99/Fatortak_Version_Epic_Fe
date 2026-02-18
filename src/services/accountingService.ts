@@ -15,6 +15,9 @@ import {
   PagedResponseDto,
   PaginationDto,
   PostPaymentDto,
+  GiveCustodyByAccountDto,
+  ReturnCustodyByAccountDto,
+  ReplenishCustodyByAccountDto,
 } from "../types/api";
 
 export const accountingService = {
@@ -200,6 +203,28 @@ export const accountingService = {
   getExpensePostingStatus: async (expenseId: number) => {
     return apiClient.get<{ expenseId: number; isPosted: boolean }>(
       `/api/accounting/posting/expense/${expenseId}/status`
+    );
+  },
+
+
+  giveCustodyByAccount: async (data: GiveCustodyByAccountDto) => {
+    return apiClient.post<{ success: boolean; message: string }>(
+      "/api/accounting/custody/give-by-account",
+      data
+    );
+  },
+
+  returnCustodyByAccount: async (data: ReturnCustodyByAccountDto) => {
+    return apiClient.post<{ success: boolean; message: string }>(
+      "/api/accounting/custody/return-by-account",
+      data
+    );
+  },
+
+  replenishCustodyByAccount: async (data: ReplenishCustodyByAccountDto) => {
+    return apiClient.post<{ success: boolean; message: string }>(
+      "/api/accounting/custody/replenish-by-account",
+      data
     );
   },
 };

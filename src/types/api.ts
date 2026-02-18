@@ -755,3 +755,25 @@ export interface PostPaymentDto {
   invoiceId: string;
   amount: number;
 }
+
+
+export interface GiveCustodyByAccountDto {
+  accountId: string;
+  amount: number;
+  sourceAccountId?: string;
+  description?: string;
+}
+
+export interface ReturnCustodyByAccountDto {
+  accountId: string;
+  amount: number;
+  destinationAccountId?: string;
+  description?: string;
+}
+
+export interface ReplenishCustodyByAccountDto {
+  accountId: string;
+  amount: number;
+  sourceAccountId?: string;
+  description?: string;
+}

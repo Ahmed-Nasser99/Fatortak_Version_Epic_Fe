@@ -8,6 +8,9 @@ import {
   JournalEntryFilterDto,
   PaginationDto,
   PostPaymentDto,
+  GiveCustodyByAccountDto,
+  ReturnCustodyByAccountDto,
+  ReplenishCustodyByAccountDto,
 } from "../types/api";
 import { toast } from "sonner";
 
@@ -264,3 +267,54 @@ export const useExpensePostingStatus = (expenseId: number) => {
   });
 };
 
+
+export const useGiveCustodyByAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: GiveCustodyByAccountDto) =>
+      accountingService.giveCustodyByAccount(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["journalEntries"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      toast.success("Custody given successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to give custody");
+    },
+  });
+};
+
+export const useReturnCustodyByAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: ReturnCustodyByAccountDto) =>
+      accountingService.returnCustodyByAccount(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["journalEntries"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      toast.success("Custody returned successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to return custody");
+    },
+  });
+};
+
+export const useReplenishCustodyByAccount = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: ReplenishCustodyByAccountDto) =>
+      accountingService.replenishCustodyByAccount(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["journalEntries"] });
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      toast.success("Custody replenished successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to replenish custody");
+    },
+  });
+};

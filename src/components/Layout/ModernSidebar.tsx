@@ -89,11 +89,18 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
     // Automatically open Accounting submenu if any accounting route is active
     if (
       pathname.includes("/chart-of-accounts") ||
-      pathname.includes("/expense-categories") ||
       pathname.includes("/journal-entries") ||
       pathname.includes("/financial-reports")
     ) {
       setOpenSubmenus((prev) => ({ ...prev, "/accounting": true }));
+    }
+
+    // Automatically open Expenses submenu if any expense route is active
+    if (
+      pathname.includes("/expenses") ||
+      pathname.includes("/expense-categories")
+    ) {
+      setOpenSubmenus((prev) => ({ ...prev, "/expenses-group": true }));
     }
   }, [pathname]);
 
@@ -123,7 +130,23 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       icon: Receipt,
       path: "/sell-invoices",
     },
-    { name: t("expenses") || "Expenses", icon: DollarSign, path: "/expenses" },
+    {
+      name: t("expenses") || "Expenses",
+      icon: DollarSign,
+      path: "/expenses-group",
+      subItems: [
+        {
+          name: t("expenses") || "Expenses",
+          path: "/expenses",
+          icon: DollarSign,
+        },
+        {
+          name: isRTL ? "تصنيفات المصاريف" : "Expense Categories",
+          path: "/expense-categories",
+          icon: Tag,
+        },
+      ],
+    },
     {
       name: isRTL ? "المحاسبة" : "Accounting",
       icon: Calculator,
@@ -135,14 +158,14 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           icon: BookOpen,
         },
         {
-          name: isRTL ? "تصنيفات المصاريف" : "Expense Categories",
-          path: "/expense-categories",
-          icon: Tag,
-        },
-        {
           name: isRTL ? "قيود اليومية" : "Journal Entries",
           path: "/journal-entries",
           icon: FileText,
+        },
+        {
+          name: isRTL ? "إدارة العهد" : "Custody Management",
+          path: "/custody",
+          icon: Wallet,
         },
         {
           name: isRTL ? "التقارير المالية" : "Financial Reports",

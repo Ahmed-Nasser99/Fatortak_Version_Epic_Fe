@@ -61,6 +61,7 @@ import ChartOfAccounts from "./pages/ChartOfAccounts";
 import JournalEntries from "./pages/JournalEntries";
 import FinancialReports from "./pages/FinancialReports";
 import ExpenseCategories from "./pages/ExpenseCategories";
+import Custody from "./pages/Custody";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -131,6 +132,7 @@ function AppContent() {
           <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
           <Route path="expense-categories" element={<ExpenseCategories />} />
           <Route path="journal-entries" element={<JournalEntries />} />
+          <Route path="custody" element={<Custody />} />
           <Route path="financial-reports" element={<FinancialReports />} />
           <Route path="items" element={<Items />} />
           <Route path="expenses" element={<Expenses />} />
