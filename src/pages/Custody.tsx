@@ -75,7 +75,6 @@ const Custody: React.FC = () => {
 
     return allAccounts.filter(a => 
       a.parentAccountId === parentAccount.id && 
-      a.isPostable &&
       (searchTerm === "" || a.name.toLowerCase().includes(searchTerm.toLowerCase()) || a.accountCode.includes(searchTerm))
     );
   }, [allAccounts, searchTerm]);
@@ -154,7 +153,7 @@ const Custody: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20 p-6">
       <div className="max-w-7xl mx-auto space-y-6" dir={isRTL ? "rtl" : "ltr"}>
         {/* Header */}
-        <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-yellow-600 rounded-3xl p-8 text-white shadow-2xl">
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600 rounded-3xl p-8 text-white shadow-2xl">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
             <div className="flex items-center space-x-4 space-x-reverse">
               <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg mx-3">
@@ -164,7 +163,7 @@ const Custody: React.FC = () => {
                 <h1 className="text-3xl font-bold mb-2">
                   {isRTL ? "إدارة العهد والحسابات" : "Custody & Accounts Management"}
                 </h1>
-                <p className="text-orange-100 text-lg">
+                <p className="text-blue-100 text-lg">
                   {isRTL
                     ? "إدارة عهد الموظفين والعمليات المالية من خلال حساباتهم"
                     : "Manage employee custodies and financial operations via accounts"}
