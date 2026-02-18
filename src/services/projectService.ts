@@ -52,4 +52,9 @@ export const projectService = {
   updateProjectStatus: async (id: string, status: any) => {
     return apiClient.post<ProjectDto>(`/api/projects/${id}/status`, { status });
   },
+  
+  // Create project with contract setup
+  createProjectWithContract: async (data: any) => {
+    return apiClient.post<ProjectDto>("/api/projects/with-contract", data);
+  },
 };

@@ -495,10 +495,11 @@ export interface ProjectDto {
   description?: string;
   customerId?: string;
   customerName?: string;
-  startDate?: string;
-  endDate?: string;
   status: ProjectStatus;
-  totalBudget?: number;
+  contractValue: number;
+  paymentTerms?: string;
+  notes?: string;
+  invoiceId?: string;
   totalIncome: number;
   totalExpenses: number;
   netProfit: number;
@@ -510,20 +511,16 @@ export interface CreateProjectDto {
   name: string;
   description?: string;
   customerId?: string;
-  startDate?: string;
-  endDate?: string;
   status?: ProjectStatus;
-  budget?: number;
+  contractValue: number;
 }
 
 export interface UpdateProjectDto {
   name?: string;
   description?: string;
   customerId?: string;
-  startDate?: string;
-  endDate?: string;
   status?: ProjectStatus;
-  budget?: number;
+  contractValue?: number;
 }
 
 export enum ProjectStatus {

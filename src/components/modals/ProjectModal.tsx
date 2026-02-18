@@ -35,10 +35,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
     customerId: Yup.string()
       .required(isRTL ? "العميل مطلوب" : "Client is required")
       .nullable(),
-    startDate: Yup.mixed().nullable(),
-    endDate: Yup.mixed().nullable(),
     status: Yup.string().nullable(),
-    budget: Yup.number().nullable(),
+    contractValue: Yup.number().nullable(),
   });
 
   const formik = useFormik<CreateProjectDto>({
@@ -46,10 +44,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       name: project?.name || "",
       description: project?.description || "",
       customerId: project?.customerId || "",
-      startDate: project?.startDate ? project.startDate.split("T")[0] : "",
-      endDate: project?.endDate ? project.endDate.split("T")[0] : "",
       status: project?.status || ProjectStatus.Active,
-      budget: project?.totalBudget || "",
+      contractValue: project?.contractValue || "",
     },
     enableReinitialize: true,
     validationSchema,
@@ -58,9 +54,7 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         // Sanitize data
         const values = {
           ...formValues,
-          startDate: formValues.startDate || null,
-          endDate: formValues.endDate || null,
-          budget: formValues.budget === "" || formValues.budget === undefined || formValues.budget === null ? null : Number(formValues.budget),
+          contractValue: formValues.contractValue === "" || formValues.contractValue === undefined || formValues.contractValue === null ? null : Number(formValues.contractValue),
         };
 
         let result;
@@ -197,56 +191,22 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               )}
             </div>
 
-            {/* Budget */}
+            {/* Contract Value */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {isRTL ? "الميزانية" : "Budget"}
+                {isRTL ? "قيمة العقد" : "Contract Value"}
               </label>
               <input
                 type="number"
-                {...formik.getFieldProps("budget")}
+                {...formik.getFieldProps("contractValue")}
                 className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                   isRTL ? "text-right" : "text-left"
                 }`}
                 placeholder="0.00"
               />
-               {formik.touched.budget && formik.errors.budget && (
+               {formik.touched.contractValue && formik.errors.contractValue && (
                 <p className="text-red-500 text-xs mt-1">
-                  {formik.errors.budget}
-                </p>
-              )}
-            </div>
-
-            {/* Start Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {isRTL ? "تاريخ البدء" : "Start Date"}
-              </label>
-              <input
-                type="date"
-                {...formik.getFieldProps("startDate")}
-                className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-              />
-               {formik.touched.startDate && formik.errors.startDate && (
-                <p className="text-red-500 text-xs mt-1">
-                  {formik.errors.startDate}
-                </p>
-              )}
-            </div>
-
-            {/* End Date */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {isRTL ? "تاريخ الانتهاء" : "End Date"}
-              </label>
-              <input
-                type="date"
-                {...formik.getFieldProps("endDate")}
-                className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white`}
-              />
-               {formik.touched.endDate && formik.errors.endDate && (
-                <p className="text-red-500 text-xs mt-1">
-                  {formik.errors.endDate}
+                  {formik.errors.contractValue}
                 </p>
               )}
             </div>

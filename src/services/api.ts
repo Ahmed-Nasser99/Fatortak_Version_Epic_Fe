@@ -1,5 +1,5 @@
 // Enhanced API client without Supabase dependencies
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://localhost:44338";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "https://localhost:44338";
 
 export interface ServiceResult<T> {
   success: boolean;

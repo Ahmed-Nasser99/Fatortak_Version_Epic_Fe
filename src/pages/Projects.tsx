@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plus,
   Search,
@@ -42,6 +43,7 @@ import { formatDate, formatNumber } from "@/Helpers/localization";
 const Projects: React.FC = () => {
    // const roleAccess = useRoleAccess();
   const { t, isRTL } = useLanguage();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editProject, setEditProject] = useState<any>(null);
@@ -217,15 +219,27 @@ const Projects: React.FC = () => {
               </div>
             </div>
 
-            <Button
-              onClick={handleNewProject}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-2 border-white/30 hover:border-white/50 px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              <span className="font-semibold">
-                {isRTL ? "مشروع جديد" : "New Project"}
-              </span>
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={() => navigate("new-with-contract")}
+                className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white border-2 border-white/20 hover:border-white/40 px-6 py-3 rounded-xl shadow-lg transition-all duration-200"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                <span className="font-semibold">
+                  {isRTL ? "إنشاء مع عقد" : "Create with Contract"}
+                </span>
+              </Button>
+              <Button
+                onClick={handleNewProject}
+                className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-2 border-white/30 hover:border-white/50 px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                <span className="font-semibold">
+                  {isRTL ? "مشروع جديد" : "New Project"}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -320,7 +334,7 @@ const Projects: React.FC = () => {
                           <div className="text-sm text-muted-foreground">{project.description}</div>
                         </td>
                         <td className="px-6 py-4 text-sm">{project.customerName || "-"}</td>
-                        <td className="px-6 py-4 text-sm font-medium">{project.totalBudget ? formatNumber(project.totalBudget) : "-"}</td>
+                        <td className="px-6 py-4 text-sm font-medium">{project.contractValue ? formatNumber(project.contractValue) : "-"}</td>
                         <td className="px-6 py-4">
                             <div className="w-[140px]">
                                 <Select
@@ -342,10 +356,7 @@ const Projects: React.FC = () => {
                             </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
-                            <div className="flex flex-col">
-                                {project.startDate && <span>{isRTL ? "من: " : "From: "}{formatDate(project.startDate)}</span>}
-                                {project.endDate && <span>{isRTL ? "إلى: " : "To: "}{formatDate(project.endDate)}</span>}
-                            </div>
+                            {formatDate(project.createdAt)}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex items-center space-x-1">
@@ -403,7 +414,7 @@ const Projects: React.FC = () => {
                             </div>
                         </div>
                         <div className="flex justify-between text-sm">
-                             <span>{isRTL ? "الميزانية: " : "Budget: "}{project.totalBudget ? formatNumber(project.totalBudget) : "-"}</span>
+                             <span>{isRTL ? "الميزانية: " : "Budget: "}{project.contractValue ? formatNumber(project.contractValue) : "-"}</span>
                         </div>
                          <div className="flex gap-2 justify-end">
                             <Button variant="outline" size="sm" onClick={() => handleEditProject(project)}>
