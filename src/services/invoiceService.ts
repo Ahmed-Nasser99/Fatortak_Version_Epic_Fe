@@ -33,6 +33,7 @@ export const invoiceService = {
       if (filters.maximumPrice) params.maximumPrice = filters.maximumPrice;
       if (filters.customerId) params.customerId = filters.customerId;
       if (filters.invoiceType) params.invoiceType = filters.invoiceType;
+      if (filters.projectId) params.projectId = filters.projectId;
     }
 
     return apiClient.get<PagedResponseDto<InvoiceDto>>("/api/invoices", params);

@@ -82,6 +82,7 @@ export interface InvoiceFilterDto {
   type?: string;
   startDate?: string;
   endDate?: string;
+  projectId?: string;
 }
 
 export interface SendInvoiceDto {
@@ -422,6 +423,7 @@ export interface UpdateExpenseCategoryDto {
 export interface ExpenseFilterDto {
   notes?: string;
   branchId?: string;
+  projectId?: string;
 }
 
 // Auth related DTOs

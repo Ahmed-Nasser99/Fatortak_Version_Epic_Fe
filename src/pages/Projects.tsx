@@ -12,7 +12,8 @@ import {
   TrendingUp,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  Eye
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import {
@@ -363,6 +364,15 @@ const Projects: React.FC = () => {
                             <Button
                               variant="ghost"
                               size="sm"
+                              onClick={() => navigate(`/projects/${project.id}`)}
+                              className="text-indigo-600 hover:text-indigo-800"
+                              title={isRTL ? "عرض التفاصيل" : "View Details"}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               onClick={() => handleEditProject(project)}
                               className="text-primary hover:text-primary/80"
                             >
@@ -417,6 +427,9 @@ const Projects: React.FC = () => {
                              <span>{isRTL ? "الميزانية: " : "Budget: "}{project.contractValue ? formatNumber(project.contractValue) : "-"}</span>
                         </div>
                          <div className="flex gap-2 justify-end">
+                            <Button variant="outline" size="sm" onClick={() => navigate(`/projects/${project.id}`)}>
+                                <Eye className="w-3 h-3" />
+                            </Button>
                             <Button variant="outline" size="sm" onClick={() => handleEditProject(project)}>
                                 <Edit className="w-3 h-3" />
                             </Button>

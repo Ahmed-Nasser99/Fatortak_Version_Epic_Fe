@@ -18,6 +18,7 @@ export const expenseService = {
       pageNumber: pagination.pageNumber,
       pageSize: pagination.pageSize,
       ...(filters?.notes && { notes: filters.notes }),
+      ...(filters?.projectId && { projectId: filters.projectId }),
     };
 
     return apiClient.get<PagedResponseDto<ExpenseDto>>("/api/expenses", params);
