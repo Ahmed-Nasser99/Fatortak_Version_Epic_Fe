@@ -1,0 +1,177 @@
+import React, { useState } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { InvoiceDto } from "../../types/api";
+import { invoiceService } from "../../services/invoiceService";
+import { toast } from "react-toastify";
+import { DollarSign, CreditCard, Wallet, Landmark } from 'lucide-react';
+
+interface RecordPaymentModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  invoice: InvoiceDto | null;
+  onSuccess: () => void;
+}
+
+const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose, invoice, onSuccess }) => {
+  const [amount, setAmount] = useState<number>(0);
+  const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
+  const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (invoice) {
+      // Default to remaining balance
+      const paidSoFar = (invoice as any).amountPaid || 0;
+      setAmount(invoice.total - paidSoFar);
+    }
+  }, [invoice]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!invoice) return;
+
+    if (amount <= 0) {
+      toast.error("Amount must be greater than zero");
+      return;
+    }
+
+    const remainingBalance = invoice.total - ((invoice as any).amountPaid || 0);
+    if (amount > remainingBalance + 0.01) { // Added small epsilon for float precision
+      toast.error(`Amount exceeds remaining balance of ${remainingBalance}`);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const result = await invoiceService.recordPayment(invoice.id, {
+        amount,
+        paymentMethod
+      });
+
+      if (result.success) {
+        toast.success("Payment recorded successfully");
+        onSuccess();
+        onClose();
+      } else {
+        toast.error(result.errorMessage || "Failed to record payment");
+      }
+    } catch (error: any) {
+      toast.error(error.message || "An error occurred while recording payment");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!invoice) return null;
+
+  const remainingBalance = invoice.total - ((invoice as any).amountPaid || 0);
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <DollarSign className="w-5 h-5 text-indigo-600" />
+            Record Payment - {invoice.invoiceNumber}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-6 pt-4">
+          <div className="bg-slate-50 p-4 rounded-xl space-y-2 border border-slate-100">
+            <div className="flex justify-between text-xs text-slate-500 font-medium">
+              <span>Total Amount</span>
+              <span className="font-mono">{invoice.total.toLocaleString()} EGP</span>
+            </div>
+            <div className="flex justify-between text-xs text-slate-500 font-medium">
+              <span>Remaining Balance</span>
+              <span className="font-mono font-bold text-slate-900">{remainingBalance.toLocaleString()} EGP</span>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="amount" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Payment Amount
+              </Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-mono text-sm">
+                  EGP
+                </span>
+                <Input
+                  id="amount"
+                  type="number"
+                  step="0.01"
+                  value={amount}
+                  onChange={(e) => setAmount(parseFloat(e.target.value))}
+                  placeholder="Enter amount"
+                  className="pl-12 font-mono text-lg font-bold"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="method" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Payment Method
+              </Label>
+              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+                <SelectTrigger id="method">
+                  <SelectValue placeholder="Select method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Cash">
+                    <div className="flex items-center gap-2">
+                      <Wallet className="w-4 h-4" />
+                      <span>Cash</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="BankTransfer">
+                    <div className="flex items-center gap-2">
+                      <Landmark className="w-4 h-4" />
+                      <span>Bank Transfer</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="CreditCard">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="w-4 h-4" />
+                      <span>Credit Card</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={onClose}
+              className="rounded-xl"
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={loading}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-8"
+            >
+              {loading ? "Recording..." : "Record Payment"}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default RecordPaymentModal;

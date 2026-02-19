@@ -176,31 +176,55 @@ class ApiClient {
   }
 
   // POST request
-  async post<T>(endpoint: string, data?: any): Promise<ServiceResult<T>> {
+  async post<T>(
+    endpoint: string,
+    data?: any,
+    headers: Record<string, string> = {}
+  ): Promise<ServiceResult<T>> {
     const isFormData = data instanceof FormData;
 
-    return this.request<T>(endpoint, {
-      method: "POST",
-      body: isFormData ? data : data ? JSON.stringify(data) : undefined,
-    });
+    return this.request<T>(
+      endpoint,
+      {
+        method: "POST",
+        body: isFormData ? data : data ? JSON.stringify(data) : undefined,
+      },
+      headers
+    );
   }
 
   // PUT request
-  async put<T>(endpoint: string, data?: any): Promise<ServiceResult<T>> {
+  async put<T>(
+    endpoint: string,
+    data?: any,
+    headers: Record<string, string> = {}
+  ): Promise<ServiceResult<T>> {
     const isFormData = data instanceof FormData;
 
-    return this.request<T>(endpoint, {
-      method: "PUT",
-      body: isFormData ? data : data ? JSON.stringify(data) : undefined,
-    });
+    return this.request<T>(
+      endpoint,
+      {
+        method: "PUT",
+        body: isFormData ? data : data ? JSON.stringify(data) : undefined,
+      },
+      headers
+    );
   }
 
   // PATCH request
-  async patch<T>(endpoint: string, data?: any): Promise<ServiceResult<T>> {
-    return this.request<T>(endpoint, {
-      method: "PATCH",
-      body: data ? JSON.stringify(data) : undefined,
-    });
+  async patch<T>(
+    endpoint: string,
+    data?: any,
+    headers: Record<string, string> = {}
+  ): Promise<ServiceResult<T>> {
+    return this.request<T>(
+      endpoint,
+      {
+        method: "PATCH",
+        body: data ? JSON.stringify(data) : undefined,
+      },
+      headers
+    );
   }
 
   // DELETE request

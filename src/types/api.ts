@@ -101,6 +101,11 @@ export interface UpdateInvoiceStatusDto {
   status: string;
 }
 
+export interface RecordPaymentDto {
+  amount: number;
+  paymentMethod?: string;
+}
+
 // User related DTOs
 export interface UserDto {
   id: string;
@@ -516,6 +521,7 @@ export interface ProjectDto {
   totalInvoiced: number;
   totalExpenses: number;
   totalAdvances: number;
+  totalCollected: number;
   netProfit: number;
   projectLines: ProjectLineDto[];
   updatedAt: string;

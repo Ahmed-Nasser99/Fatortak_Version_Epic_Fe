@@ -33,6 +33,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
 import { Button } from '../components/ui/button';
 import ExpenseModal from '../components/modals/ExpenseModal';
 import EnhancedInvoiceModal from '../components/modals/EnhancedInvoiceModal';
+import RecordPaymentModal from '../components/modals/RecordPaymentModal';
 import { toast } from 'react-toastify';
 import { 
   PieChart, 
@@ -56,6 +57,8 @@ const ProjectDetails: React.FC = () => {
   const [activeTab, setActiveTab] = useState('overview');
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
 
   const { data: projectResponse, isLoading: projectLoading, refetch: refetchProject } = useProject(id!);
   const project = projectResponse?.data;
@@ -72,6 +75,11 @@ const ProjectDetails: React.FC = () => {
   );
 
   const { data: advancesResponse, isLoading: advancesLoading } = useJournalEntries(
+    { pageNumber: 1, pageSize: 100 },
+    { projectId: id, referenceType: JournalEntryReferenceType.Manual }
+  );
+
+  const { data: paymentsResponse, isLoading: paymentsLoading } = useJournalEntries(
     { pageNumber: 1, pageSize: 100 },
     { projectId: id, referenceType: JournalEntryReferenceType.Payment }
   );
@@ -106,14 +114,17 @@ const ProjectDetails: React.FC = () => {
   const invoices = invoicesResponse?.data?.data || [];
   const expenses = expensesResponse?.data?.data || [];
   const advances = advancesResponse?.data?.data || [];
+  const payments = paymentsResponse?.data?.data || [];
 
   // Financial Stats from Backend
   const invoicedAmount = project.totalInvoiced || 0;
+  const collectedAmount = project.totalCollected || 0;
   const totalExpenses = project.totalExpenses || 0;
   const totalAdvances = project.totalAdvances || 0;
   const totalCosts = totalExpenses + totalAdvances;
   const netProfit = project.netProfit || 0;
   const profitMargin = invoicedAmount > 0 ? (netProfit / invoicedAmount) * 100 : 0;
+  const collectionPercentage = invoicedAmount > 0 ? (collectedAmount / invoicedAmount) * 100 : 0;
   const progressPercentage = project.contractValue > 0 ? (invoicedAmount / project.contractValue) * 100 : 0;
 
   // Chart Data
@@ -231,14 +242,14 @@ const ProjectDetails: React.FC = () => {
             detail={
               <div className="space-y-1.5">
                 <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
-                  <span>Progress</span>
-                  <span>{progressPercentage.toFixed(1)}%</span>
+                  <span>Collected</span>
+                  <span>{formatNumber(collectedAmount)} ({collectionPercentage.toFixed(0)}%)</span>
                 </div>
                 <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: `${progressPercentage}%` }}
-                    className="bg-indigo-600 h-full rounded-full"
+                    animate={{ width: `${collectionPercentage}%` }}
+                    className="bg-emerald-500 h-full rounded-full"
                   />
                 </div>
               </div>
@@ -439,6 +450,8 @@ const ProjectDetails: React.FC = () => {
                           <th className="py-5 px-6">Invoice ID</th>
                           <th className="py-5 px-4">Date</th>
                           <th className="py-5 px-4">Amount</th>
+                          <th className="py-5 px-4 text-right">Paid</th>
+                          <th className="py-5 px-4 text-right">Balance</th>
                           <th className="py-5 px-4">Status</th>
                           <th className="py-5 px-6 text-right">Action</th>
                         </tr>
@@ -456,14 +469,29 @@ const ProjectDetails: React.FC = () => {
                               </td>
                               <td className="py-5 px-4 text-slate-600">{formatDate(inv.issueDate)}</td>
                               <td className="py-5 px-4 font-black font-mono tracking-tighter text-slate-900">{formatNumber(inv.total)} EGP</td>
+                              <td className="py-5 px-4 text-right font-mono text-emerald-600 font-bold">{formatNumber((inv as any).amountPaid || 0)}</td>
+                              <td className="py-5 px-4 text-right font-mono text-slate-500">{formatNumber(inv.total - ((inv as any).amountPaid || 0))}</td>
                               <td className="py-5 px-4">
-                                <Badge variant={inv.status === 'Paid' ? 'outline' : 'secondary'} className={inv.status === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : ''}>
+                                <Badge variant={inv.status === 'Paid' ? 'outline' : 'secondary'} className={inv.status === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : inv.status === 'PartialPaid' ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : ''}>
                                   {inv.status}
                                 </Badge>
                               </td>
-                              <td className="py-5 px-6 text-right">
+                              <td className="py-5 px-6 text-right flex justify-end gap-2">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => {
+                                    setSelectedInvoice(inv);
+                                    setIsRecordPaymentOpen(true);
+                                  }} 
+                                  disabled={inv.status === 'Paid'}
+                                  className="text-emerald-600 hover:bg-emerald-50 rounded-xl"
+                                  title="Record Payment"
+                                >
+                                  <DollarSign className="w-4 h-4" />
+                                </Button>
                                 <Button variant="ghost" size="sm" onClick={() => navigate(`/invoice/${inv.id}`)} className="text-indigo-600 hover:bg-indigo-50 rounded-xl">
-                                  View Details <ChevronRight className="w-4 h-4 ml-1" />
+                                  <ChevronRight className="w-4 h-4" />
                                 </Button>
                               </td>
                             </tr>
@@ -474,6 +502,77 @@ const ProjectDetails: React.FC = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              {/* Received Payments History */}
+              <div className="mt-12 space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-700 delay-150">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-50 rounded-lg">
+                      <TrendingUp className="w-5 h-5 text-emerald-600" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold text-slate-900">Received Payments</h3>
+                      <p className="text-sm text-slate-500 font-medium tracking-tight">Financial timeline of collected revenue from the client.</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 px-5 py-2.5 bg-emerald-900/5 rounded-2xl border border-emerald-100 shadow-sm backdrop-blur-sm group hover:bg-emerald-900/10 transition-all duration-300">
+                    <div className="flex flex-col items-end">
+                      <span className="text-[10px] font-black text-emerald-600/70 uppercase tracking-widest leading-none mb-1">Project Liquidity</span>
+                      <span className="text-xl font-black font-mono text-emerald-700 tracking-tighter leading-none">{formatNumber(collectedAmount)} <span className="text-[10px] font-normal opacity-70">EGP</span></span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-all duration-500">
+                  <table className="w-full text-sm text-left">
+                    <thead className="bg-slate-50/50 font-bold text-slate-500 border-b border-slate-100">
+                      <tr>
+                        <th className="py-5 px-6 uppercase tracking-wider text-[10px]">Date</th>
+                        <th className="py-5 px-4 uppercase tracking-wider text-[10px]">Transaction Id</th>
+                        <th className="py-5 px-4 uppercase tracking-wider text-[10px]">Reference / Note</th>
+                        <th className="py-5 px-6 text-right uppercase tracking-wider text-[10px]">Amount Received</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {payments.length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="py-20 text-center">
+                            <div className="flex flex-col items-center justify-center opacity-40">
+                              <Receipt className="w-12 h-12 mb-3 text-slate-300" />
+                              <p className="text-slate-500 italic font-medium">No payments received yet. Payments recorded on invoices will appear here.</p>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        payments.map((p) => (
+                          <tr key={p.id} className="hover:bg-emerald-50/20 group transition-all duration-300">
+                            <td className="py-5 px-6">
+                              <div className="flex flex-col">
+                                <span className="font-bold text-slate-900">{formatDate(p.date)}</span>
+                                <span className="text-[10px] text-slate-400 font-mono">{new Date(p.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                              </div>
+                            </td>
+                            <td className="py-5 px-4">
+                              <Badge variant="outline" className="font-mono text-[10px] bg-slate-50 border-slate-200 text-slate-600 py-0.5">
+                                {p.entryNumber}
+                              </Badge>
+                            </td>
+                            <td className="py-5 px-4 max-w-sm">
+                              <p className="text-xs font-medium text-slate-600 leading-relaxed italic">{p.description || 'Customer payment collection'}</p>
+                            </td>
+                            <td className="py-5 px-6 text-right">
+                              <div className="flex flex-col items-end">
+                                <span className="font-black font-mono text-lg text-emerald-600 tracking-tighter">{formatNumber(p.totalCredit)} <span className="text-[10px] font-normal opacity-70">EGP</span></span>
+                                <span className="text-[9px] font-black text-emerald-500/50 uppercase tracking-tighter">Verified Collection</span>
+                              </div>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </TabsContent>
 
             {/* Expenses Tab */}
@@ -522,31 +621,31 @@ const ProjectDetails: React.FC = () => {
               <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
                 <CardHeader className="bg-white border-b border-slate-100 flex flex-row items-center justify-between py-6">
                   <div>
-                    <CardTitle className="text-xl font-bold text-slate-900">Petty Cash & Advances</CardTitle>
-                    <CardDescription>Journal entries for employee custody or cash advances.</CardDescription>
+                    <CardTitle className="text-xl font-bold text-slate-900">Cost Center & Advances</CardTitle>
+                    <CardDescription>Manual project allocations and employee petty cash advances.</CardDescription>
                   </div>
-                  <Badge className="bg-orange-500 px-3 py-1">{advances.length} Entries</Badge>
+                  <Badge className="bg-orange-500 px-3 py-1">{advances.length} Records</Badge>
                 </CardHeader>
                 <CardContent className="p-0">
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm text-left">
                       <thead className="bg-slate-50 font-bold text-slate-500">
                         <tr>
-                          <th className="py-5 px-6">JE Number</th>
+                          <th className="py-5 px-6">Ref Number</th>
                           <th className="py-5 px-4">Date</th>
                           <th className="py-5 px-4">Reference / Description</th>
-                          <th className="py-5 px-6 text-right">Debit</th>
+                          <th className="py-5 px-6 text-right">Cost (Debit)</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
                         {advances.length === 0 ? (
-                          <tr><td colSpan={4} className="py-16 text-center text-slate-400 italic">No advanced payments for this project.</td></tr>
+                          <tr><td colSpan={4} className="py-16 text-center text-slate-400 italic">No manual costs or advances for this project.</td></tr>
                         ) : (
                           advances.map((adv) => (
                             <tr key={adv.id} className="hover:bg-orange-50/10 transition-colors">
-                              <td className="py-5 px-6 font-mono text-xs font-bold text-slate-900 border-l-2 border-orange-200 ml-1">{adv.entryNumber}</td>
+                              <td className="py-5 px-6 font-mono text-xs font-bold text-slate-900 border-l-2 border-orange-200 ml-1 pl-4">{adv.entryNumber}</td>
                               <td className="py-5 px-4 text-slate-500">{formatDate(adv.date)}</td>
-                              <td className="py-5 px-4 text-slate-600 font-medium">{adv.description || 'Advance payment'}</td>
+                              <td className="py-5 px-4 text-slate-600 font-medium">{adv.description || 'Project cost allocation'}</td>
                               <td className="py-5 px-6 text-right font-black font-mono tracking-tighter text-orange-600">{formatNumber(adv.totalDebit)} EGP</td>
                             </tr>
                           ))
@@ -746,6 +845,16 @@ const ProjectDetails: React.FC = () => {
           toast.success("Invoice added successfully");
         }}
         initialData={{ projectId: id }}
+      />
+
+      <RecordPaymentModal
+        isOpen={isRecordPaymentOpen}
+        onClose={() => setIsRecordPaymentOpen(false)}
+        invoice={selectedInvoice}
+        onSuccess={() => {
+          refetchProject();
+          setIsRecordPaymentOpen(false);
+        }}
       />
     </motion.div>
   );

@@ -7,6 +7,7 @@ import {
   SendInvoiceDto,
   MarkPaidDto,
   UpdateInvoiceStatusDto,
+  RecordPaymentDto,
   PagedResponseDto,
   PaginationDto,
 } from "../types/api";
@@ -189,5 +190,9 @@ export const invoiceService = {
     return apiClient.post<any>(
       `/api/invoices/installment/unPay/${installmentId}`
     );
+  },
+
+  recordPayment: async (id: string, data: RecordPaymentDto) => {
+    return apiClient.post<boolean>(`/api/invoices/${id}/payments`, data);
   },
 };
