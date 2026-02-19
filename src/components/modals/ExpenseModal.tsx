@@ -23,6 +23,7 @@ interface ExpenseModalProps {
   onClose: () => void;
   onSuccess: () => void;
   expense?: ExpenseDto | null;
+  initialProjectId?: string;
 }
 
 const ExpenseModal: React.FC<ExpenseModalProps> = ({
@@ -30,6 +31,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
   onClose,
   onSuccess,
   expense = null,
+  initialProjectId,
 }) => {
   const { isRTL, t } = useLanguage();
   const roleAccess = useRoleAccess();
@@ -81,7 +83,7 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         total: 0,
         notes: "",
         branchId: mainBranchResult?.data?.id || "",
-        projectId: "",
+        projectId: initialProjectId || "",
         categoryId: "",
         paymentAccountId: "",
       });

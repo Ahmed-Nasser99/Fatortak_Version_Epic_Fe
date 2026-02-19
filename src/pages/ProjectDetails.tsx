@@ -11,8 +11,16 @@ import {
   FileText,
   Clock,
   Briefcase,
-  AlertCircle
+  AlertCircle,
+  Plus,
+  ArrowUpRight,
+  ArrowDownRight,
+  ChevronRight,
+  Info,
+  Layers,
+  Activity
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useProject } from '../hooks/useProjects';
 import { useInvoices } from '../hooks/useInvoices';
 import { useExpenses } from '../hooks/useExpenses';
@@ -23,13 +31,33 @@ import { Badge } from '../components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '../components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { Button } from '../components/ui/button';
+import ExpenseModal from '../components/modals/ExpenseModal';
+import EnhancedInvoiceModal from '../components/modals/EnhancedInvoiceModal';
+import { toast } from 'react-toastify';
+import { 
+  PieChart, 
+  Pie, 
+  Cell, 
+  ResponsiveContainer, 
+  Tooltip as RechartsTooltip, 
+  BarChart, 
+  Bar, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid, 
+  Legend,
+  AreaChart,
+  Area
+} from 'recharts';
 
 const ProjectDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
 
-  const { data: projectResponse, isLoading: projectLoading } = useProject(id!);
+  const { data: projectResponse, isLoading: projectLoading, refetch: refetchProject } = useProject(id!);
   const project = projectResponse?.data;
 
   // Data for tabs
@@ -51,18 +79,27 @@ const ProjectDetails: React.FC = () => {
   if (projectLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"
+        ></motion.div>
       </div>
     );
   }
 
   if (!project) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px] text-gray-500">
-        <AlertCircle className="w-12 h-12 mb-4" />
-        <h2 className="text-xl font-bold">Project Not Found</h2>
-        <Button variant="link" onClick={() => navigate('/projects')}>Back to Projects</Button>
-      </div>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center justify-center min-h-[400px] text-gray-500"
+      >
+        <AlertCircle className="w-16 h-16 mb-4 text-rose-500" />
+        <h2 className="text-2xl font-bold text-gray-900">Project Not Found</h2>
+        <p className="mb-6">The project you're looking for doesn't exist or you don't have access.</p>
+        <Button variant="default" className="bg-indigo-600" onClick={() => navigate('/projects')}>Back to Projects</Button>
+      </motion.div>
     );
   }
 
@@ -70,341 +107,647 @@ const ProjectDetails: React.FC = () => {
   const expenses = expensesResponse?.data?.data || [];
   const advances = advancesResponse?.data?.data || [];
 
-  // Financial Stats
-  const invoicedAmount = invoices.reduce((sum, inv) => sum + (inv.total || 0), 0);
-  const totalExpenses = expenses.reduce((sum, exp) => sum + (exp.total || 0), 0);
-  const totalAdvances = advances.reduce((sum, adv) => sum + (adv.totalDebit || 0), 0);
+  // Financial Stats from Backend
+  const invoicedAmount = project.totalInvoiced || 0;
+  const totalExpenses = project.totalExpenses || 0;
+  const totalAdvances = project.totalAdvances || 0;
   const totalCosts = totalExpenses + totalAdvances;
-  const netProfit = invoicedAmount - totalCosts;
+  const netProfit = project.netProfit || 0;
   const profitMargin = invoicedAmount > 0 ? (netProfit / invoicedAmount) * 100 : 0;
+  const progressPercentage = project.contractValue > 0 ? (invoicedAmount / project.contractValue) * 100 : 0;
+
+  // Chart Data
+  const costBreakdownData = [
+    { name: 'Expenses', value: totalExpenses, color: '#f43f5e' },
+    { name: 'Advances', value: totalAdvances, color: '#f97316' },
+  ];
+
+  const financialComparisonData = [
+    { name: 'Revenue', amount: invoicedAmount, fill: '#10b981' },
+    { name: 'Costs', amount: totalCosts, fill: '#f43f5e' },
+    { name: 'Profit', amount: netProfit, fill: '#6366f1' },
+  ];
 
   const getStatusBadge = (status: ProjectStatus) => {
     switch (status) {
-      case ProjectStatus.Active: return <Badge className="bg-green-100 text-green-700">Active</Badge>;
-      case ProjectStatus.Completed: return <Badge className="bg-blue-100 text-blue-700">Completed</Badge>;
-      case ProjectStatus.OnHold: return <Badge className="bg-yellow-100 text-yellow-700">On Hold</Badge>;
-      case ProjectStatus.Cancelled: return <Badge className="bg-red-100 text-red-700">Cancelled</Badge>;
-      default: return <Badge className="bg-gray-100 text-gray-700">Not Started</Badge>;
+      case ProjectStatus.Active: 
+        return <Badge className="bg-emerald-50 text-emerald-700 border-emerald-100 px-3 py-1">Active</Badge>;
+      case ProjectStatus.Completed: 
+        return <Badge className="bg-blue-50 text-blue-700 border-blue-100 px-3 py-1">Completed</Badge>;
+      case ProjectStatus.OnHold: 
+        return <Badge className="bg-amber-50 text-amber-700 border-amber-100 px-3 py-1">On Hold</Badge>;
+      case ProjectStatus.Cancelled: 
+        return <Badge className="bg-rose-50 text-rose-700 border-rose-100 px-3 py-1">Cancelled</Badge>;
+      default: 
+        return <Badge className="bg-slate-100 text-slate-700 px-3 py-1">Draft</Badge>;
     }
   };
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/projects')}>
-            <ArrowLeft className="w-5 h-5" />
-          </Button>
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-gray-900">{project.name}</h1>
-              {getStatusBadge(project.status)}
-            </div>
-            <p className="text-gray-500">{project.customerName || 'No Client Assigned'}</p>
+  const ExecutiveStat = ({ title, value, icon: Icon, detail }: any) => (
+    <Card className="relative overflow-hidden border border-slate-100 shadow-sm hover:shadow-md transition-shadow group">
+      <CardContent className="p-6">
+        <div className="flex justify-between items-start">
+          <div className="space-y-1">
+            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{title}</p>
+            <h3 className="text-2xl font-black font-mono tracking-tighter text-slate-900 group-hover:text-indigo-600 transition-colors">
+              {formatNumber(value)} <span className="text-xs font-normal text-slate-400">EGP</span>
+            </h3>
+            {detail && <div className="mt-2">{detail}</div>}
+          </div>
+          <div className="p-2.5 bg-slate-50 rounded-xl group-hover:bg-indigo-50 transition-colors">
+            <Icon className="w-5 h-5 text-slate-400 group-hover:text-indigo-600 transition-colors" />
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <Button variant="outline" onClick={() => navigate(`/projects/new-with-contract?edit=${project.id}`)}>
-            Edit Project
-          </Button>
-          <Button className="bg-indigo-600 hover:bg-indigo-700">
-            Create Invoice
-          </Button>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      className="space-y-8 pb-12"
+    >
+      {/* Header Section */}
+      <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm p-6 md:p-8">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50/50 rounded-full blur-3xl -mr-20 -mt-20 -z-10" />
+        
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-5">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => navigate('/projects')}
+              className="bg-slate-50 hover:bg-slate-100 text-slate-600 rounded-xl"
+            >
+              <ArrowLeft className="w-5 h-5" />
+            </Button>
+            <div className="space-y-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">{project.name}</h1>
+                {getStatusBadge(project.status)}
+              </div>
+              <div className="flex items-center gap-2 text-slate-500 font-medium">
+                <User className="w-4 h-4" />
+                <span>{project.customerName || 'Internal Project'}</span>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setIsExpenseModalOpen(true)} 
+              className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-5 shadow-sm"
+            >
+              <Plus className="w-4 h-4 text-rose-500" /> <span className="text-slate-700">Add Expense</span>
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsInvoiceModalOpen(true)} 
+              className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-5 shadow-sm"
+            >
+              <Plus className="w-4 h-4 text-emerald-500" /> <span className="text-slate-700">Receive Payment</span>
+            </Button>
+            <Button 
+              className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 rounded-xl px-6 shadow-md shadow-indigo-200"
+              onClick={() => navigate(`/projects/new-with-contract?edit=${project.id}`)}
+            >
+              Edit Project
+            </Button>
+          </div>
+        </div>
+
+        {/* Hero Financials */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+          <ExecutiveStat 
+            title="Contract Value" 
+            value={project.contractValue} 
+            icon={Briefcase} 
+          />
+          <ExecutiveStat 
+            title="Total Invoiced" 
+            value={invoicedAmount} 
+            icon={Receipt} 
+            detail={
+              <div className="space-y-1.5">
+                <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
+                  <span>Progress</span>
+                  <span>{progressPercentage.toFixed(1)}%</span>
+                </div>
+                <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressPercentage}%` }}
+                    className="bg-indigo-600 h-full rounded-full"
+                  />
+                </div>
+              </div>
+            }
+          />
+          <ExecutiveStat 
+            title="Total Costs" 
+            value={totalCosts} 
+            icon={DollarSign} 
+            detail={
+              <div className="flex gap-2 text-[9px] font-bold uppercase tracking-tight">
+                <span className="text-slate-500">Exp: {formatNumber(totalExpenses)}</span>
+                <span className="text-slate-400">|</span>
+                <span className="text-slate-500">Adv: {formatNumber(totalAdvances)}</span>
+              </div>
+            }
+          />
+          <ExecutiveStat 
+            title="Net Profit" 
+            value={netProfit} 
+            icon={TrendingUp} 
+            detail={
+              <div className="flex items-center gap-1">
+                {netProfit >= 0 ? <ArrowUpRight className="w-3 h-3 text-slate-400" /> : <ArrowDownRight className="w-3 h-3 text-rose-400" />}
+                <span className={`text-xs font-bold ${netProfit >= 0 ? 'text-slate-600' : 'text-rose-600'}`}>{profitMargin.toFixed(1)}% Margin</span>
+              </div>
+            }
+          />
         </div>
       </div>
 
-      {/* Main Content with Tabs */}
+      {/* Tabs Navigation */}
       <Tabs defaultValue="overview" className="w-full" onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 bg-gray-100 p-1 rounded-xl">
-          <TabsTrigger value="overview" className="flex items-center gap-2">
-            <Layout className="w-4 h-4" /> Overview
-          </TabsTrigger>
-          <TabsTrigger value="payments" className="flex items-center gap-2">
-            <Receipt className="w-4 h-4" /> Payments
-          </TabsTrigger>
-          <TabsTrigger value="expenses" className="flex items-center gap-2">
-            <DollarSign className="w-4 h-4" /> Expenses
-          </TabsTrigger>
-          <TabsTrigger value="advances" className="flex items-center gap-2">
-            <Clock className="w-4 h-4" /> Advances
-          </TabsTrigger>
-          <TabsTrigger value="profitability" className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" /> Profitability
-          </TabsTrigger>
-        </TabsList>
+        <div className="flex justify-center mb-10">
+          <TabsList className="bg-slate-100/50 p-1.5 rounded-2xl flex items-center gap-1 border border-slate-200/60 shadow-sm backdrop-blur-sm">
+            {[
+              { id: 'overview', label: 'Overview', icon: Layout },
+              { id: 'payments', label: 'Payments', icon: Receipt },
+              { id: 'expenses', label: 'Expenses', icon: DollarSign },
+              { id: 'advances', label: 'Advances', icon: Calendar },
+              { id: 'profitability', label: 'Profitability', icon: Activity }
+            ].map((tab) => (
+              <TabsTrigger 
+                key={tab.id}
+                value={tab.id} 
+                className="group relative px-6 py-2.5 rounded-xl data-[state=active]:text-slate-900 text-slate-500 font-bold uppercase tracking-widest text-[10px] transition-all shadow-none h-auto bg-transparent gap-2 flex items-center border-none"
+              >
+                <tab.icon className={`w-3.5 h-3.5 relative z-10 transition-colors ${activeTab === tab.id ? 'text-indigo-600' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                <span className="relative z-10">{tab.label}</span>
+                {activeTab === tab.id && (
+                  <motion.div 
+                    layoutId="activeTabPill"
+                    className="absolute inset-0 bg-white rounded-xl shadow-sm border border-slate-200/50"
+                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  />
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
-        {/* Tab Contents */}
-        <div className="mt-6">
-          <TabsContent value="overview">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="md:col-span-2">
-                <CardHeader>
-                  <CardTitle>Project Summary</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1">
-                      <span className="text-sm text-gray-500 flex items-center gap-2">
-                        <Calendar className="w-4 h-4" /> Start Date
-                      </span>
-                      <p className="font-medium">{formatDate(project.createdAt)}</p>
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-sm text-gray-500 flex items-center gap-2">
-                        <User className="w-4 h-4" /> Client
-                      </span>
-                      <p className="font-medium">{project.customerName || '---'}</p>
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Overview Tab */}
+            <TabsContent value="overview">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Main Content: Document Details */}
+                <Card className="md:col-span-2 border-slate-100 shadow-sm overflow-hidden rounded-2xl">
+                  <div className="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex items-center justify-between font-bold text-slate-900">
+                    <div className="flex items-center gap-2">
+                      <Layers className="w-4 h-4 text-indigo-500" />
+                      Contract Details & Items
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <span className="text-sm text-gray-500">Description</span>
-                    <p className="text-gray-700">{project.description || 'No description provided.'}</p>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm text-left">
+                        <thead>
+                          <tr className="bg-slate-50/30 text-slate-500 font-semibold border-b border-slate-100">
+                            <th className="py-4 px-6">Service/Product Description</th>
+                            <th className="py-4 px-3 text-center w-24">QTY</th>
+                            <th className="py-4 px-3 text-center w-24">Unit</th>
+                            <th className="py-4 px-4 text-right w-32">Unit Price</th>
+                            <th className="py-4 px-6 text-right w-40">Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-50">
+                          {(!project.projectLines || project.projectLines.length === 0) ? (
+                            <tr><td colSpan={5} className="py-12 text-center text-slate-400 italic">No line items specified for this project.</td></tr>
+                          ) : (
+                            project.projectLines.map((line, index) => (
+                              <tr key={line.id} className={`${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/10'} hover:bg-indigo-50/30 transition-colors`}>
+                                <td className="py-4 px-6 font-medium text-slate-800">{line.description}</td>
+                                <td className="py-4 px-3 text-center text-slate-600 font-mono">{line.quantity}</td>
+                                <td className="py-4 px-3 text-center"><Badge variant="outline" className="text-[10px] font-bold text-slate-500 bg-slate-50 border-slate-200">{line.unit || '---'}</Badge></td>
+                                <td className="py-4 px-4 text-right text-slate-600 font-mono tracking-tighter">{formatNumber(line.unitPrice)}</td>
+                                <td className="py-4 px-6 text-right font-bold text-indigo-900 font-mono tracking-tighter">{formatNumber(line.lineTotal)}</td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                        {project.projectLines?.length > 0 && (
+                          <tfoot>
+                            <tr className="bg-slate-50 font-bold border-t border-slate-200">
+                              <td colSpan={4} className="py-4 px-6 text-right text-slate-700 uppercase tracking-wider text-xs">Contract Sub-Total</td>
+                              <td className="py-4 px-6 text-right text-indigo-700 font-mono text-lg">{formatNumber(project.contractValue)} EGP</td>
+                            </tr>
+                          </tfoot>
+                        )}
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Sidebar: Metadata & Conditions */}
+                <div className="space-y-6">
+                  <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+                    <CardHeader className="bg-slate-50/50 pb-4 border-b border-slate-100">
+                      <div className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                        <Info className="w-4 h-4 text-indigo-500" /> Project Metadata
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-6 space-y-5">
+                      <div className="space-y-1">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Description</span>
+                        <p className="text-sm text-slate-600 leading-relaxed font-medium">
+                          {project.description || 'Professional services as per technical offer.'}
+                        </p>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Created On</span>
+                          <div className="flex items-center gap-1.5 text-xs font-bold text-slate-700">
+                            <Calendar className="w-3 h-3 text-indigo-400" /> {formatDate(project.createdAt)}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
+                          <div className="flex items-center gap-1.5">
+                            <div className={`w-2 h-2 rounded-full ${project.status === ProjectStatus.Active ? 'bg-emerald-500' : 'bg-slate-300'} animate-pulse`} />
+                            <span className="text-xs font-bold text-slate-700">{project.status}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {(project.paymentTerms || project.notes) && (
+                    <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+                      <CardHeader className="bg-indigo-50/30 pb-4 border-b border-indigo-50">
+                        <div className="flex items-center gap-2 text-sm font-bold text-indigo-900">
+                          <FileText className="w-4 h-4 text-indigo-600" /> Terms & Remarks
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-6 space-y-6">
+                        {project.paymentTerms && (
+                          <div className="space-y-2">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Invoicing Scheme</span>
+                            <p className="text-xs text-slate-600 leading-relaxed font-medium italic">"{project.paymentTerms}"</p>
+                          </div>
+                        )}
+                        {project.notes && (
+                          <div className="space-y-2">
+                            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Special Notes</span>
+                            <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 text-[11px] text-slate-500 font-medium whitespace-pre-wrap">
+                              {project.notes}
+                            </div>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            </TabsContent>
+
+            {/* Payments Tab */}
+            <TabsContent value="payments">
+              <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+                <CardHeader className="bg-white border-b border-slate-100 flex flex-row items-center justify-between py-6">
+                  <div>
+                    <CardTitle className="text-xl font-bold text-slate-900">Invoices & Requisition</CardTitle>
+                    <CardDescription>Track all billing documents sent to the client.</CardDescription>
+                  </div>
+                  <Badge className="bg-indigo-600 px-3 py-1">{invoices.length} Documents</Badge>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-slate-50 font-bold text-slate-500">
+                        <tr>
+                          <th className="py-5 px-6">Invoice ID</th>
+                          <th className="py-5 px-4">Date</th>
+                          <th className="py-5 px-4">Amount</th>
+                          <th className="py-5 px-4">Status</th>
+                          <th className="py-5 px-6 text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {invoices.length === 0 ? (
+                          <tr><td colSpan={5} className="py-16 text-center text-slate-400 italic">No invoices found. Generate an invoice to begin.</td></tr>
+                        ) : (
+                          invoices.map((inv) => (
+                            <tr key={inv.id} className="hover:bg-slate-50/50 group transition-colors">
+                              <td className="py-5 px-6">
+                                <span className="font-bold text-indigo-600 group-hover:underline cursor-pointer" onClick={() => navigate(`/invoice/${inv.id}`)}>
+                                  {inv.invoiceNumber}
+                                </span>
+                              </td>
+                              <td className="py-5 px-4 text-slate-600">{formatDate(inv.issueDate)}</td>
+                              <td className="py-5 px-4 font-black font-mono tracking-tighter text-slate-900">{formatNumber(inv.total)} EGP</td>
+                              <td className="py-5 px-4">
+                                <Badge variant={inv.status === 'Paid' ? 'outline' : 'secondary'} className={inv.status === 'Paid' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : ''}>
+                                  {inv.status}
+                                </Badge>
+                              </td>
+                              <td className="py-5 px-6 text-right">
+                                <Button variant="ghost" size="sm" onClick={() => navigate(`/invoice/${inv.id}`)} className="text-indigo-600 hover:bg-indigo-50 rounded-xl">
+                                  View Details <ChevronRight className="w-4 h-4 ml-1" />
+                                </Button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Financial Overview</CardTitle>
+            {/* Expenses Tab */}
+            <TabsContent value="expenses">
+              <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+                <CardHeader className="bg-white border-b border-slate-100 flex flex-row items-center justify-between py-6">
+                  <div>
+                    <CardTitle className="text-xl font-bold text-slate-900">Direct Project Expenses</CardTitle>
+                    <CardDescription>Costs associated with procurement, labor, and logistics.</CardDescription>
+                  </div>
+                  <Badge className="bg-rose-500 px-3 py-1">{expenses.length} Records</Badge>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500">Contract Value</span>
-                    <span className="font-bold">{formatNumber(project.contractValue)} EGP</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500">Total Invoiced</span>
-                    <span className="font-bold text-indigo-600">{formatNumber(invoicedAmount)} EGP</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-gray-500">Progress</span>
-                    <span className="font-bold">
-                      {project.contractValue > 0 ? ((invoicedAmount / project.contractValue) * 100).toFixed(1) : 0}%
-                    </span>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-slate-50 font-bold text-slate-500">
+                        <tr>
+                          <th className="py-5 px-6">Date</th>
+                          <th className="py-5 px-4">Cost Center</th>
+                          <th className="py-5 px-4">Activity / Note</th>
+                          <th className="py-5 px-6 text-right">Debit Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {expenses.length === 0 ? (
+                          <tr><td colSpan={4} className="py-16 text-center text-slate-400 italic">Zero expenses recorded.</td></tr>
+                        ) : (
+                          expenses.map((exp) => (
+                            <tr key={exp.id} className="hover:bg-rose-50/10 transition-colors">
+                              <td className="py-5 px-6 text-slate-600">{formatDate(exp.date)}</td>
+                              <td className="py-5 px-4 font-bold text-slate-800"><Badge variant="outline" className="bg-slate-50 border-slate-200">{exp.categoryName}</Badge></td>
+                              <td className="py-5 px-4 text-slate-500 italic max-w-xs truncate">{exp.notes || 'Project related expense'}</td>
+                              <td className="py-5 px-6 text-right font-black font-mono tracking-tighter text-rose-600">{formatNumber(exp.total)} EGP</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </CardContent>
               </Card>
-            </div>
-          </TabsContent>
+            </TabsContent>
 
-          <TabsContent value="payments">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
+            {/* Advances Tab */}
+            <TabsContent value="advances">
+              <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+                <CardHeader className="bg-white border-b border-slate-100 flex flex-row items-center justify-between py-6">
                   <div>
-                    <CardTitle>Invoices & Payments</CardTitle>
-                    <CardDescription>All billing documents associated with this project</CardDescription>
+                    <CardTitle className="text-xl font-bold text-slate-900">Petty Cash & Advances</CardTitle>
+                    <CardDescription>Journal entries for employee custody or cash advances.</CardDescription>
                   </div>
-                  <Badge variant="outline">{invoices.length} Invoices</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-600 font-medium border-b">
-                      <tr>
-                        <th className="py-3 px-4">Invoice #</th>
-                        <th className="py-3 px-4">Date</th>
-                        <th className="py-3 px-4">Amount</th>
-                        <th className="py-3 px-4">Status</th>
-                        <th className="py-3 px-4 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {invoices.length === 0 ? (
-                        <tr>
-                          <td colSpan={5} className="py-8 text-center text-gray-500 italic">No invoices found for this project.</td>
-                        </tr>
-                      ) : (
-                        invoices.map((inv) => (
-                          <tr key={inv.id} className="hover:bg-gray-50">
-                            <td className="py-3 px-4 font-medium text-indigo-600">{inv.invoiceNumber}</td>
-                            <td className="py-3 px-4">{formatDate(inv.issueDate)}</td>
-                            <td className="py-3 px-4 font-bold">{formatNumber(inv.total)} EGP</td>
-                            <td className="py-3 px-4">
-                              <Badge variant={inv.status === 'Paid' ? 'outline' : 'secondary'}>{inv.status}</Badge>
-                            </td>
-                            <td className="py-3 px-4 text-right">
-                              <Button variant="ghost" size="sm" onClick={() => navigate(`/invoice/${inv.id}`)}>View</Button>
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="expenses">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>Project Expenses</CardTitle>
-                    <CardDescription>Direct costs recorded for materials, labor, etc.</CardDescription>
-                  </div>
-                  <Badge variant="outline">{expenses.length} Expenses</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-600 font-medium border-b">
-                      <tr>
-                        <th className="py-3 px-4">Date</th>
-                        <th className="py-3 px-4">Category</th>
-                        <th className="py-3 px-4">Notes</th>
-                        <th className="py-3 px-4 text-right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {expenses.length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="py-8 text-center text-gray-500 italic">No expenses recorded for this project.</td>
-                        </tr>
-                      ) : (
-                        expenses.map((exp) => (
-                          <tr key={exp.id} className="hover:bg-gray-50">
-                            <td className="py-3 px-4">{formatDate(exp.date)}</td>
-                            <td className="py-3 px-4"><Badge variant="outline">{exp.categoryName}</Badge></td>
-                            <td className="py-3 px-4 text-gray-500 max-w-xs truncate">{exp.notes || '---'}</td>
-                            <td className="py-3 px-4 text-right font-bold text-red-600">{formatNumber(exp.total)} EGP</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="advances">
-            <Card>
-              <CardHeader>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <CardTitle>Advances & Custody Used</CardTitle>
-                    <CardDescription>Employee advances or payments associated with this project</CardDescription>
-                  </div>
-                  <Badge variant="outline">{advances.length} Entries</Badge>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-600 font-medium border-b">
-                      <tr>
-                        <th className="py-3 px-4">#Number</th>
-                        <th className="py-3 px-4">Date</th>
-                        <th className="py-3 px-4">Description</th>
-                        <th className="py-3 px-4 text-right">Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {advances.length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="py-8 text-center text-gray-500 italic">No advances found for this project.</td>
-                        </tr>
-                      ) : (
-                        advances.map((adv) => (
-                          <tr key={adv.id} className="hover:bg-gray-50">
-                            <td className="py-3 px-4 font-mono text-xs">{adv.entryNumber}</td>
-                            <td className="py-3 px-4">{formatDate(adv.date)}</td>
-                            <td className="py-3 px-4 text-gray-500">{adv.description || '---'}</td>
-                            <td className="py-3 px-4 text-right font-bold text-orange-600">{formatNumber(adv.totalDebit)} EGP</td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="profitability">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Profitability Analysis</CardTitle>
+                  <Badge className="bg-orange-500 px-3 py-1">{advances.length} Entries</Badge>
                 </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="space-y-4">
-                    <div className="flex justify-between items-center bg-green-50 p-4 rounded-xl">
-                      <div>
-                        <p className="text-sm text-green-700 font-medium">Total Revenue (Invoiced)</p>
-                        <h3 className="text-xl font-bold text-green-900">{formatNumber(invoicedAmount)} EGP</h3>
-                      </div>
-                      <TrendingUp className="w-8 h-8 text-green-200" />
-                    </div>
-
-                    <div className="flex justify-between items-center bg-red-50 p-4 rounded-xl">
-                      <div>
-                        <p className="text-sm text-red-700 font-medium">Total Project Costs</p>
-                        <h3 className="text-xl font-bold text-red-900">{formatNumber(totalCosts)} EGP</h3>
-                        <p className="text-[10px] text-red-400 mt-1">Expenses + Advances</p>
-                      </div>
-                      <Briefcase className="w-8 h-8 text-red-200" />
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <div className="flex justify-between items-center p-2">
-                        <span className="text-gray-600 font-bold">Net Profit</span>
-                        <span className={`text-2xl font-black ${netProfit >= 0 ? 'text-indigo-600' : 'text-red-600'}`}>
-                          {formatNumber(netProfit)} EGP
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center p-2">
-                        <span className="text-gray-500">Margin</span>
-                        <span className={`text-lg font-bold ${profitMargin >= 0 ? 'text-indigo-400' : 'text-red-400'}`}>
-                          {profitMargin.toFixed(2)}%
-                        </span>
-                      </div>
-                    </div>
+                <CardContent className="p-0">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-slate-50 font-bold text-slate-500">
+                        <tr>
+                          <th className="py-5 px-6">JE Number</th>
+                          <th className="py-5 px-4">Date</th>
+                          <th className="py-5 px-4">Reference / Description</th>
+                          <th className="py-5 px-6 text-right">Debit</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {advances.length === 0 ? (
+                          <tr><td colSpan={4} className="py-16 text-center text-slate-400 italic">No advanced payments for this project.</td></tr>
+                        ) : (
+                          advances.map((adv) => (
+                            <tr key={adv.id} className="hover:bg-orange-50/10 transition-colors">
+                              <td className="py-5 px-6 font-mono text-xs font-bold text-slate-900 border-l-2 border-orange-200 ml-1">{adv.entryNumber}</td>
+                              <td className="py-5 px-4 text-slate-500">{formatDate(adv.date)}</td>
+                              <td className="py-5 px-4 text-slate-600 font-medium">{adv.description || 'Advance payment'}</td>
+                              <td className="py-5 px-6 text-right font-black font-mono tracking-tighter text-orange-600">{formatNumber(adv.totalDebit)} EGP</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
                   </div>
                 </CardContent>
               </Card>
+            </TabsContent>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Cost Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent className="flex flex-col items-center justify-center h-[300px]">
-                  <div className="w-full space-y-4">
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span>Direct Expenses ({((totalExpenses / (totalCosts || 1)) * 100).toFixed(0)}%)</span>
-                        <span>{formatNumber(totalExpenses)} EGP</span>
+            {/* Profitability Tab */}
+            <TabsContent value="profitability">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* Financial Health Summary */}
+                <Card className="md:col-span-2 border-none shadow-sm rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-slate-900 text-white p-8">
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-1">
+                        <CardTitle className="text-2xl font-black">Profitability Performance</CardTitle>
+                        <CardDescription className="text-slate-400 font-medium">Real-time financial impact of this project.</CardDescription>
                       </div>
-                      <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
-                        <div className="bg-red-500 h-full" style={{ width: `${(totalExpenses / (totalCosts || 1)) * 100}%` }}></div>
+                      <Activity className="w-10 h-10 text-indigo-400 opacity-50" />
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-8">
+                    <div className="space-y-8">
+                      <div className="flex flex-col md:flex-row gap-6">
+                        <div className="flex-1 bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100">
+                          <p className="text-[10px] font-black text-emerald-700 uppercase tracking-widest mb-1">Incoming Revenue</p>
+                          <h4 className="text-2xl font-black font-mono text-emerald-900">{formatNumber(invoicedAmount)} EGP</h4>
+                          <p className="text-[10px] text-emerald-600 mt-2 font-bold flex items-center gap-1"><ArrowUpRight className="w-3 h-3" /> Fully Invoiced</p>
+                        </div>
+                        <div className="flex-1 bg-rose-50/50 p-6 rounded-2xl border border-rose-100">
+                          <p className="text-[10px] font-black text-rose-700 uppercase tracking-widest mb-1">Total Expenditures</p>
+                          <h4 className="text-2xl font-black font-mono text-rose-900">{formatNumber(totalCosts)} EGP</h4>
+                          <p className="text-[10px] text-rose-600 mt-2 font-bold">Sum of Ops + Advances</p>
+                        </div>
                       </div>
+
+                      <div className="py-8 border-y border-slate-100">
+                        <div className="flex justify-between items-end mb-4">
+                          <div>
+                            <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">Calculated Net Profit</p>
+                            <h2 className={`text-4xl font-black font-mono ${netProfit >= 0 ? 'text-indigo-600' : 'text-rose-600'}`}>
+                              {formatNumber(netProfit)} <span className="text-lg font-normal opacity-50">EGP</span>
+                            </h2>
+                          </div>
+                          <div className={`text-right ${netProfit >= 0 ? 'text-indigo-600' : 'text-rose-600'}`}>
+                            <p className="text-[11px] font-black uppercase tracking-widest opacity-50">Margin Score</p>
+                            <p className="text-2xl font-black">{profitMargin.toFixed(2)}%</p>
+                          </div>
+                        </div>
+                        
+                        {/* Health Meter */}
+                        <div className="space-y-6">
+                          <div className="space-y-2">
+                            <div className="flex justify-between text-[10px] font-black text-slate-500">
+                              <span>REVENUE IMPACT</span>
+                              <span>{profitMargin > 20 ? 'OPTIMAL' : profitMargin > 0 ? 'STABLE' : 'CRITICAL'}</span>
+                            </div>
+                            <div className="w-full bg-slate-100 h-4 rounded-full p-1 overflow-hidden flex">
+                              <motion.div 
+                                initial={{ width: 0 }}
+                                animate={{ width: `${Math.max(5, Math.min(100, (netProfit / (invoicedAmount || 1)) * 100))}%` }}
+                                className={`h-full rounded-full ${netProfit >= 0 ? 'bg-indigo-600' : 'bg-rose-500'}`}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="w-full h-40">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart
+                                data={financialComparisonData}
+                                layout="vertical"
+                                barCategoryGap="20%"
+                              >
+                                <XAxis type="number" hide />
+                                <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={10} fontWeight="bold" width={60} />
+                                <RechartsTooltip 
+                                  cursor={{ fill: 'rgba(0,0,0,0.02)' }}
+                                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', fontSize: '10px' }}
+                                  formatter={(value: number) => [`${formatNumber(value)} EGP`, '']}
+                                />
+                                <Bar dataKey="amount" radius={[0, 4, 4, 0]}>
+                                  {financialComparisonData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                  ))}
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div className="text-center p-4">
+                          <p className="text-[10px] font-bold text-slate-400 mb-1 tracking-widest">ROI</p>
+                          <p className="font-mono font-black text-slate-800">{(profitMargin / 5).toFixed(1)}x</p>
+                        </div>
+                        <div className="text-center p-4">
+                          <p className="text-[10px] font-bold text-slate-400 mb-1 tracking-widest">EFFICIENCY</p>
+                          <p className="font-mono font-black text-slate-800">{(100 - (totalCosts / (invoicedAmount || 1)) * 100).toFixed(0)}%</p>
+                        </div>
+                        <div className="text-center p-4">
+                          <p className="text-[10px] font-bold text-slate-400 mb-1 tracking-widest">BURN RATE</p>
+                          <p className="font-mono font-black text-slate-800">{((totalCosts / (project.contractValue || 1)) * 100).toFixed(1)}%</p>
+                        </div>
+                        <div className="text-center p-4">
+                          <p className="text-[10px] font-bold text-slate-400 mb-1 tracking-widest">STATUS</p>
+                          <p className="font-bold text-emerald-600 text-xs">SOLVENT</p>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Enhanced Cost Breakdown with Recharts */}
+                <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden flex flex-col">
+                  <CardHeader className="bg-slate-50/50 pb-4 border-b border-slate-100">
+                    <CardTitle className="text-sm font-black text-slate-900 uppercase tracking-widest">Cost Distribution</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 flex-1 flex flex-col items-center justify-center">
+                    <div className="w-full h-64">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <PieChart>
+                          <Pie
+                            data={costBreakdownData}
+                            cx="50%"
+                            cy="50%"
+                            innerRadius={60}
+                            outerRadius={80}
+                            paddingAngle={5}
+                            dataKey="value"
+                            stroke="none"
+                          >
+                            {costBreakdownData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <RechartsTooltip 
+                            contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                            formatter={(value: number) => [`${formatNumber(value)} EGP`, 'Amount']}
+                          />
+                        </PieChart>
+                      </ResponsiveContainer>
                     </div>
                     
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span>Advances Used ({((totalAdvances / (totalCosts || 1)) * 100).toFixed(0)}%)</span>
-                        <span>{formatNumber(totalAdvances)} EGP</span>
-                      </div>
-                      <div className="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
-                        <div className="bg-orange-500 h-full" style={{ width: `${(totalAdvances / (totalCosts || 1)) * 100}%` }}></div>
-                      </div>
+                    <div className="mt-6 w-full space-y-4">
+                      {costBreakdownData.map((item) => (
+                        <div key={item.name} className="flex justify-between items-center text-xs font-bold">
+                          <div className="flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                            <span className="text-slate-600">{item.name}</span>
+                          </div>
+                          <div className="flex flex-col items-end">
+                            <span className="text-slate-900 font-mono">{formatNumber(item.value)}</span>
+                            <span className="text-[10px] text-slate-400 font-medium">({totalCosts > 0 ? ((item.value / totalCosts) * 100).toFixed(1) : 0}%)</span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                  </div>
-                  <p className="mt-8 text-xs text-center text-gray-400 max-w-[200px]">
-                    This breakdown help you understand where your project budget is going.
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-        </div>
+
+                    <div className="mt-8 pt-6 border-t border-slate-100 w-full text-center">
+                      <p className="text-[10px] text-slate-400 font-medium uppercase tracking-widest leading-loose">
+                        Total Project Burn<br/>
+                        <span className="text-slate-900 text-sm font-black font-mono">{formatNumber(totalCosts)} EGP</span>
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </TabsContent>
+          </motion.div>
+        </AnimatePresence>
       </Tabs>
-    </div>
+
+      {/* Modals */}
+      <ExpenseModal
+        isOpen={isExpenseModalOpen}
+        onClose={() => setIsExpenseModalOpen(false)}
+        onSuccess={() => {
+          refetchProject();
+          setIsExpenseModalOpen(false);
+          toast.success("Expense added successfully");
+        }}
+        initialProjectId={id}
+      />
+
+      <EnhancedInvoiceModal
+        isOpen={isInvoiceModalOpen}
+        isSell={true}
+        onClose={() => setIsInvoiceModalOpen(false)}
+        onSuccess={() => {
+          refetchProject();
+          setIsInvoiceModalOpen(false);
+          toast.success("Invoice added successfully");
+        }}
+        initialData={{ projectId: id }}
+      />
+    </motion.div>
   );
 };
 

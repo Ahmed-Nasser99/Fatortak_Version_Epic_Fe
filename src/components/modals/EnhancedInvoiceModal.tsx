@@ -51,6 +51,7 @@ interface EnhancedInvoiceModalProps {
   isSell: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  initialData?: { projectId?: string };
 }
 
 const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
@@ -58,6 +59,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
   isSell,
   onClose,
   onSuccess,
+  initialData,
 }) => {
   const { isRTL, t } = useLanguage();
   const createInvoiceMutation = useCreateInvoice();
@@ -72,7 +74,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     status: "Draft" as string,
     invoiceType: isSell ? "Sell" : "Buy",
     branchId: "",
-    projectId: "",
+    projectId: initialData?.projectId || "",
   });
 
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
@@ -138,8 +140,12 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         ...prev,
         dueDate: format(dueDate, "yyyy-MM-dd"),
       }));
+      
+      if (initialData?.projectId) {
+        setInvoiceData((prev) => ({ ...prev, projectId: initialData.projectId }));
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, initialData]);
 
   useEffect(() => {
     // Show installment section if status is PartialPaid or if numberOfInstallments > 0

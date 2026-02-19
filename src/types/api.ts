@@ -491,6 +491,15 @@ export interface NotificationDto {
 }
 
 // Project related DTOs
+export interface ProjectLineDto {
+  id: string;
+  description: string;
+  quantity: number;
+  unit?: string;
+  unitPrice: number;
+  lineTotal: number;
+}
+
 export interface ProjectDto {
   id: string;
   name: string;
@@ -502,10 +511,13 @@ export interface ProjectDto {
   paymentTerms?: string;
   notes?: string;
   invoiceId?: string;
-  totalIncome: number;
-  totalExpenses: number;
-  netProfit: number;
+  isInternal: boolean;
   createdAt: string;
+  totalInvoiced: number;
+  totalExpenses: number;
+  totalAdvances: number;
+  netProfit: number;
+  projectLines: ProjectLineDto[];
   updatedAt: string;
 }
 
