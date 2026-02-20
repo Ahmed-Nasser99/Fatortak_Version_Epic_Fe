@@ -82,6 +82,21 @@ export const invoiceService = {
       }),
     };
 
+    if (data.attachment) {
+      const formData = new FormData();
+      Object.keys(invoiceData).forEach(key => {
+        if (key === 'items' || key === 'installments') {
+          formData.append(key, JSON.stringify((invoiceData as any)[key]));
+        } else {
+          formData.append(key, (invoiceData as any)[key]);
+        }
+      });
+      formData.append("file", data.attachment);
+      return apiClient.post<InvoiceDto>("/api/invoices", formData, {
+        "X-User-Id": localStorage.getItem("user_id") || "",
+      });
+    }
+
     return apiClient.post<InvoiceDto>("/api/invoices", invoiceData, {
       "X-User-Id": localStorage.getItem("user_id") || "",
     });
@@ -107,6 +122,19 @@ export const invoiceService = {
       benefits: data.benefits || 0,
       installments: data.installments || [],
     };
+
+    if (data.attachment) {
+      const formData = new FormData();
+      Object.keys(updateData).forEach(key => {
+        if (key === 'items' || key === 'installments') {
+          formData.append(key, JSON.stringify((updateData as any)[key]));
+        } else {
+          formData.append(key, (updateData as any)[key]);
+        }
+      });
+      formData.append("file", data.attachment);
+      return apiClient.post<InvoiceDto>(`/api/invoices/update/${id}`, formData);
+    }
 
     return apiClient.post<InvoiceDto>(`/api/invoices/update/${id}`, updateData);
   },
@@ -193,6 +221,13 @@ export const invoiceService = {
   },
 
   recordPayment: async (id: string, data: RecordPaymentDto) => {
+    if (data.attachment) {
+      const formData = new FormData();
+      formData.append("amount", data.amount.toString());
+      if (data.paymentMethod) formData.append("paymentMethod", data.paymentMethod);
+      formData.append("file", data.attachment);
+      return apiClient.post<boolean>(`/api/invoices/${id}/payments`, formData);
+    }
     return apiClient.post<boolean>(`/api/invoices/${id}/payments`, data);
   },
 };

@@ -21,6 +21,8 @@ import {
   FileText,
   PawPrint,
   Printer,
+  Eye,
+  Paperclip,
 } from "lucide-react";
 import { formatCurrency } from "@/Helpers/formatCurrency";
 import { formatDate } from "@/Helpers/localization";
@@ -50,7 +52,7 @@ const InstallmentReceiptModal: React.FC<InstallmentReceiptModalProps> = ({
   invoice,
   installmentNo,
 }) => {
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const receiptRef = useRef<HTMLDivElement>(null);
 
   if (!installment || !invoice) return null;
@@ -340,6 +342,28 @@ const InstallmentReceiptModal: React.FC<InstallmentReceiptModalProps> = ({
                 </div>
               </div>
             </div>
+
+            {installment.attachmentUrl && (
+              <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Paperclip className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    <span className="font-semibold text-blue-900 dark:text-blue-100 italic">
+                      {isRTL ? "مرفق الدفع" : "Payment Attachment"}
+                    </span>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 border-blue-200 dark:border-blue-800"
+                    onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${installment.attachmentUrl}`, '_blank')}
+                  >
+                    <Eye className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
+                    <span className="text-blue-600 dark:text-blue-400">{isRTL ? "عرض" : "View"}</span>
+                  </Button>
+                </div>
+              </div>
+            )}
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">

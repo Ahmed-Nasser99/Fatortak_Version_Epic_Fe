@@ -1,5 +1,5 @@
 import React from "react";
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, Paperclip, FileText } from "lucide-react";
 import { getColorClasses } from "./colorUtils";
 import { formatDate } from "@/Helpers/localization";
 
@@ -215,6 +215,33 @@ const BoldCorporateTemplate: React.FC<TemplateProps> = ({
             <p className="text-gray-700 dark:text-gray-300 font-medium">
               {invoice.notes}
             </p>
+          </div>
+        )}
+
+        {/* Bold Attachment */}
+        {invoice.attachmentUrl && (
+          <div className={`mt-10 p-6 bg-gray-50 dark:bg-gray-800/50 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-3xl`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                <div className={`p-3 bg-gradient-to-br ${colors.gradient} rounded-2xl shadow-lg`}>
+                  <Paperclip className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <div className={`text-xs font-black ${colors.text} uppercase tracking-widest mb-1`}>
+                    {isRTL ? "تم إرفاق ملف" : "Attachment Linked"}
+                  </div>
+                  <div className="text-lg font-bold text-gray-900 dark:text-white">
+                    {invoice.attachmentUrl.split('/').pop()}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+                className={`px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-xl`}
+              >
+                {isRTL ? "فتح" : "Open"}
+              </button>
+            </div>
           </div>
         )}
       </div>

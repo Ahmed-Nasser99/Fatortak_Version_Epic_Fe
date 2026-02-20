@@ -1,4 +1,5 @@
 import React from "react";
+import { FileText } from "lucide-react";
 import { getColorClasses } from "./colorUtils";
 import { formatDate } from "@/Helpers/localization";
 
@@ -179,6 +180,28 @@ const MinimalistCleanTemplate: React.FC<TemplateProps> = ({
           <p className="text-gray-600 dark:text-gray-400 text-sm font-light leading-relaxed">
             {invoice.notes}
           </p>
+        </div>
+      )}
+
+      {/* Minimal Attachment */}
+      {invoice.attachmentUrl && (
+        <div className="mt-8 pt-8 border-t border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+              <div className="text-gray-400">
+                <FileText className="w-5 h-5" />
+              </div>
+              <span className="text-sm text-gray-600 dark:text-gray-400 font-light">
+                {isRTL ? "المرفق:" : "Attachment:"} {invoice.attachmentUrl.split('/').pop()}
+              </span>
+            </div>
+            <button
+              onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+              className="text-xs uppercase tracking-widest text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors border-b border-gray-300 dark:border-gray-700 pb-1"
+            >
+              {isRTL ? "عرض الملف" : "View File"}
+            </button>
+          </div>
         </div>
       )}
     </div>

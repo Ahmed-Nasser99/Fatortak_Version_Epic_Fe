@@ -13,7 +13,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { InvoiceDto } from "../../types/api";
 import { invoiceService } from "../../services/invoiceService";
 import { toast } from "react-toastify";
-import { DollarSign, CreditCard, Wallet, Landmark } from 'lucide-react';
+import { DollarSign, CreditCard, Wallet, Landmark, FileText, CheckSquare } from 'lucide-react';
 
 interface RecordPaymentModalProps {
   isOpen: boolean;
@@ -25,6 +25,7 @@ interface RecordPaymentModalProps {
 const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose, invoice, onSuccess }) => {
   const [amount, setAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
 
   React.useEffect(() => {
@@ -54,7 +55,8 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
     try {
       const result = await invoiceService.recordPayment(invoice.id, {
         amount,
-        paymentMethod
+        paymentMethod,
+        attachment: attachment || undefined
       });
 
       if (result.success) {
@@ -146,8 +148,31 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
                       <span>Credit Card</span>
                     </div>
                   </SelectItem>
+                  <SelectItem value="Cheque">
+                    <div className="flex items-center gap-2">
+                      <CheckSquare className="w-4 h-4" />
+                      <span>Cheque</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="attachment" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Attachment (Optional)
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="attachment"
+                  type="file"
+                  onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                  className="cursor-pointer file:cursor-pointer file:border-0 file:bg-indigo-50 file:text-indigo-700 file:text-xs file:font-bold file:px-3 file:h-full"
+                />
+                {attachment && (
+                   <FileText className="w-5 h-5 text-indigo-500 shrink-0" />
+                )}
+              </div>
             </div>
           </div>
 

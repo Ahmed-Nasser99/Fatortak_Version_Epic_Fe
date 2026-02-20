@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, User, Building2 } from "lucide-react";
+import { Calendar, User, Building2, FileText, Paperclip } from "lucide-react";
 import { getColorClasses } from "./colorUtils";
 import { formatDate } from "@/Helpers/localization";
 
@@ -229,22 +229,48 @@ const ClassicProfessionalTemplate: React.FC<TemplateProps> = ({
           </div>
         </div>
 
-        {/* Notes */}
-        {invoice.notes && (
-          <div
-            className={`mt-8 p-6 ${colors.bgLight} dark:${colors.bg}/20 border-l-4 border-${colors.primary} rounded`}
-          >
-            <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
-              {t("notes")}
-            </h3>
-            <p className="text-gray-700 dark:text-gray-300 text-sm">
-              {invoice.notes}
-            </p>
+      {/* Notes */}
+      {invoice.notes && (
+        <div
+          className={`mt-8 p-6 ${colors.bgLight} dark:${colors.bg}/20 border-l-4 border-${colors.primary} rounded`}
+        >
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-2">
+            {t("notes")}
+          </h3>
+          <p className="text-gray-700 dark:text-gray-300 text-sm">
+            {invoice.notes}
+          </p>
+        </div>
+      )}
+
+      {/* Attachment */}
+      {invoice.attachmentUrl && (
+        <div className={`mt-8 p-6 bg-blue-50 dark:bg-blue-900/10 border-l-4 border-blue-600 rounded-xl`}>
+          <h3 className="font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <Paperclip className="w-5 h-5 mr-2 rtl:mr-0 rtl:ml-2 text-blue-600" />
+            {isRTL ? "المرفقات" : "Attachments"}
+          </h3>
+          <div className="flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-xl border border-blue-100 dark:border-blue-900 shadow-sm">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <p className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {invoice.attachmentUrl.split('/').pop()}
+              </p>
+            </div>
+            <button
+              onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg transition-all"
+            >
+              {isRTL ? "عرض" : "View"}
+            </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
-  );
+  </div>
+);
 };
 
 export default ClassicProfessionalTemplate;

@@ -107,6 +107,17 @@ export const accountingService = {
   },
 
   createJournalEntry: async (data: JournalEntryCreateDto) => {
+    if (data.attachment) {
+      const formData = new FormData();
+      formData.append("date", data.date);
+      if (data.description) formData.append("description", data.description);
+      formData.append("lines", JSON.stringify(data.lines));
+      formData.append("file", data.attachment);
+      return apiClient.post<JournalEntryDto>(
+        "/api/accounting/journal-entries",
+        formData
+      );
+    }
     return apiClient.post<JournalEntryDto>(
       "/api/accounting/journal-entries",
       data

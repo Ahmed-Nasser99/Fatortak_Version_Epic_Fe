@@ -1,5 +1,5 @@
 import React from "react";
-import { Calendar, User, FileText, Package } from "lucide-react";
+import { Calendar, User, FileText, Package, Paperclip } from "lucide-react";
 import { getColorClasses } from "./colorUtils";
 import { formatDate } from "@/Helpers/localization";
 
@@ -279,15 +279,34 @@ const ModernGradientTemplate: React.FC<TemplateProps> = ({
         </div>
       </div>
 
-      {/* Notes */}
-      {invoice.notes && (
-        <div className="bg-gray-50 dark:bg-gray-800/50 p-6 rounded-2xl mt-8">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
-            {t("notes")}
+      {/* Attachment */}
+      {invoice.attachmentUrl && (
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-2xl mt-8 border border-blue-100 dark:border-blue-800">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center">
+            <Paperclip className={`w-5 h-5 ${colors.text} ${isRTL ? "ml-2" : "mr-2"}`} />
+            {isRTL ? "المرفقات" : "Attachments"}
           </h3>
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-            {invoice.notes}
-          </p>
+          <div className="flex items-center justify-between p-3 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+              <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
+                <FileText className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {isRTL ? "ملف المرفق" : "Attachment File"}
+                </div>
+                <div className="text-xs text-gray-500 dark:text-gray-400">
+                  {invoice.attachmentUrl.split('/').pop()}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+            >
+              {isRTL ? "عرض" : "View"}
+            </button>
+          </div>
         </div>
       )}
     </div>

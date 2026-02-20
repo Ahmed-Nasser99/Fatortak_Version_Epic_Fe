@@ -1,5 +1,5 @@
 import React from "react";
-import { Zap, Code } from "lucide-react";
+import { Zap, Code, Paperclip, FileText } from "lucide-react";
 import { getColorClasses } from "./colorUtils";
 import { formatDate } from "@/Helpers/localization";
 
@@ -247,19 +247,32 @@ const TechModernTemplate: React.FC<TemplateProps> = ({
         </div>
       </div>
 
-      {/* Tech Notes */}
-      {invoice.notes && (
+      {/* Tech Attachment */}
+      {invoice.attachmentUrl && (
         <div
-          className={`mt-8 ${colors.bg}/20 backdrop-blur border border-${colors.primary}/30 rounded-xl p-6`}
+          className={`mt-8 ${colors.bg}/20 backdrop-blur border border-blue-500/30 rounded-xl p-6`}
         >
-          <div
-            className={`${colors.text} font-mono text-xs uppercase tracking-wider mb-3`}
-          >
-            {t("notes")}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3 rtl:space-x-reverse">
+              <div className={`p-2 bg-blue-500/20 rounded-lg border border-blue-500/30`}>
+                <Paperclip className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <div className="text-xs font-mono uppercase tracking-wider text-blue-400 mb-1">
+                  {isRTL ? "ملف المرفق" : "Attachment File"}
+                </div>
+                <div className={`text-sm ${colors.textLight} font-mono`}>
+                  {invoice.attachmentUrl.split('/').pop()}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+              className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-mono uppercase tracking-widest rounded-lg transition-all border border-blue-400/50 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+            >
+              {isRTL ? "فتح" : "Open"}
+            </button>
           </div>
-          <p className={`${colors.textLight} leading-relaxed`}>
-            {invoice.notes}
-          </p>
         </div>
       )}
     </div>

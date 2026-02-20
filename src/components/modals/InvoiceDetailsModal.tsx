@@ -10,6 +10,11 @@ import {
   DollarSign,
   Printer,
   Package,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+  Paperclip,
+  Eye,
 } from "lucide-react";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useCurrentCompany } from "../../hooks/useCompanies";
@@ -222,6 +227,74 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
             customColor={selectedColor}
           />
         </div>
+
+        {/* Payment History & Installments Section */}
+        {invoice.installments && invoice.installments.length > 0 && (
+          <div className="px-8 pb-8">
+            <div className="bg-gray-50 dark:bg-gray-800/40 rounded-3xl p-6 border border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3 rtl:space-x-reverse">
+                  <div className="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-green-600 dark:text-green-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+                      {isRTL ? "سجل المدفوعات والأقساط" : "Payment & Installment History"}
+                    </h3>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      {isRTL ? `إجمالي ${invoice.installments.length} أقساط` : `Total of ${invoice.installments.length} installments`}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {invoice.installments.map((installment: any, index: number) => (
+                  <div 
+                    key={installment.id || index}
+                    className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    <div className="flex items-center space-x-4 rtl:space-x-reverse mb-3 md:mb-0">
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        installment.status === 'Paid' 
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600' 
+                          : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600'
+                      }`}>
+                        {installment.status === 'Paid' ? <CheckCircle2 className="w-5 h-5" /> : <Clock className="w-5 h-5" />}
+                      </div>
+                      <div>
+                        <div className="font-bold text-gray-900 dark:text-white">
+                          {formatCurrency(installment.amount)}
+                        </div>
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          {isRTL ? "تاريخ الاستحقاق:" : "Due Date:"} {formatDate(installment.dueDate)}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-3">
+                      <Badge variant="outline" className={`${getStatusColor(installment.status)}`}>
+                        {t(`status.${installment.status.toLowerCase()}`)}
+                      </Badge>
+
+                      {installment.attachmentUrl && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="flex items-center space-x-2 text-blue-600 border-blue-100 hover:bg-blue-50 dark:border-blue-900 dark:hover:bg-blue-900/20"
+                          onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${installment.attachmentUrl}`, '_blank')}
+                        >
+                          <Paperclip className="w-4 h-4" />
+                          <span>{isRTL ? "عرض الإيصال" : "View Receipt"}</span>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Actions Footer */}
         <div className="border-t border-gray-200 dark:border-gray-700 p-6 bg-gray-50 dark:bg-gray-800/50">

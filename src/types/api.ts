@@ -18,6 +18,18 @@ export interface InvoiceDto {
   projectId?: string;
   projectName?: string;
   customerId?: string;
+  attachmentUrl?: string;
+  installments?: InstallmentDto[];
+}
+
+export interface InstallmentDto {
+  id: string;
+  invoiceId: string;
+  amount: number;
+  dueDate: string;
+  status: string;
+  paidAt?: string;
+  attachmentUrl?: string;
 }
 
 export interface PagedResponseDto<T> {
@@ -104,6 +116,7 @@ export interface UpdateInvoiceStatusDto {
 export interface RecordPaymentDto {
   amount: number;
   paymentMethod?: string;
+  attachment?: File;
 }
 
 // User related DTOs
@@ -657,6 +670,7 @@ export interface JournalEntryDto {
   lines: JournalEntryLineDto[];
   totalDebit: number;
   totalCredit: number;
+  attachmentUrl?: string;
 }
 
 export interface JournalEntryLineCreateDto {
@@ -671,6 +685,7 @@ export interface JournalEntryCreateDto {
   date: string;
   description?: string;
   lines: JournalEntryLineCreateDto[];
+  attachmentUrl?: string;
 }
 
 export interface JournalEntryFilterDto {

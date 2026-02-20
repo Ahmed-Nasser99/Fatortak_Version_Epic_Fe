@@ -9,6 +9,7 @@ import {
   RotateCcw,
   Eye,
   Filter,
+  Paperclip,
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import {
@@ -95,7 +96,6 @@ const JournalEntries: React.FC = () => {
     { isActive: true, isPostable: true }
   );
 
-  const createEntryMutation = useCreateJournalEntry();
   const postEntryMutation = usePostJournalEntry();
   const reverseEntryMutation = useReverseJournalEntry();
 
@@ -451,6 +451,7 @@ const CreateJournalEntryModal: React.FC<CreateJournalEntryModalProps> = ({
       { accountId: "", debit: 0, credit: 0 },
     ],
   });
+  const [attachment, setAttachment] = useState<File | null>(null);
 
   const addLine = () => {
     setFormData({
@@ -534,7 +535,10 @@ const CreateJournalEntryModal: React.FC<CreateJournalEntryModalProps> = ({
     }
 
     try {
-      const result = await createEntryMutation.mutateAsync(formData);
+      const result = await createEntryMutation.mutateAsync({
+        ...formData,
+        attachment: attachment || undefined
+      });
       if (result.success) {
         onSuccess();
         setFormData({
@@ -545,6 +549,7 @@ const CreateJournalEntryModal: React.FC<CreateJournalEntryModalProps> = ({
             { accountId: "", debit: 0, credit: 0 },
           ],
         });
+        setAttachment(null);
       }
     } catch (error: any) {
       // Error handled by mutation
@@ -683,6 +688,28 @@ const CreateJournalEntryModal: React.FC<CreateJournalEntryModalProps> = ({
             </div>
           </div>
 
+          <div className="mt-4">
+             <Label>{isRTL ? "المرفقات" : "Attachment"}</Label>
+             <div className="flex items-center gap-2 mt-1">
+               <Input
+                 type="file"
+                 onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                 className="flex-1"
+               />
+               {attachment && (
+                 <Button 
+                   type="button" 
+                   variant="ghost" 
+                   size="sm" 
+                   onClick={() => setAttachment(null)}
+                   className="text-red-500"
+                 >
+                   <RotateCcw className="w-4 h-4" />
+                 </Button>
+               )}
+             </div>
+          </div>
+
           <div className="flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
             <div>
               <span className="text-sm font-semibold">
@@ -798,6 +825,26 @@ const JournalEntryDetailModal: React.FC<JournalEntryDetailModalProps> = ({
                   : "Unposted"}
               </Badge>
             </div>
+            {entry.attachmentUrl && (
+              <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Paperclip className="w-5 h-5 text-blue-600" />
+                    <span className="font-semibold text-blue-700 dark:text-blue-300">
+                      {isRTL ? "المرفق" : "Attachment"}
+                    </span>
+                  </div>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${entry.attachmentUrl}`, '_blank')}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    {isRTL ? "عرض" : "View"}
+                  </Button>
+                </div>
+              </div>
+            )}
             {entry.description && (
               <div className="col-span-2">
                 <Label className="text-sm text-gray-500">

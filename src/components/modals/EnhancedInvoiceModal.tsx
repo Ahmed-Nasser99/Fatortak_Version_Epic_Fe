@@ -12,6 +12,8 @@ import {
   Save,
   Loader2,
   Calendar,
+  FileText,
+  Paperclip,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useLanguage } from "../../contexts/LanguageContext";
@@ -76,6 +78,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     branchId: "",
     projectId: initialData?.projectId || "",
   });
+
+  const [attachment, setAttachment] = useState<File | null>(null);
 
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
@@ -387,6 +391,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                 amount: inst.amount,
               }))
             : undefined,
+        attachment: attachment || undefined,
       };
 
       const result = await createInvoiceMutation.mutateAsync(invoiceCreateData);
@@ -415,6 +420,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         setBenefits(0);
         setNumberOfInstallments(0);
         setInstallments([]);
+        setAttachment(null);
         setShowPreviewModal(false);
         onSuccess();
       }
@@ -921,6 +927,56 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Attachment Section */}
+            <div className="bg-gradient-to-r from-gray-50 to-indigo-50 dark:from-gray-800 dark:to-indigo-900/20 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+                <Paperclip className="w-6 h-6 mr-3 text-indigo-600" />
+                {isRTL ? "المرفقات" : "Attachments"}
+              </h3>
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                       {isRTL ? "إرفاق ملف" : "Attach File"} (PDF, JPEG, PNG, etc.)
+                    </label>
+                    <div className="relative group">
+                      <input
+                        type="file"
+                        onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      />
+                      <div className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl group-hover:border-indigo-500 transition-all duration-200 bg-white dark:bg-gray-800">
+                        <Paperclip className="w-5 h-5 text-gray-400 group-hover:text-indigo-500" />
+                        <span className="text-gray-600 dark:text-gray-400 truncate">
+                          {attachment ? attachment.name : (isRTL ? "اختر ملفاً..." : "Choose a file...")}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  {attachment && (
+                    <div className="pt-7">
+                      <button
+                        type="button"
+                        onClick={() => setAttachment(null)}
+                        className="p-2 text-red-600 hover:text-red-800 dark:text-red-400 rounded-lg hover:bg-red-50 transition-all"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {attachment && (
+                  <div className="flex items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 animate-fade-in">
+                    <FileText className="w-5 h-5 text-indigo-600" />
+                    <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
+                      {attachment.name} ({(attachment.size / 1024).toFixed(1)} KB)
+                    </span>
+                  </div>
+                )}
+              </div>
+            </div>
 
               {/* Totals Section */}
               <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
@@ -1005,7 +1061,6 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                   )}
                 </div>
               </div>
-            </div>
 
             {showInstallmentSection && (
               <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">

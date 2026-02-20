@@ -1,5 +1,5 @@
 import React from "react";
-import { Heart } from "lucide-react";
+import { Heart, Paperclip, FileText } from "lucide-react";
 import { getColorClasses } from "./colorUtils";
 import { formatDate } from "@/Helpers/localization";
 
@@ -196,10 +196,44 @@ const ElegantScriptTemplate: React.FC<TemplateProps> = ({
 
       {/* Elegant Notes */}
       {invoice.notes && (
-        <div className="mt-8 text-center">
+        <div className="mt-8 text-center pb-8 border-b border-gray-100 dark:border-gray-800">
           <p className="text-gray-600 dark:text-gray-400 font-serif italic leading-relaxed">
             {invoice.notes}
           </p>
+        </div>
+      )}
+
+      {/* Elegant Attachment */}
+      {invoice.attachmentUrl && (
+        <div className="mt-12 text-center">
+          <div className={`inline-flex items-center justify-center p-1 rounded-full bg-gradient-to-r ${colors.gradient} mb-6`}>
+            <div className="px-6 py-2 bg-white dark:bg-gray-900 rounded-full flex items-center space-x-3 rtl:space-x-reverse">
+              <Paperclip className={`w-5 h-5 ${colors.text}`} />
+              <span className={`text-sm font-serif italic ${colors.text}`}>
+                {isRTL ? "تم إرفاق مستند" : "Document Attached"}
+              </span>
+            </div>
+          </div>
+          
+          <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-lg border border-gray-100 dark:border-gray-700 max-w-lg mx-auto transform hover:scale-[1.02] transition-transform">
+            <div className="flex flex-col items-center">
+              <div className={`p-4 ${colors.bgLight} dark:${colors.bg}/20 rounded-2xl mb-4`}>
+                <FileText className={`w-10 h-10 ${colors.text}`} />
+              </div>
+              <h4 className="text-lg font-serif text-gray-900 dark:text-white mb-2">
+                {isRTL ? "معاينة الملف" : "File Preview"}
+              </h4>
+              <p className="text-sm text-gray-500 mb-6 font-mono">
+                {invoice.attachmentUrl.split('/').pop()}
+              </p>
+              <button
+                onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+                className={`w-full py-3 bg-gradient-to-r ${colors.gradient} text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all uppercase tracking-widest text-sm`}
+              >
+                {isRTL ? "عرض الملف" : "Review File"}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
