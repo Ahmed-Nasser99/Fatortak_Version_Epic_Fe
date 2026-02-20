@@ -23,6 +23,7 @@ export const projectService = {
       if (filters.name) params.name = filters.name;
       if (filters.status) params.status = filters.status;
       if (filters.clientName) params.clientName = filters.clientName;
+      if (filters.customerId) params.customerId = filters.customerId;
     }
 
     return apiClient.get<PagedResponseDto<ProjectDto>>("/api/projects", params);

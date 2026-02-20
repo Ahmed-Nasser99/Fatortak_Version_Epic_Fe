@@ -568,6 +568,7 @@ export interface ProjectFilterDto {
   name?: string;
   status?: ProjectStatus;
   clientName?: string;
+  customerId?: string;
 }
 
 

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Plus,
   Search,
@@ -13,7 +13,8 @@ import {
   CheckCircle,
   XCircle,
   Clock,
-  Eye
+  Eye,
+  Users
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import {
@@ -37,6 +38,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import ProjectModal from "../components/modals/ProjectModal";
+import ClientSelector from "../components/ui/ClientSelector";
 import EnhancedDeleteDialog from "../components/ui/enhanced-delete-dialog";
 // import { useRoleAccess } from "@/hooks/useRoleAccess"; // Assuming role access is needed later
 import { formatDate, formatNumber } from "@/Helpers/localization";
@@ -45,10 +47,16 @@ const Projects: React.FC = () => {
    // const roleAccess = useRoleAccess();
   const { t, isRTL } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const clientIdParam = searchParams.get("clientId");
+  
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editProject, setEditProject] = useState<any>(null);
   const [deleteProjectId, setDeleteProjectId] = useState<string | null>(null);
+
+  // Filter state
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(clientIdParam);
 
   // Pagination state
   const [pagination, setPagination] = useState<PaginationDto>({
@@ -58,6 +66,7 @@ const Projects: React.FC = () => {
 
   const filters: ProjectFilterDto = {
     ...(searchTerm && { name: searchTerm }),
+    ...(selectedCustomerId && { customerId: selectedCustomerId }),
   };
 
   const {
@@ -78,11 +87,15 @@ const Projects: React.FC = () => {
     ? projectsResponse.data?.totalCount || 0
     : 0;
 
-  const stats = {
-      total: totalCount,
-      active: projects.filter((p: any) => p.status === ProjectStatus.Active).length,
-      completed: projects.filter((p: any) => p.status === ProjectStatus.Completed).length,
+  const calculateStats = () => {
+    const totalBudget = projects.reduce((acc: number, p: any) => acc + (p.contractValue || 0), 0);
+    const activeProjects = projects.filter((p: any) => p.status === ProjectStatus.Active).length;
+    const completedProjects = projects.filter((p: any) => p.status === ProjectStatus.Completed).length;
+
+    return { totalBudget, activeProjects, completedProjects };
   };
+
+  const projectStats = calculateStats();
 
   const handleNewProject = () => {
     setEditProject(null);
@@ -133,6 +146,7 @@ const Projects: React.FC = () => {
 
       if (result.success) {
         toast.success(isRTL ? "تم تحديث الحالة" : "Status updated");
+        refetch();
       } else {
         toast.error(
           result.errorMessage ||
@@ -147,17 +161,17 @@ const Projects: React.FC = () => {
   const getStatusColor = (status: ProjectStatus) => {
       switch (status) {
           case ProjectStatus.Active:
-              return "bg-emerald-100 text-emerald-800 border-emerald-200 hover:bg-emerald-200";
+              return "bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800";
           case ProjectStatus.Completed:
-              return "bg-blue-100 text-blue-800 border-blue-200 hover:bg-blue-200";
+              return "bg-blue-50 text-blue-700 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800";
             case ProjectStatus.NotStarted:
-                return "bg-gray-100 text-gray-800 border-gray-200 hover:bg-gray-200";
+                return "bg-gray-50 text-gray-700 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400 dark:border-gray-800";
             case ProjectStatus.OnHold:
-                return "bg-yellow-100 text-yellow-800 border-yellow-200 hover:bg-yellow-200";
+                return "bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800";
             case ProjectStatus.Cancelled:
-                return "bg-red-100 text-red-800 border-red-200 hover:bg-red-200";
+                return "bg-red-50 text-red-700 border-red-200 dark:bg-red-900/20 dark:text-red-400 dark:border-red-800";
           default:
-              return "bg-secondary text-secondary-foreground hover:bg-secondary/80";
+              return "bg-secondary text-secondary-foreground";
       }
   };
 
@@ -198,7 +212,7 @@ const Projects: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <div className="container !max-w-full mx-auto p-4 space-y-6">
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 via-pink-600 to-red-600 rounded-3xl p-8 text-white shadow-2xl">
+        <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 rounded-3xl p-8 text-white shadow-2xl">
           <div
             className={`flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 ${
               isRTL ? "lg:flex-row-reverse" : ""
@@ -212,7 +226,7 @@ const Projects: React.FC = () => {
                 <h1 className="text-3xl font-bold mb-2">
                   {isRTL ? "المشاريع" : "Projects"}
                 </h1>
-                <p className="text-purple-100 text-lg">
+                <p className="text-blue-100 text-lg text-opacity-90">
                   {isRTL
                     ? "إدارة مهامك ومشاريعك بكفاءة"
                     : "Manage your tasks and projects efficiently"}
@@ -245,56 +259,103 @@ const Projects: React.FC = () => {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-sm text-blue-600 font-medium">{isRTL ? "إجمالي المشاريع" : "Total Projects"}</p>
-                        <p className="text-2xl font-bold text-blue-900">{formatNumber(stats.total)}</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Card className="bg-white/50 backdrop-blur-sm border-gray-100 dark:border-gray-800 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+                <CardContent className="p-6 relative">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">{isRTL ? "إجمالي الميزانية" : "Total Budget"}</p>
+                            <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">{formatNumber(projectStats.totalBudget)}</p>
+                        </div>
+                        <div className="w-14 h-14 bg-blue-50 dark:bg-blue-900/20 rounded-2xl flex items-center justify-center group-hover:bg-blue-600 transition-colors duration-300">
+                          <DollarSign className="w-7 h-7 text-blue-600 group-hover:text-white transition-colors duration-300" />
+                        </div>
                     </div>
-                    <Briefcase className="w-8 h-8 text-blue-600 opacity-50" />
+                    <div className="absolute bottom-0 left-0 h-1 w-full bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
                 </CardContent>
             </Card>
-            <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-sm text-emerald-600 font-medium">{isRTL ? "مشاريع نشطة" : "Active Projects"}</p>
-                        <p className="text-2xl font-bold text-emerald-900">{formatNumber(stats.active)}</p>
+            <Card className="bg-white/50 backdrop-blur-sm border-gray-100 dark:border-gray-800 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+                <CardContent className="p-6 relative">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">{isRTL ? "مشاريع نشطة" : "Active Projects"}</p>
+                            <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">{formatNumber(projectStats.activeProjects)}</p>
+                        </div>
+                        <div className="w-14 h-14 bg-emerald-50 dark:bg-emerald-900/20 rounded-2xl flex items-center justify-center group-hover:bg-emerald-600 transition-colors duration-300">
+                          <TrendingUp className="w-7 h-7 text-emerald-600 group-hover:text-white transition-colors duration-300" />
+                        </div>
                     </div>
-                    <TrendingUp className="w-8 h-8 text-emerald-600 opacity-50" />
+                    <div className="absolute bottom-0 left-0 h-1 w-full bg-emerald-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
                 </CardContent>
             </Card>
-             <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-4 flex items-center justify-between">
-                    <div>
-                        <p className="text-sm text-purple-600 font-medium">{isRTL ? "مشاريع مكتملة" : "Completed Projects"}</p>
-                        <p className="text-2xl font-bold text-purple-900">{formatNumber(stats.completed)}</p>
+             <Card className="bg-white/50 backdrop-blur-sm border-gray-100 dark:border-gray-800 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden group">
+                <CardContent className="p-6 relative">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider">{isRTL ? "مشاريع مكتملة" : "Completed Projects"}</p>
+                            <p className="text-3xl font-black text-gray-900 dark:text-white mt-1">{formatNumber(projectStats.completedProjects)}</p>
+                        </div>
+                        <div className="w-14 h-14 bg-purple-50 dark:bg-purple-900/20 rounded-2xl flex items-center justify-center group-hover:bg-purple-600 transition-colors duration-300">
+                          <CheckCircle className="w-7 h-7 text-purple-600 group-hover:text-white transition-colors duration-300" />
+                        </div>
                     </div>
-                    <CheckCircle className="w-8 h-8 text-purple-600 opacity-50" />
+                    <div className="absolute bottom-0 left-0 h-1 w-full bg-purple-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
                 </CardContent>
             </Card>
         </div>
 
-        {/* Search */}
+        {/* Search & Filter */}
         <Card className="bg-card/60 backdrop-blur-sm border shadow-sm">
           <CardContent className="p-6">
-            <div className="relative">
-              <Search
-                className={`absolute top-1/2 transform -translate-y-1/2 ${
-                  isRTL ? "right-4" : "left-4"
-                } w-5 h-5 text-muted-foreground`}
-              />
-              <input
-                type="text"
-                placeholder={
-                  isRTL ? "البحث في المشاريع..." : "Search projects..."
-                }
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full py-3 px-4 ${
-                  isRTL ? "pr-12 text-right" : "pl-12"
-                } border rounded-xl bg-background/60 backdrop-blur-sm focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-all duration-200`}
-              />
+            <div className={`grid grid-cols-1 md:grid-cols-2 gap-4 ${isRTL ? "rtl" : "ltr"}`}>
+              <div className="relative">
+                <Search
+                  className={`absolute top-1/2 transform -translate-y-1/2 ${
+                    isRTL ? "right-4" : "left-4"
+                  } w-5 h-5 text-muted-foreground`}
+                />
+                <input
+                  type="text"
+                  placeholder={
+                    isRTL ? "البحث في المشاريع..." : "Search projects..."
+                  }
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className={`w-full py-2.5 px-4 ${
+                    isRTL ? "pr-12 text-right" : "pl-12"
+                  } border rounded-xl bg-background/60 backdrop-blur-sm focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-all duration-200`}
+                />
+              </div>
+
+              <div className="flex items-center space-x-3 space-x-reverse">
+                <div className="flex-1">
+                  <ClientSelector
+                    value={selectedCustomerId || ""}
+                    onChange={(value) => {
+                      setSelectedCustomerId(value);
+                      if (value) {
+                        setSearchParams({ clientId: value });
+                      } else {
+                        setSearchParams({});
+                      }
+                    }}
+                    placeholder={isRTL ? "تصفية حسب العميل" : "Filter by Client"}
+                  />
+                </div>
+                {selectedCustomerId && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCustomerId(null);
+                      setSearchParams({});
+                    }}
+                    className="text-muted-foreground hover:text-foreground"
+                  >
+                    {isRTL ? "إلغاء التصفية" : "Clear"}
+                  </Button>
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -306,28 +367,28 @@ const Projects: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b bg-muted/30">
-                      <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
+                    <tr className="border-b bg-gray-50/50 dark:bg-gray-800/50">
+                      <th className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}>
                         {isRTL ? "المشروع" : "Project"}
                       </th>
-                      <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
+                      <th className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}>
                         {isRTL ? "العميل" : "Client"}
                       </th>
-                      <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
+                      <th className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}>
                          {isRTL ? "الميزانية" : "Budget"}
                       </th>
-                        <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
+                        <th className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}>
                          {isRTL ? "الحالة" : "Status"}
                       </th>
-                       <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
-                         {isRTL ? "تواريخ" : "Dates"}
+                       <th className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}>
+                         {isRTL ? "التاريخ" : "Date"}
                       </th>
-                      <th className={`px-6 py-4 text-${isRTL ? "right" : "left"} text-sm font-semibold text-muted-foreground`}>
+                      <th className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}>
                         {isRTL ? "إجراءات" : "Actions"}
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border/50">
+                  <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
                     {projects.map((project: any) => (
                       <tr key={project.id} className="hover:bg-muted/20 transition-colors">
                         <td className="px-6 py-4">

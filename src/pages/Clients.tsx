@@ -114,6 +114,10 @@ const Clients: React.FC = () => {
     setDeleteCustomerId(customerId);
   };
 
+  const handleViewProjects = (id: string, name: string) => {
+    navigate(`/projects?clientId=${id}`);
+  };
+
   const handleToggleActivation = async (customerId: string) => {
     try {
       const result = await toggleActivationMutation.mutateAsync(customerId);
@@ -483,6 +487,17 @@ const Clients: React.FC = () => {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               )}
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() =>
+                                  handleViewProjects(customer.id, customer.name)
+                                }
+                                className="text-emerald-600 hover:text-emerald-800"
+                                title={isRTL ? "عرض المشاريع" : "View Projects"}
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
                               {roleAccess.canCreate() && (
                                 <Button
                                   variant="ghost"
@@ -600,6 +615,17 @@ const Clients: React.FC = () => {
                       >
                         <Edit className="w-3 h-3 mr-1" />
                         {t("edit")}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() =>
+                          handleViewProjects(customer.id, customer.name)
+                        }
+                        className="flex-1 text-emerald-600 border-emerald-200 hover:bg-emerald-50"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        {isRTL ? "مشاريع" : "Projects"}
                       </Button>
                       {roleAccess.canCreate() && (
                         <Button
