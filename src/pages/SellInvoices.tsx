@@ -1066,6 +1066,7 @@ const SellInvoices: React.FC = () => {
           invoice={invoices.find((inv) => inv.id === installmentsInvoiceId)}
           isOpen={!!installmentsInvoiceId}
           onClose={() => setInstallmentsInvoiceId(null)}
+          onUpdate={refetch}
         />
       )}
 

@@ -45,11 +45,12 @@ interface IntegratedInstallmentsManagerProps {
   invoice: any;
   isOpen: boolean;
   onClose: () => void;
+  onUpdate?: () => void;
 }
 
 const IntegratedInstallmentsManager: React.FC<
   IntegratedInstallmentsManagerProps
-> = ({ invoiceId, invoice, isOpen, onClose }) => {
+> = ({ invoiceId, invoice, isOpen, onClose, onUpdate }) => {
   const { t, isRTL } = useLanguage();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -169,6 +170,7 @@ const IntegratedInstallmentsManager: React.FC<
       if (result.success) {
         toast.success(t("installmentPaidSuccessfully"));
         refetch();
+        if (onUpdate) onUpdate();
       }
     } catch (error) {
       toast.error(t("installmentPaymentFailed"));
@@ -180,6 +182,7 @@ const IntegratedInstallmentsManager: React.FC<
       if (result.success) {
         toast.success(t("installmentMarkedunPaid"));
         refetch();
+        if (onUpdate) onUpdate();
       }
     } catch (error) {
       toast.error(t("installmentUnPaymentFailed"));

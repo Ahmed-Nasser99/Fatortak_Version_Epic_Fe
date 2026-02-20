@@ -221,13 +221,14 @@ export const invoiceService = {
   },
 
   recordPayment: async (id: string, data: RecordPaymentDto) => {
-    if (data.attachment) {
-      const formData = new FormData();
-      formData.append("amount", data.amount.toString());
-      if (data.paymentMethod) formData.append("paymentMethod", data.paymentMethod);
-      formData.append("file", data.attachment);
-      return apiClient.post<boolean>(`/api/invoices/${id}/payments`, formData);
+    const formData = new FormData();
+    formData.append("amount", data.amount.toString());
+    if (data.paymentMethod) {
+      formData.append("paymentMethod", data.paymentMethod);
     }
-    return apiClient.post<boolean>(`/api/invoices/${id}/payments`, data);
+    if (data.attachment) {
+      formData.append("file", data.attachment);
+    }
+    return apiClient.post<boolean>(`/api/invoices/${id}/payments`, formData);
   },
 };

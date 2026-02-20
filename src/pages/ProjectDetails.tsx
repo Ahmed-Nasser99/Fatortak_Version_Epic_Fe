@@ -64,22 +64,22 @@ const ProjectDetails: React.FC = () => {
   const project = projectResponse?.data;
 
   // Data for tabs
-  const { data: invoicesResponse, isLoading: invoicesLoading } = useInvoices(
+  const { data: invoicesResponse, isLoading: invoicesLoading, refetch: refetchInvoices } = useInvoices(
     { pageNumber: 1, pageSize: 100 },
     { projectId: id }
   );
   
-  const { data: expensesResponse, isLoading: expensesLoading } = useExpenses(
+  const { data: expensesResponse, isLoading: expensesLoading, refetch: refetchExpenses } = useExpenses(
     { pageNumber: 1, pageSize: 100 },
     { projectId: id }
   );
 
-  const { data: advancesResponse, isLoading: advancesLoading } = useJournalEntries(
+  const { data: advancesResponse, isLoading: advancesLoading, refetch: refetchAdvances } = useJournalEntries(
     { pageNumber: 1, pageSize: 100 },
     { projectId: id, referenceType: JournalEntryReferenceType.Manual }
   );
 
-  const { data: paymentsResponse, isLoading: paymentsLoading } = useJournalEntries(
+  const { data: paymentsResponse, isLoading: paymentsLoading, refetch: refetchPayments } = useJournalEntries(
     { pageNumber: 1, pageSize: 100 },
     { projectId: id, referenceType: JournalEntryReferenceType.Payment }
   );
@@ -853,6 +853,10 @@ const ProjectDetails: React.FC = () => {
         invoice={selectedInvoice}
         onSuccess={() => {
           refetchProject();
+          refetchInvoices();
+          refetchPayments();
+          refetchAdvances();
+          refetchExpenses();
           setIsRecordPaymentOpen(false);
         }}
       />
