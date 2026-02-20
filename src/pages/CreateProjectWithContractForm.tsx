@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { 
   Plus, 
   Trash2, 
@@ -37,6 +37,8 @@ interface ProjectLineForm {
 
 const CreateProjectWithContractForm = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const queryClientId = searchParams.get('clientId');
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
   
@@ -100,6 +102,12 @@ const CreateProjectWithContractForm = () => {
     }
   };
 
+  useEffect(() => {
+    if (customers.length > 0 && queryClientId) {
+      handleCustomerChange(queryClientId);
+    }
+  }, [customers, queryClientId]);
+
   const handleCustomerChange = (id: string) => {
     setClientId(id);
     const customer = customers.find(c => c.id === id);
@@ -158,7 +166,8 @@ const CreateProjectWithContractForm = () => {
       const result = await projectService.createProjectWithContract(payload);
       if (result.success) {
         toast.success(activate ? 'Project Activated & Invoice Generated!' : 'Project Saved as Draft');
-        navigate('/projects');
+        const newProjectId = (result.data as any).id;
+        navigate(`/projects/${newProjectId}`);
       } else {
         toast.error(result.errorMessage || 'Failed to create project');
       }

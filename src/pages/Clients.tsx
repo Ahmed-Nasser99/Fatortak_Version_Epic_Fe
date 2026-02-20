@@ -14,6 +14,7 @@ import {
   Building,
   Calendar,
   TrendingUp,
+  Briefcase,
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import {
@@ -38,6 +39,7 @@ import CustomerUpdateModal from "../components/modals/CustomerUpdateModal";
 import EnhancedDeleteDialog from "../components/ui/enhanced-delete-dialog";
 import { useRoleAccess } from "@/hooks/useRoleAccess";
 import { formatDate, formatNumber } from "@/Helpers/localization";
+import { useNavigate } from "react-router-dom";
 
 const Clients: React.FC = () => {
   const roleAccess = useRoleAccess();
@@ -46,6 +48,8 @@ const Clients: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editCustomerId, setEditCustomerId] = useState<string | null>(null);
   const [deleteCustomerId, setDeleteCustomerId] = useState<string | null>(null);
+
+  const navigate = useNavigate();
 
   // Pagination state
   const [pagination, setPagination] = useState<PaginationDto>({
@@ -118,15 +122,13 @@ const Clients: React.FC = () => {
         toast.success(
           isRTL
             ? "تم تحديث حالة العميل بنجاح"
-            : "Customer status updated successfully"
+            : "Customer status updated successfully",
         );
         refetch();
       }
     } catch (error) {
       toast.error(
-        isRTL
-          ? "فشل في تحديث حالة العميل"
-          : "Failed to update customer status"
+        isRTL ? "فشل في تحديث حالة العميل" : "Failed to update customer status",
       );
     }
   };
@@ -139,17 +141,13 @@ const Clients: React.FC = () => {
 
       if (result.success) {
         toast.success(
-          isRTL
-            ? "تم حذف العميل بنجاح"
-            : "Customer deleted successfully"
+          isRTL ? "تم حذف العميل بنجاح" : "Customer deleted successfully",
         );
         setDeleteCustomerId(null);
         refetch();
       }
     } catch (error) {
-      toast.error(
-        isRTL ? "فشل في حذف العميل" : "Failed to delete customer"
-      );
+      toast.error(isRTL ? "فشل في حذف العميل" : "Failed to delete customer");
     }
   };
 
@@ -485,6 +483,23 @@ const Clients: React.FC = () => {
                                   <Edit className="w-4 h-4" />
                                 </Button>
                               )}
+                              {roleAccess.canCreate() && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    navigate(
+                                      `/projects/new-with-contract?clientId=${customer.id}`,
+                                    )
+                                  }
+                                  className="text-indigo-600 hover:text-indigo-800"
+                                  title={
+                                    isRTL ? "إنشاء مشروع" : "Create Project"
+                                  }
+                                >
+                                  <Briefcase className="w-4 h-4" />
+                                </Button>
+                              )}
                               {roleAccess.canDelete() && (
                                 <Button
                                   variant="ghost"
@@ -572,9 +587,7 @@ const Clients: React.FC = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
-                        <span>
-                          {formatDate(customer.createdAt)}
-                        </span>
+                        <span>{formatDate(customer.createdAt)}</span>
                       </div>
                     </div>
 
@@ -588,6 +601,21 @@ const Clients: React.FC = () => {
                         <Edit className="w-3 h-3 mr-1" />
                         {t("edit")}
                       </Button>
+                      {roleAccess.canCreate() && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            navigate(
+                              `/projects/new-with-contract?clientId=${customer.id}`,
+                            )
+                          }
+                          className="flex-1 text-indigo-600 border-indigo-200 hover:bg-indigo-50"
+                        >
+                          <Briefcase className="w-3 h-3 mr-1" />
+                          {isRTL ? "مشروع" : "Project"}
+                        </Button>
+                      )}
                       <Button
                         variant="outline"
                         size="sm"
@@ -606,9 +634,9 @@ const Clients: React.FC = () => {
             <div className="border-t bg-muted/20 px-6 py-4">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-sm text-muted-foreground">
-                    {isRTL
-                      ? `عرض ${formatNumber(customers.length)} من ${formatNumber(totalCount)} عملاء`
-                      : `Showing ${formatNumber(customers.length)} of ${formatNumber(totalCount)} customers`}
+                  {isRTL
+                    ? `عرض ${formatNumber(customers.length)} من ${formatNumber(totalCount)} عملاء`
+                    : `Showing ${formatNumber(customers.length)} of ${formatNumber(totalCount)} customers`}
                 </div>
                 <div className="flex space-x-2">
                   <Button
@@ -687,9 +715,7 @@ const Clients: React.FC = () => {
         onClose={() => setDeleteCustomerId(null)}
         onConfirm={handleConfirmDelete}
         title={isRTL ? "حذف العميل" : "Delete Client"}
-        description={
-          t("confirmDeleteClient")
-        }
+        description={t("confirmDeleteClient")}
         itemName={
           customers.find((customer) => customer.id === deleteCustomerId)?.name
         }
