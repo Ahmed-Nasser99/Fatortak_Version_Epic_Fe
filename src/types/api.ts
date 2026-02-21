@@ -538,6 +538,7 @@ export interface ProjectDto {
   totalExpenses: number;
   totalAdvances: number;
   totalCollected: number;
+  totalPaid: number;
   netProfit: number;
   projectLines: ProjectLineDto[];
   updatedAt: string;

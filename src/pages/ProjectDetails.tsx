@@ -119,12 +119,41 @@ const ProjectDetails: React.FC = () => {
   }
 
   const invoices = invoicesResponse?.data?.data || [];
+  const salesInvoices = invoices.filter(
+    (inv) =>
+      inv.invoiceType?.toLowerCase() === "sales" ||
+      inv.invoiceType?.toLowerCase() === "sell" ||
+      inv.invoiceType?.toLowerCase() === "sale",
+  );
+  const purchaseInvoices = invoices.filter(
+    (inv) =>
+      inv.invoiceType?.toLowerCase() === "purchase" ||
+      inv.invoiceType?.toLowerCase() === "buy",
+  );
+
   const expenses = expensesResponse?.data?.data || [];
-  const payments = paymentsResponse?.data?.data || [];
+  const allPayments = paymentsResponse?.data?.data || [];
+
+  // Revenue Collections: Entries that CREDIT Accounts Receivable (1200 series)
+  const revenuePayments = allPayments.filter((p) =>
+    p.lines.some((l) => l.accountCode.startsWith("120") && l.credit > 0),
+  );
+
+  // Supplier Payments: Entries that CREDIT Cash/Bank (1000/1100 series) for Purchase Invoices
+  const supplierPayments = allPayments.filter((p) =>
+    p.lines.some(
+      (l) =>
+        (l.accountCode.startsWith("100") ||
+          l.accountCode.startsWith("110") ||
+          l.accountCode.startsWith("101")) &&
+        l.credit > 0,
+    ),
+  );
 
   // Financial Stats from Backend
   const invoicedAmount = project.totalInvoiced || 0;
   const collectedAmount = project.totalCollected || 0;
+  const totalPaidOut = project.totalPaid || 0;
   const totalExpenses = project.totalExpenses || 0;
   const totalAdvances = project.totalAdvances || 0;
   const totalCosts = totalExpenses + totalAdvances;
@@ -269,14 +298,13 @@ const ProjectDetails: React.FC = () => {
             value={totalCosts}
             icon={DollarSign}
             detail={
-              <div className="flex gap-2 text-[9px] font-bold uppercase tracking-tight">
-                <span className="text-slate-500">
-                  Exp: {formatNumber(totalExpenses)}
-                </span>
-                <span className="text-slate-400">|</span>
-                <span className="text-slate-500">
-                  Adv: {formatNumber(totalAdvances)}
-                </span>
+              <div className="flex flex-col gap-1 text-[9px] font-bold uppercase tracking-tight">
+                <div className="flex justify-between text-slate-500">
+                  <span>Accrued: {formatNumber(totalExpenses)}</span>
+                </div>
+                <div className="flex justify-between text-rose-500">
+                  <span>Paid: {formatNumber(totalPaidOut)}</span>
+                </div>
               </div>
             }
           />
@@ -531,14 +559,14 @@ const ProjectDetails: React.FC = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <Badge className="bg-indigo-600 px-3 py-1">
-                        {invoices.length} Documents
+                        {salesInvoices.length} Documents
                       </Badge>
 
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => {
-                          const unpaidInvoice = invoices.find(
+                          const unpaidInvoice = salesInvoices.find(
                             (inv) => inv.status !== "Paid",
                           );
                           if (unpaidInvoice) {
@@ -571,17 +599,17 @@ const ProjectDetails: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {invoices.length === 0 ? (
+                        {salesInvoices.length === 0 ? (
                           <tr>
                             <td
                               colSpan={5}
                               className="py-16 text-center text-slate-400 italic"
                             >
-                              No invoices found. Generate an invoice to begin.
+                              No billing documents found for this project.
                             </td>
                           </tr>
                         ) : (
-                          invoices.map((inv) => (
+                          salesInvoices.map((inv) => (
                             <tr
                               key={inv.id}
                               className="hover:bg-slate-50/50 group transition-colors"
@@ -708,20 +736,19 @@ const ProjectDetails: React.FC = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
-                      {payments.length === 0 ? (
+                      {revenuePayments.length === 0 ? (
                         <tr>
                           <td colSpan={4} className="py-20 text-center">
                             <div className="flex flex-col items-center justify-center opacity-40">
                               <Receipt className="w-12 h-12 mb-3 text-slate-300" />
                               <p className="text-slate-500 italic font-medium">
-                                No payments received yet. Payments recorded on
-                                invoices will appear here.
+                                No revenue payments received yet.
                               </p>
                             </div>
                           </td>
                         </tr>
                       ) : (
-                        payments.map((p) => (
+                        revenuePayments.map((p) => (
                           <tr
                             key={p.id}
                             className="hover:bg-emerald-50/20 group transition-all duration-300"
@@ -776,76 +803,245 @@ const ProjectDetails: React.FC = () => {
 
             {/* Expenses Tab */}
             <TabsContent value="expenses">
-              <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
-                <CardHeader className="bg-white border-b border-slate-100 flex flex-row items-center justify-between py-6">
-                  <div className="flex flex-row items-center justify-between w-full">
+              <div className="space-y-8">
+                <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-white border-b border-slate-100 flex flex-row items-center justify-between py-6">
+                    <div className="flex flex-row items-center justify-between w-full">
+                      <div>
+                        <CardTitle className="text-xl font-bold text-slate-900">
+                          Direct Project Expenses
+                        </CardTitle>
+                        <CardDescription>
+                          Costs associated with procurement, labor, and logistics.
+                        </CardDescription>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Badge className="bg-rose-500 px-3 py-1">
+                          {expenses.length} Records
+                        </Badge>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setIsExpenseModalOpen(true)}
+                          className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-4 shadow-sm h-9"
+                        >
+                          <Plus className="w-4 h-4 text-rose-500" />{" "}
+                          <span className="text-slate-700">Add Expense</span>
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50 font-bold text-slate-500">
+                          <tr>
+                            <th className="py-5 px-6">Date</th>
+                            <th className="py-5 px-4">Cost Center</th>
+                            <th className="py-5 px-4">Activity / Note</th>
+                            <th className="py-5 px-6 text-right">Debit Amount</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {expenses.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={4}
+                                className="py-16 text-center text-slate-400 italic"
+                              >
+                                Zero expenses recorded.
+                              </td>
+                            </tr>
+                          ) : (
+                            expenses.map((exp) => (
+                              <tr
+                                key={exp.id}
+                                className="hover:bg-rose-50/10 transition-colors"
+                              >
+                                <td className="py-5 px-6 text-slate-600">
+                                  {formatDate(exp.date)}
+                                </td>
+                                <td className="py-5 px-4 font-bold text-slate-800">
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-slate-50 border-slate-200"
+                                  >
+                                    {exp.categoryName}
+                                  </Badge>
+                                </td>
+                                <td className="py-5 px-4 text-slate-500 italic max-w-xs truncate">
+                                  {exp.notes || "Project related expense"}
+                                </td>
+                                <td className="py-5 px-6 text-right font-black font-mono tracking-tighter text-rose-600">
+                                  {formatNumber(exp.total)} EGP
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Purchase Invoices Section */}
+                <Card className="border-slate-100 shadow-sm rounded-2xl overflow-hidden">
+                  <CardHeader className="bg-white border-b border-slate-100 flex flex-row items-center justify-between py-6">
                     <div>
                       <CardTitle className="text-xl font-bold text-slate-900">
-                        Direct Project Expenses
+                        Purchase Documents
                       </CardTitle>
                       <CardDescription>
-                        Costs associated with procurement, labor, and logistics.
+                        Invoices received from suppliers for project materials.
                       </CardDescription>
                     </div>
+                    <Badge className="bg-amber-500 px-3 py-1">
+                      {purchaseInvoices.length} Documents
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm text-left">
+                        <thead className="bg-slate-50 font-bold text-slate-500">
+                          <tr>
+                            <th className="py-5 px-6">Invoice ID</th>
+                            <th className="py-5 px-4">Date</th>
+                            <th className="py-5 px-4">Amount</th>
+                            <th className="py-5 px-4 text-right">Paid</th>
+                            <th className="py-5 px-4">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-slate-100">
+                          {purchaseInvoices.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={5}
+                                className="py-16 text-center text-slate-400 italic"
+                              >
+                                No purchase documents found.
+                              </td>
+                            </tr>
+                          ) : (
+                            purchaseInvoices.map((inv) => (
+                              <tr
+                                key={inv.id}
+                                className="hover:bg-slate-50/50 group transition-colors"
+                              >
+                                <td className="py-5 px-6">
+                                  <span
+                                    className="font-bold text-amber-600 group-hover:underline cursor-pointer"
+                                    onClick={() => navigate(`/invoice/${inv.id}`)}
+                                  >
+                                    {inv.invoiceNumber}
+                                  </span>
+                                </td>
+                                <td className="py-5 px-4 text-slate-600">
+                                  {formatDate(inv.issueDate)}
+                                </td>
+                                <td className="py-5 px-4 font-black font-mono tracking-tighter text-slate-900">
+                                  {formatNumber(inv.total)} EGP
+                                </td>
+                                <td className="py-5 px-4 text-right font-mono text-emerald-600 font-bold">
+                                  {formatNumber((inv as any).amountPaid || 0)}
+                                </td>
+                                <td className="py-5 px-4">
+                                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-100">
+                                    {inv.status}
+                                  </Badge>
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Supplier Payments History */}
+                <div className="space-y-6">
+                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <Badge className="bg-rose-500 px-3 py-1">
-                        {expenses.length} Records
-                      </Badge>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsExpenseModalOpen(true)}
-                        className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-4 shadow-sm h-9"
-                      >
-                        <Plus className="w-4 h-4 text-rose-500" />{" "}
-                        <span className="text-slate-700">Add Expense</span>
-                      </Button>
+                      <div className="p-2 bg-rose-50 rounded-lg">
+                        <DollarSign className="w-5 h-5 text-rose-600" />
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-slate-900">
+                          Payments to Suppliers
+                        </h3>
+                        <p className="text-sm text-slate-500 font-medium tracking-tight">
+                          History of outbound payments made against purchase invoices.
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 px-5 py-2.5 bg-rose-900/5 rounded-2xl border border-rose-100 shadow-sm">
+                      <div className="flex flex-col items-end">
+                        <span className="text-[10px] font-black text-rose-600/70 uppercase tracking-widest leading-none mb-1">
+                          Outbound Cash
+                        </span>
+                        <span className="text-xl font-black font-mono text-rose-700 tracking-tighter leading-none">
+                          {formatNumber(totalPaidOut)}{" "}
+                          <span className="text-[10px] font-normal opacity-70">
+                            EGP
+                          </span>
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="overflow-x-auto">
+
+                  <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm">
                     <table className="w-full text-sm text-left">
-                      <thead className="bg-slate-50 font-bold text-slate-500">
+                      <thead className="bg-slate-50/50 font-bold text-slate-500 border-b border-slate-100">
                         <tr>
-                          <th className="py-5 px-6">Date</th>
-                          <th className="py-5 px-4">Cost Center</th>
-                          <th className="py-5 px-4">Activity / Note</th>
-                          <th className="py-5 px-6 text-right">Debit Amount</th>
+                          <th className="py-5 px-6 uppercase tracking-wider text-[10px]">
+                            Date
+                          </th>
+                          <th className="py-5 px-4 uppercase tracking-wider text-[10px]">
+                            Transaction
+                          </th>
+                          <th className="py-5 px-4 uppercase tracking-wider text-[10px]">
+                            Reference / Note
+                          </th>
+                          <th className="py-5 px-6 text-right uppercase tracking-wider text-[10px]">
+                            Amount Paid
+                          </th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-100">
-                        {expenses.length === 0 ? (
+                        {supplierPayments.length === 0 ? (
                           <tr>
-                            <td
-                              colSpan={4}
-                              className="py-16 text-center text-slate-400 italic"
-                            >
-                              Zero expenses recorded.
+                            <td colSpan={4} className="py-20 text-center text-slate-400 italic">
+                              No outbound payments recorded yet.
                             </td>
                           </tr>
                         ) : (
-                          expenses.map((exp) => (
+                          supplierPayments.map((p) => (
                             <tr
-                              key={exp.id}
-                              className="hover:bg-rose-50/10 transition-colors"
+                              key={p.id}
+                              className="hover:bg-rose-50/20 group transition-all duration-300"
                             >
-                              <td className="py-5 px-6 text-slate-600">
-                                {formatDate(exp.date)}
+                              <td className="py-5 px-6">
+                                <span className="font-bold text-slate-900">
+                                  {formatDate(p.date)}
+                                </span>
                               </td>
-                              <td className="py-5 px-4 font-bold text-slate-800">
+                              <td className="py-5 px-4">
                                 <Badge
                                   variant="outline"
-                                  className="bg-slate-50 border-slate-200"
+                                  className="font-mono text-[10px] bg-slate-50 border-slate-200 text-slate-600"
                                 >
-                                  {exp.categoryName}
+                                  {p.entryNumber}
                                 </Badge>
                               </td>
-                              <td className="py-5 px-4 text-slate-500 italic max-w-xs truncate">
-                                {exp.notes || "Project related expense"}
+                              <td className="py-5 px-4">
+                                <p className="text-xs font-medium text-slate-600 italic">
+                                  {p.description || "Project related payment"}
+                                </p>
                               </td>
-                              <td className="py-5 px-6 text-right font-black font-mono tracking-tighter text-rose-600">
-                                {formatNumber(exp.total)} EGP
+                              <td className="py-5 px-6 text-right">
+                                <span className="font-black font-mono text-lg text-rose-600 tracking-tighter">
+                                  {formatNumber(p.totalCredit)} EGP
+                                </span>
                               </td>
                             </tr>
                           ))
@@ -853,8 +1049,8 @@ const ProjectDetails: React.FC = () => {
                       </tbody>
                     </table>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             </TabsContent>
           </motion.div>
         </AnimatePresence>
