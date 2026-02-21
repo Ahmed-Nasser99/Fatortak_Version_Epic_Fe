@@ -62,15 +62,16 @@ export const invoiceService = {
     const invoiceData = {
       customerName: data.customerName,
       customerId: data.customerId,
-      invoiceNumber: data.invoiceNumber,
       issueDate: data.issueDate,
       dueDate: data.dueDate,
+      paymentAccountId: data.paymentAccountId,
       notes: data.notes || "",
       total: data.total || 0,
       vatAmount: data.vatTotal || 0,
       currency: data.currency || "EGP",
-      invoiceType: data.invoiceType || "Sell",
       status: data.status || "Draft",
+      invoiceType: data.invoiceType || "Sell",
+      projectId: data.projectId,
       items: data.items || [],
 
       // Add installment-related fields
@@ -87,7 +88,7 @@ export const invoiceService = {
       Object.keys(invoiceData).forEach(key => {
         if (key === 'items' || key === 'installments') {
           formData.append(key, JSON.stringify((invoiceData as any)[key]));
-        } else {
+        } else if ((invoiceData as any)[key] !== undefined && (invoiceData as any)[key] !== null) {
           formData.append(key, (invoiceData as any)[key]);
         }
       });
@@ -107,13 +108,14 @@ export const invoiceService = {
     const updateData = {
       customerId: data.customerId,
       customerName: data.customerName,
-      invoiceNumber: data.invoiceNumber,
       issueDate: data.issueDate,
       dueDate: data.dueDate,
+      paymentAccountId: data.paymentAccountId,
       notes: data.notes || "",
       terms: data.terms || "",
       status: data.status || "Draft",
       invoiceType: data.invoiceType || "Sell",
+      projectId: data.projectId,
       items: data.items || [],
 
       // Add missing installment-related fields
@@ -128,7 +130,7 @@ export const invoiceService = {
       Object.keys(updateData).forEach(key => {
         if (key === 'items' || key === 'installments') {
           formData.append(key, JSON.stringify((updateData as any)[key]));
-        } else {
+        } else if ((updateData as any)[key] !== undefined && (updateData as any)[key] !== null) {
           formData.append(key, (updateData as any)[key]);
         }
       });
@@ -138,6 +140,7 @@ export const invoiceService = {
 
     return apiClient.post<InvoiceDto>(`/api/invoices/update/${id}`, updateData);
   },
+
   // Delete invoice
   deleteInvoice: async (id: string) => {
     return apiClient.post<boolean>(`/api/invoices/delete/${id}`);
@@ -228,6 +231,9 @@ export const invoiceService = {
     }
     if (data.attachment) {
       formData.append("file", data.attachment);
+    }
+    if (data.paymentAccountId) {
+      formData.append("paymentAccountId", data.paymentAccountId);
     }
     return apiClient.post<boolean>(`/api/invoices/${id}/payments`, formData);
   },

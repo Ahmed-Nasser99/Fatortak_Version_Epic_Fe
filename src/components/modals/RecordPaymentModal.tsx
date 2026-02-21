@@ -46,7 +46,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
     }
 
     const remainingBalance = invoice.total - ((invoice as any).amountPaid || 0);
-    if (amount > remainingBalance + 0.01) { // Added small epsilon for float precision
+    if (amount > remainingBalance + 0.01) {
       toast.error(`Amount exceeds remaining balance of ${remainingBalance}`);
       return;
     }

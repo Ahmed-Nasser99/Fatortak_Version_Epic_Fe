@@ -73,7 +73,7 @@ const Dashboard: React.FC = () => {
   } = useDashboardReport(
     period,
     filterBranchId || undefined,
-    filterProjectId === "all" ? undefined : filterProjectId
+    filterProjectId === "all" ? undefined : filterProjectId,
   );
 
   const userProfile = userProfileResponse?.success
@@ -227,8 +227,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
@@ -376,7 +374,9 @@ const Dashboard: React.FC = () => {
                                 </span>
                               </div>
                               <span className="font-semibold text-yellow-600 dark:text-yellow-400">
-                                {formatCurrency(stats.revenueBreakdown.partialPaid)}
+                                {formatCurrency(
+                                  stats.revenueBreakdown.partialPaid,
+                                )}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -392,7 +392,7 @@ const Dashboard: React.FC = () => {
                             </div>
                           </>
                         )}
-                        
+
                         {index === 1 && stats?.expenseBreakdown && (
                           <>
                             <div className="flex items-center justify-between">
@@ -414,7 +414,9 @@ const Dashboard: React.FC = () => {
                                 </span>
                               </div>
                               <span className="font-semibold text-yellow-600 dark:text-yellow-400">
-                                {formatCurrency(stats.expenseBreakdown.partialPaid)}
+                                {formatCurrency(
+                                  stats.expenseBreakdown.partialPaid,
+                                )}
                               </span>
                             </div>
                             <div className="flex items-center justify-between">
@@ -530,15 +532,13 @@ const Dashboard: React.FC = () => {
                         liquidityPercentage >= 100
                           ? t("excellentStatus")
                           : liquidityPercentage >= 50
-                          ? t("goodStatus")
-                          : t("lowStatus"),
+                            ? t("goodStatus")
+                            : t("lowStatus"),
                     })}
                   </p>
                   <div className="flex items-center gap-2 text-xs text-green-700">
                     <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="font-medium">
-                      {t("aiInsight")}
-                    </span>
+                    <span className="font-medium">{t("aiInsight")}</span>
                   </div>
                 </div>
               </CardContent>
@@ -578,7 +578,10 @@ const Dashboard: React.FC = () => {
                         </tr>
                       ) : (
                         recentTransactions.map((tx, idx) => (
-                          <tr key={idx} className="border-b last:border-0 dark:border-gray-700">
+                          <tr
+                            key={idx}
+                            className="border-b last:border-0 dark:border-gray-700"
+                          >
                             <td className="py-3 text-start text-gray-900 dark:text-gray-200">
                               {formatDate(tx.date)}
                             </td>

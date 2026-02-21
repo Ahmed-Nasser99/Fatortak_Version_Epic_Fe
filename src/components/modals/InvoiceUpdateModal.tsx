@@ -21,6 +21,8 @@ import CustomerModal from "./CustomerModal";
 import ItemModal from "./ItemModal";
 import SearchableDropdown from "../ui/SearchableDropdown";
 import PartialPaymentPreviewModal from "./PartialPaymentPreviewModal";
+import { AccountDto } from "../../types/api";
+import { accountingService } from "../../services/accountingService";
 import BranchSelector from "../ui/BranchSelector";
 
 interface InvoiceItem {
@@ -61,14 +63,17 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
   const [invoiceData, setInvoiceData] = useState({
     customerName: "",
     customerId: "",
-    invoiceNumber: "",
     issueDate: new Date().toISOString().split("T")[0],
     dueDate: "",
     notes: "",
     status: "Draft",
     invoiceType: isSell ? "Sell" : "Buy",
     branchId: "",
+    paymentAccountId: "",
   });
+
+  const [accounts, setAccounts] = useState<AccountDto[]>([]);
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
 
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
   const [showCustomerModal, setShowCustomerModal] = useState(false);
@@ -113,7 +118,6 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
       setInvoiceData({
         customerName: invoice.customerName || "",
         customerId: invoice.customerId || "",
-        invoiceNumber: invoice.invoiceNumber || "",
         issueDate: invoice.issueDate
           ? formatBackendDate(invoice.issueDate)
           : new Date().toISOString().split("T")[0],
@@ -124,6 +128,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
         status: invoice.status || "Draft",
         invoiceType: invoice.invoiceType || "Sell",
         branchId: invoice.branchId || "",
+        paymentAccountId: invoice.paymentAccountId || "",
       });
 
       // Set installment-related data
@@ -163,6 +168,23 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
       }
     }
   }, [invoice]);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      setLoadingAccounts(true);
+      try {
+        const result = await accountingService.getAccounts({ pageNumber: 1, pageSize: 1000 });
+        if (result.success && result.data?.data) {
+          setAccounts(result.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+      } finally {
+        setLoadingAccounts(false);
+      }
+    };
+    fetchAccounts();
+  }, []);
 
   useEffect(() => {
     setShowInstallmentSection(
@@ -367,6 +389,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
         status: invoiceData.status,
         invoiceType: invoiceData.invoiceType,
         branchId: invoiceData.branchId,
+        paymentAccountId: invoiceData.paymentAccountId,
         items: invoiceItems.map((item) => ({
           id: item.id,
           itemId: item.itemId,
@@ -445,39 +468,63 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Invoice Info */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("invoiceNumber")}
-              </label>
-              <input
-                type="text"
-                value={invoiceData.invoiceNumber}
-                readOnly
-                className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white"
-              />
-            </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {t("status")}
-              </label>
-              <select
-                value={invoiceData.status}
-                onChange={(e) =>
-                  setInvoiceData((prev) => ({
-                    ...prev,
-                    status: e.target.value,
-                  }))
-                }
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-              >
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    {t("status")}
+                  </label>
+                  <select
+                    value={invoiceData.status}
+                    onChange={(e) =>
+                      setInvoiceData((prev) => ({
+                        ...prev,
+                        status: e.target.value,
+                      }))
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {statusOptions.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {(invoiceData.status === "Paid" || invoiceData.status === "PartialPaid") && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      {isRTL ? "حساب الدفع" : "Payment Account"} *
+                    </label>
+                    <select
+                      value={invoiceData.paymentAccountId}
+                      onChange={(e) =>
+                        setInvoiceData((prev) => ({
+                          ...prev,
+                          paymentAccountId: e.target.value,
+                        }))
+                      }
+                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                      required
+                    >
+                      <option value="">{isRTL ? "اختر الحساب" : "Select Account"}</option>
+                      {accounts
+                        .filter(acc => {
+                          if (isSell) {
+                            return acc.accountCode.startsWith("1000") || acc.accountCode.startsWith("110") || acc.accountCode.startsWith("120");
+                          } else {
+                            return acc.accountCode.startsWith("1000") || acc.accountCode.startsWith("110") || acc.accountCode.startsWith("1500");
+                          }
+                        })
+                        .map((acc) => (
+                          <option key={acc.id} value={acc.id}>
+                            {acc.accountCode} - {acc.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -983,7 +1030,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
         onClose={() => setShowPreviewModal(false)}
         onConfirm={submitInvoice}
         invoiceData={{
-          invoiceNumber: invoiceData.invoiceNumber,
+          invoiceNumber: invoice.invoiceNumber || "",
           customerName: invoiceData.customerName,
           total: adjustedTotal,
           originalTotal: total,

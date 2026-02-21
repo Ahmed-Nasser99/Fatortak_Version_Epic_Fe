@@ -15,6 +15,8 @@ import {
   FileText,
   Paperclip,
 } from "lucide-react";
+import { AccountDto } from "../../types/api";
+import { accountingService } from "../../services/accountingService";
 import { format } from "date-fns";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useCustomers } from "../../hooks/useCustomers";
@@ -69,7 +71,6 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
   const [invoiceData, setInvoiceData] = useState({
     customerName: "",
     customerId: "",
-    invoiceNumber: "",
     issueDate: format(new Date(), "yyyy-MM-dd"),
     dueDate: "",
     notes: "",
@@ -77,7 +78,9 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     invoiceType: isSell ? "Sell" : "Buy",
     branchId: "",
     projectId: initialData?.projectId || "",
+    paymentAccountId: "",
   });
+
 
   const [attachment, setAttachment] = useState<File | null>(null);
 
@@ -91,6 +94,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
   const [installments, setInstallments] = useState<Installment[]>([]);
   const [showInstallmentSection, setShowInstallmentSection] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [accounts, setAccounts] = useState<AccountDto[]>([]);
+  const [loadingAccounts, setLoadingAccounts] = useState(false);
   const { data: mainBranchResult } = useMainBranch();
 
   useEffect(() => {
@@ -134,10 +139,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      const invoiceNumber = `INV-${Date.now().toString().slice(-6)}`;
-      setInvoiceData((prev) => ({ ...prev, invoiceNumber }));
-
       // Set due date to 30 days from now by default
+
       const dueDate = new Date();
       dueDate.setDate(dueDate.getDate() + 30);
       setInvoiceData((prev) => ({
@@ -150,6 +153,23 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
       }
     }
   }, [isOpen, initialData]);
+
+  useEffect(() => {
+    const fetchAccounts = async () => {
+      setLoadingAccounts(true);
+      try {
+        const result = await accountingService.getAccounts({ pageNumber: 1, pageSize: 1000 });
+        if (result.success && result.data?.data) {
+          setAccounts(result.data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+      } finally {
+        setLoadingAccounts(false);
+      }
+    };
+    fetchAccounts();
+  }, []);
 
   useEffect(() => {
     // Show installment section if status is PartialPaid or if numberOfInstallments > 0
@@ -365,7 +385,6 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
       const invoiceCreateData = {
         customerName: invoiceData.customerName,
         customerId: invoiceData.customerId,
-        invoiceNumber: invoiceData.invoiceNumber,
         issueDate: new Date(invoiceData.issueDate || new Date()).toISOString(),
         dueDate: new Date(invoiceData.dueDate).toISOString(),
         notes: invoiceData.notes,
@@ -377,6 +396,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         invoiceType: isSell ? "Sell" : "Buy",
         branchId: invoiceData.branchId,
         projectId: invoiceData.projectId,
+        paymentAccountId: invoiceData.paymentAccountId,
         items: invoiceItems.map((item) => ({
           ...item,
           discount: item.discount / 100,
@@ -405,7 +425,6 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         setInvoiceData({
           customerName: "",
           customerId: "",
-          invoiceNumber: "",
           issueDate: format(new Date(), "yyyy-MM-dd"),
           dueDate: "",
           notes: "",
@@ -413,6 +432,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
           invoiceType: isSell ? "Sell" : "Buy",
           branchId: mainBranchResult?.data?.id || "",
           projectId: "",
+          paymentAccountId: "",
         });
         setInvoiceItems([]);
         setSelectedCustomer(null);
@@ -474,17 +494,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                 {t("invoiceDetails") || "Invoice Details"}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="space-y-2">
-                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    {t("invoiceNumber") || "Invoice Number"}
-                  </label>
-                  <input
-                    type="text"
-                    value={invoiceData.invoiceNumber}
-                    readOnly
-                    className="w-full px-4 py-3 bg-gray-100 dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white font-mono text-center shadow-sm"
-                  />
-                </div>
+
 
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -507,6 +517,42 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                     ))}
                   </select>
                 </div>
+
+                {(invoiceData.status === "Paid" || invoiceData.status === "PartialPaid") && (
+                  <div className="space-y-2">
+                    <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                      {isRTL ? "حساب الدفع" : "Payment Account"} *
+                    </label>
+                    <select
+                      value={invoiceData.paymentAccountId}
+                      onChange={(e) =>
+                        setInvoiceData((prev) => ({
+                          ...prev,
+                          paymentAccountId: e.target.value,
+                        }))
+                      }
+                      className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm transition-all duration-200"
+                      required
+                    >
+                      <option value="">{isRTL ? "اختر الحساب" : "Select Account"}</option>
+                      {accounts
+                        .filter(acc => {
+                          if (isSell) {
+                            // Sales: Cash (1000) or Bank (1100)
+                            return acc.accountCode.startsWith("1000") || acc.accountCode.startsWith("110") || acc.accountCode.startsWith("120"); // Adjusted logic to find cash/bank
+                          } else {
+                            // Purchase: Cash, Bank, or Custody (1500)
+                            return acc.accountCode.startsWith("1000") || acc.accountCode.startsWith("110") || acc.accountCode.startsWith("1500");
+                          }
+                        })
+                        .map((acc) => (
+                          <option key={acc.id} value={acc.id}>
+                            {acc.accountCode} - {acc.name}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+                )}
 
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
@@ -1323,7 +1369,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         onClose={() => setShowPreviewModal(false)}
         onConfirm={submitInvoice}
         invoiceData={{
-          invoiceNumber: invoiceData.invoiceNumber,
+          invoiceNumber: "",
           customerName: invoiceData.customerName,
           total: adjustedTotal,
           originalTotal: total,

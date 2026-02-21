@@ -51,7 +51,7 @@ export interface PaginationDto {
 export interface InvoiceCreateDto {
   customerName: string;
   customerEmail?: string;
-  invoiceNumber: string;
+  invoiceNumber?: string;
   issueDate: string;
   dueDate: string;
   total: number;
@@ -62,6 +62,7 @@ export interface InvoiceCreateDto {
   invoiceType?: string;
   branchId?: string;
   projectId?: string;
+  paymentAccountId?: string;
 }
 
 
@@ -78,6 +79,7 @@ export interface InvoiceUpdateDto {
   currency?: string;
   invoiceType?: string;
   branchId?: string;
+  paymentAccountId?: string;
 }
 
 export interface InvoiceFilterDto {
@@ -117,6 +119,7 @@ export interface RecordPaymentDto {
   amount: number;
   paymentMethod?: string;
   attachment?: File;
+  paymentAccountId?: string;
 }
 
 // User related DTOs
