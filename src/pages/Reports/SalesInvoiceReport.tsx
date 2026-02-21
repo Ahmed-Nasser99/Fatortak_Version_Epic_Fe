@@ -42,10 +42,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import EnhancedInvoiceModal from "@/components/modals/EnhancedInvoiceModal";
-import InvoiceDetailsModal from "@/components/modals/InvoiceDetailsModal";
 import InvoiceFilterModal from "@/components/modals/InvoiceFilterModal";
-import InvoiceUpdateModal from "@/components/modals/InvoiceUpdateModal";
 import { useRoleAccess } from "@/hooks/useRoleAccess";
 import { formatCurrency } from "@/Helpers/formatCurrency";
 import { formatNumber, formatDate } from "@/Helpers/localization";
@@ -108,12 +105,8 @@ const SalesInvoiceReport: React.FC = () => {
     totalCount: invoiceStats?.totalCount || 0,
   };
 
-  const handleCloseDetailsModal = () => {
-    setViewInvoiceId(null);
-  };
-
   const handleDownloadInvoice = (invoiceId: string) => {
-    toast.info(t("downloadingInvoice"));
+    toast.info("Downloading...");
   };
 
   const formatPhoneForWhatsApp = (phone) => {
@@ -277,42 +270,18 @@ const SalesInvoiceReport: React.FC = () => {
     setPagination((prev) => ({ ...prev, pageNumber: newPage }));
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "paid":
-        return "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400";
-      case "sent":
-        return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400";
-      case "draft":
-        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/20 dark:text-yellow-400";
-      case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400";
-      case "overdue":
-        return "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-400";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200 dark:bg-gray-900/20 dark:text-gray-400";
+  const getStatusColor = (type: string, direction: string) => {
+    if (type === "Payment") {
+      return "bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400";
     }
+    return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/20 dark:text-blue-400";
   };
 
-  const getStatusIcon = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "paid":
-        return <CheckCircle className="w-3 h-3" />;
-      case "sent":
-        return <Send className="w-3 h-3" />;
-      case "draft":
-        return <Clock className="w-3 h-3" />;
-      case "pending":
-        return <Clock className="w-3 h-3" />;
-      case "cancelled":
-        return <XCircle className="w-3 h-3" />;
-      case "overdue":
-        return <AlertCircle className="w-3 h-3" />;
-      default:
-        return <Clock className="w-3 h-3" />;
+  const getStatusIcon = (type: string) => {
+    if (type === "Payment") {
+      return <CheckCircle className="w-3 h-3" />;
     }
+    return <FileText className="w-3 h-3" />;
   };
 
   const handleViewInstallments = (invoiceId: string) => {
@@ -527,14 +496,21 @@ const SalesInvoiceReport: React.FC = () => {
                           isRTL ? "right" : "left"
                         } text-sm font-semibold text-muted-foreground`}
                       >
-                        {t("invoiceNumber")}
+                        {t("type")}
                       </th>
                       <th
                         className={`px-6 py-4 text-${
                           isRTL ? "right" : "left"
                         } text-sm font-semibold text-muted-foreground`}
                       >
-                        {t("customer")}
+                        {t("reference")}
+                      </th>
+                      <th
+                        className={`px-6 py-4 text-${
+                          isRTL ? "right" : "left"
+                        } text-sm font-semibold text-muted-foreground`}
+                      >
+                        {isRTL ? "المشروع" : "Project"}
                       </th>
                       <th
                         className={`px-6 py-4 text-${
@@ -548,92 +524,60 @@ const SalesInvoiceReport: React.FC = () => {
                           isRTL ? "right" : "left"
                         } text-sm font-semibold text-muted-foreground`}
                       >
-                        {t("status")}
-                      </th>
-                      <th
-                        className={`px-6 py-4 text-${
-                          isRTL ? "right" : "left"
-                        } text-sm font-semibold text-muted-foreground`}
-                      >
                         {t("date")}
-                      </th>
-                      <th
-                        className={`px-6 py-4 text-${
-                          isRTL ? "right" : "left"
-                        } text-sm font-semibold text-muted-foreground`}
-                      >
-                        {t("dueDate")}
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/50">
-                    {invoices.map((invoice: any) => (
+                    {invoices.map((transaction: any) => (
                       <tr
-                        key={invoice.id}
+                        key={transaction.id}
                         className="hover:bg-muted/20 transition-colors"
                       >
                         <td className="px-6 py-4">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                              <FileText className="w-4 h-4 text-primary" />
+                          <Badge
+                            className={`${getStatusColor(
+                              transaction.referenceType,
+                              transaction.direction
+                            )} border`}
+                          >
+                            <div className="flex items-center space-x-1">
+                              {getStatusIcon(transaction.referenceType)}
+                              <span className="text-xs">
+                                {transaction.referenceType}
+                              </span>
                             </div>
-                            <span
-                              className="font-medium cursor-pointer text-blue-500"
-                              onClick={() => handleViewInvoice(invoice.id)}
-                            >
-                              {invoice.invoiceNumber}
+                          </Badge>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <span className="font-medium">
+                              {transaction.referenceId || "N/A"}
+                            </span>
+                            <span className="text-xs text-muted-foreground">
+                              {transaction.description}
                             </span>
                           </div>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
-                              <Users className="w-4 h-4 text-muted-foreground" />
-                            </div>
-                            <span>{invoice.customerName}</span>
-                          </div>
+                          <span className="text-sm">
+                            {transaction.projectName || "-"}
+                          </span>
                         </td>
-                        <td className="px-6 py-4 !text-start">
-                          <div>
-                            <div className="font-semibold">
-                              {formatCurrency(invoice.total)}{" "}
-                              {invoice.currency || "EGP"}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {t("vatLabel")}:{" "}
-                              {formatCurrency(invoice.vatAmount)}{" "}
-                              {invoice.currency || "EGP"}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {t("discountLabel")}:{" "}
-                              {formatCurrency(invoice.totalDiscount)}{" "}
-                              {invoice.currency || "EGP"}
-                            </div>
-                          </div>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`font-semibold ${
+                              transaction.direction === "Credit"
+                                ? "text-green-600"
+                                : "text-blue-600"
+                            }`}
+                          >
+                            {formatCurrency(transaction.amount)}{" "}
+                            {company?.currency || "EGP"}
+                          </span>
                         </td>
-                        <td className="px-6 py-4 !text-start">
-                          <div className="relative">
-                            <Button
-                              variant="ghost"
-                              disabled
-                              className={`h-auto p-2 ${getStatusColor(
-                                invoice.status,
-                              )} border !opacity-100 !hover:opacity-80`}
-                            >
-                              <div className="flex items-center space-x-2">
-                                {getStatusIcon(invoice.status)}
-                                <span className="text-xs font-medium">
-                                  {t(`${invoice.status.toLowerCase()}Status`)}
-                                </span>
-                              </div>
-                            </Button>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground !text-start">
-                          {formatDate(invoice.issueDate)}
-                        </td>
-                        <td className="px-6 py-4 text-sm text-muted-foreground !text-start">
-                          {formatDate(invoice.dueDate)}
+                        <td className="px-6 py-4 text-sm text-muted-foreground">
+                          {transaction.date}
                         </td>
                       </tr>
                     ))}
@@ -644,29 +588,32 @@ const SalesInvoiceReport: React.FC = () => {
 
             {/* Mobile Cards */}
             <div className="lg:hidden divide-y divide-border/50">
-              {invoices.map((invoice: any) => (
-                <div key={invoice.id} className="p-4 space-y-4">
+              {invoices.map((transaction: any) => (
+                <div key={transaction.id} className="p-4 space-y-4">
                   <div className={`flex items-start justify-between`}>
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <FileText className="w-5 h-5 text-primary" />
+                        {getStatusIcon(transaction.referenceType)}
                       </div>
                       <div>
                         <h3 className="font-semibold">
-                          {invoice?.invoiceNumber}
+                          {transaction.referenceId || "N/A"}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          {invoice?.customerName}
+                          {transaction.description}
                         </p>
                       </div>
                     </div>
                     <Badge
-                      className={`${getStatusColor(invoice.status)} border`}
+                      className={`${getStatusColor(
+                        transaction.referenceType,
+                        transaction.direction
+                      )} border`}
                     >
                       <div className="flex items-center space-x-1">
-                        {getStatusIcon(invoice.status)}
+                        {getStatusIcon(transaction.referenceType)}
                         <span className="text-xs">
-                          {t(`${invoice.status.toLowerCase()}Status`)}
+                          {transaction.referenceType}
                         </span>
                       </div>
                     </Badge>
@@ -677,57 +624,32 @@ const SalesInvoiceReport: React.FC = () => {
                       <span className="text-muted-foreground block">
                         {t("amount")}
                       </span>
-                      <span className="font-semibold">
-                        {formatCurrency(invoice.total)}{" "}
-                        {invoice.currency || "EGP"}
+                      <span
+                        className={`font-semibold ${
+                          transaction.direction === "Credit"
+                            ? "text-green-600"
+                            : "text-blue-600"
+                        }`}
+                      >
+                        {formatCurrency(transaction.amount)}{" "}
+                        {company?.currency || "EGP"}
                       </span>
                     </div>
                     <div>
                       <span className="text-muted-foreground block">
-                        {t("dueDate")}
+                        {t("date")}
                       </span>
-                      <span>{formatDate(invoice.dueDate)}</span>
+                      <span>{transaction.date}</span>
                     </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleViewInvoice(invoice.id)}
-                      className="flex-1 min-w-0"
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      {t("view")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleShareInvoice(invoice)}
-                      className="flex-1 min-w-0"
-                    >
-                      <Share2 className="w-3 h-3 mr-1" />
-                      {t("share")}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownloadInvoice(invoice.id)}
-                      className="flex-1 min-w-0"
-                    >
-                      <Download className="w-3 h-3 mr-1" />
-                      {t("download")}
-                    </Button>
-                    {invoice?.hasInstallments && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleViewInstallments(invoice.id)}
-                        className="flex-1 min-w-0"
-                      >
-                        <Calendar className="w-3 h-3 mr-1" />
-                        {t("viewInstallments")}
-                      </Button>
+                    {transaction.projectName && (
+                      <div className="col-span-2">
+                        <span className="text-muted-foreground block">
+                          {isRTL ? "المشروع" : "Project"}
+                        </span>
+                        <span className="font-medium">
+                          {transaction.projectName}
+                        </span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -787,23 +709,6 @@ const SalesInvoiceReport: React.FC = () => {
         currentFilters={filters}
         isSell={true}
       />
-
-      {viewInvoiceId && invoiceDetails && (
-        <InvoiceDetailsModal
-          isOpen={!!viewInvoiceId}
-          onClose={handleCloseDetailsModal}
-          invoice={invoiceDetails}
-        />
-      )}
-
-      {installmentsInvoiceId && (
-        <IntegratedInstallmentsManager
-          invoiceId={installmentsInvoiceId}
-          invoice={invoices.find((inv) => inv.id === installmentsInvoiceId)}
-          isOpen={!!installmentsInvoiceId}
-          onClose={() => setInstallmentsInvoiceId(null)}
-        />
-      )}
     </div>
   );
 };

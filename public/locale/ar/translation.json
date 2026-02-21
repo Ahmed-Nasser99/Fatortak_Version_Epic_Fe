@@ -1154,5 +1154,7 @@
   "imageUpload.dragAndDrop": "قم بالسحب والإفلات أو",
   "imageUpload.clickToBrowse": "انقر للتصفح",
   "imageUpload.maxSize": "الحد الأقصى {{size}} ميجابايت",
-  "imageUpload.allowedFormats": "JPG, PNG, GIF"
+  "imageUpload.allowedFormats": "JPG, PNG, GIF",
+  "employeeCustodyReport": "تقرير عهد الموظفين",
+  "employeeCustodyReportDescription": "تتبع الأرصدة والتحركات المالية لكل موظف"
 }

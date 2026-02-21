@@ -471,6 +471,13 @@ const ClientAccountStatementReport: React.FC = () => {
                           isRTL ? "right" : "left"
                         } text-sm font-semibold text-muted-foreground`}
                       >
+                        {isRTL ? "المشروع" : "Project"}
+                      </th>
+                      <th
+                        className={`px-6 py-4 text-${
+                          isRTL ? "right" : "left"
+                        } text-sm font-semibold text-muted-foreground`}
+                      >
                         {isRTL ? "قيمة الفاتورة" : "Invoice Amount"}
                       </th>
                       <th
@@ -519,6 +526,9 @@ const ClientAccountStatementReport: React.FC = () => {
                         </td>
                         <td className="px-6 py-4 text-sm">
                           {transaction.transactionDetails}
+                        </td>
+                        <td className="px-6 py-4 text-sm">
+                          {transaction.projectName || "-"}
                         </td>
                         <td className="px-6 py-4 font-medium">
                           {transaction.invoiceAmount
@@ -606,6 +616,16 @@ const ClientAccountStatementReport: React.FC = () => {
                               Math.abs(transaction.paymentAmount)
                             )}{" "}
                             {statement.customerInfo.currency}
+                          </span>
+                        </div>
+                      )}
+                      {transaction.projectName && (
+                        <div className="col-span-2">
+                          <span className="text-muted-foreground block text-xs">
+                            {isRTL ? "المشروع" : "Project"}
+                          </span>
+                          <span className="font-medium text-xs">
+                            {transaction.projectName}
                           </span>
                         </div>
                       )}

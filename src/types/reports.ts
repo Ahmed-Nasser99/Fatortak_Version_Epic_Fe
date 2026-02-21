@@ -76,6 +76,8 @@ export interface AccountStatementTransactionDto {
   creditAmount?: number;
   balance: number;
   orderPriority: number;
+  projectId?: string;
+  projectName?: string;
 }
 
 export interface AccountStatementFilterDto {
@@ -173,4 +175,13 @@ export interface TransactionDto {
   projectName?: string;
   attachmentUrl?: string;
   category?: string;
+}
+
+export interface EmployeeCustodyReportDto {
+  employeeId: string;
+  employeeName: string;
+  currentBalance: number;
+  totalReceived: number;
+  totalSpent: number;
+  transactions: TransactionDto[];
 }

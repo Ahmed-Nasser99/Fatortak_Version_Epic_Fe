@@ -278,6 +278,8 @@ export const reportService = {
       params
     );
   },
-
+  getEmployeeCustodyReport: async () => {
+    return apiClient.get<EmployeeCustodyReportDto[]>("/api/reports/employee-custody");
+  },
 };
 

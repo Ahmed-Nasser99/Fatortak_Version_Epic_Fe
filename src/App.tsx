@@ -20,6 +20,7 @@ import Reports from "./pages/Reports";
 import ProjectSheetReport from "./pages/Reports/ProjectSheetReport";
 import TreasuryReport from "./pages/Reports/TreasuryReport";
 import SupplierLedgerReport from "./pages/Reports/SupplierLedgerReport";
+import EmployeeCustodyReport from "./pages/Reports/EmployeeCustodyReport";
 import Team from "./pages/Team";
 import Settings from "./pages/Settings";
 import UserProfile from "./pages/UserProfile";
@@ -174,6 +175,7 @@ function AppContent() {
           <Route path="reports/project-sheet" element={<ProjectSheetReport />} />
           <Route path="reports/treasury" element={<TreasuryReport />} />
           <Route path="reports/supplier-ledger" element={<SupplierLedgerReport />} />
+          <Route path="reports/employee-custody" element={<EmployeeCustodyReport />} />
           <Route path="team" element={<Team />} />
           <Route path="settings" element={<Settings />} />
           <Route path="employees" element={<Employees />} />

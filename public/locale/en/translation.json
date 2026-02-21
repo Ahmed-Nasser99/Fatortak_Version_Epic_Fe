@@ -530,6 +530,8 @@
   "itemWithThisCodeExists": "An item with this code already exists",
   "reports.revenue": "Revenue",
   "reports.orders": "Orders",
+  "employeeCustodyReport": "Employee Custody Report",
+  "employeeCustodyReportDescription": "Track financial balances and transactions for each employee",
   "topCustomersPerformance": "Top Customers Performance",
   "topSuppliersOverview": "Top Suppliers Overview",
   "detailedCashFlow": "Detailed Cash Flow",

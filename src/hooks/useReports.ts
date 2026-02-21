@@ -211,4 +211,11 @@ export const useSupplierLedgerReport = (
     staleTime: 0,
   });
 };
-
+export const useEmployeeCustodyReport = () => {
+  return useQuery({
+    queryKey: ["employee-custody-report"],
+    queryFn: () => reportService.getEmployeeCustodyReport(),
+    gcTime: 0,
+    staleTime: 0,
+  });
+};
