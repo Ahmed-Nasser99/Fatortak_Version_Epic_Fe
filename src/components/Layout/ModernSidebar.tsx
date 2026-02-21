@@ -163,16 +163,16 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           icon: FileText,
         },
         {
-          name: isRTL ? "إدارة العهد" : "Custody Management",
-          path: "/custody",
-          icon: Wallet,
-        },
-        {
           name: isRTL ? "التقارير المالية" : "Financial Reports",
           path: "/financial-reports",
           icon: BarChart3,
         },
       ],
+    },
+    {
+      name: isRTL ? "إدارة العهد" : "Custody Management",
+      path: "/custody",
+      icon: Wallet,
     },
     { name: t("clients") || "Clients", icon: Users, path: "/clients" },
     {
