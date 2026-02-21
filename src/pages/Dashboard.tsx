@@ -22,6 +22,7 @@ import {
   Building,
 } from "lucide-react";
 import BranchSelector from "../components/ui/BranchSelector";
+import ProjectSelector from "../components/ui/ProjectSelector";
 import {
   Select,
   SelectContent,
@@ -61,6 +62,7 @@ const Dashboard: React.FC = () => {
   const [showItemModal, setShowItemModal] = React.useState(false);
   const [period, setPeriod] = React.useState("month");
   const [filterBranchId, setFilterBranchId] = React.useState("");
+  const [filterProjectId, setFilterProjectId] = React.useState("all");
 
   // Fetch real data from API
   const { data: userProfileResponse } = useCurrentUserProfile();
@@ -68,7 +70,11 @@ const Dashboard: React.FC = () => {
     data: dashboardResponse,
     isLoading,
     error,
-  } = useDashboardReport(period, filterBranchId || undefined);
+  } = useDashboardReport(
+    period,
+    filterBranchId || undefined,
+    filterProjectId === "all" ? undefined : filterProjectId
+  );
 
   const userProfile = userProfileResponse?.success
     ? userProfileResponse.data
@@ -277,6 +283,12 @@ const Dashboard: React.FC = () => {
             <BranchSelector
               value={filterBranchId}
               onChange={setFilterBranchId}
+              className="w-48"
+            />
+
+            <ProjectSelector
+              value={filterProjectId}
+              onChange={setFilterProjectId}
               className="w-48"
             />
           </div>

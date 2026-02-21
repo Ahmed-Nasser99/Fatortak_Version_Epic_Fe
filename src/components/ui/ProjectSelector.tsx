@@ -41,6 +41,9 @@ const ProjectSelector: React.FC<ProjectSelectorProps> = ({
         <SelectValue placeholder={placeholder || (isRTL ? "اختر المشروع" : "Select Project")} />
       </SelectTrigger>
       <SelectContent>
+        <SelectItem value="all">
+          {isRTL ? "كل المشاريع" : "All Projects"}
+        </SelectItem>
         {projects.map((project) => (
           <SelectItem key={project.id} value={project.id}>
             {project.name}

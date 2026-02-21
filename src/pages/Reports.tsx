@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import BranchSelector from "@/components/ui/BranchSelector";
+import ProjectSelector from "@/components/ui/ProjectSelector";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   TrendingUp,
@@ -30,6 +31,7 @@ import {
 export default function ReportsPage() {
   const [period, setPeriod] = useState("month");
   const [filterBranchId, setFilterBranchId] = useState("");
+  const [filterProjectId, setFilterProjectId] = useState("all");
   const { t, isRTL } = useLanguage();
   const {
     stats,
@@ -44,8 +46,12 @@ export default function ReportsPage() {
   } = useReports();
 
   useEffect(() => {
-    fetchAllReports(period, filterBranchId || undefined);
-  }, [period, filterBranchId]);
+    fetchAllReports(
+      period,
+      filterBranchId || undefined,
+      filterProjectId === "all" ? undefined : filterProjectId
+    );
+  }, [period, filterBranchId, filterProjectId]);
 
   const statCards = [
     {
@@ -193,6 +199,12 @@ export default function ReportsPage() {
               <BranchSelector
                 value={filterBranchId}
                 onChange={setFilterBranchId}
+                className="w-48 bg-white/20 backdrop-blur-sm border-white/30 text-white rounded-xl"
+              />
+
+              <ProjectSelector
+                value={filterProjectId}
+                onChange={setFilterProjectId}
                 className="w-48 bg-white/20 backdrop-blur-sm border-white/30 text-white rounded-xl"
               />
 

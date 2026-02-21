@@ -4,6 +4,7 @@ import { useLanguage } from "../../contexts/LanguageContext";
 import { useCustomers } from "@/hooks/useCustomers";
 import SearchableDropdown from "../ui/SearchableDropdown";
 import BranchSelector from "../ui/BranchSelector";
+import ProjectSelector from "../ui/ProjectSelector";
 
 interface InvoiceFilterModalProps {
   isOpen: boolean;
@@ -30,6 +31,7 @@ const InvoiceFilterModal: React.FC<InvoiceFilterModalProps> = ({
     maximumPrice: currentFilters.maximumPrice || "",
     invoiceType: currentFilters.invoiceType || "",
     branchId: currentFilters.branchId || "",
+    projectId: currentFilters.projectId || "",
   });
   const { data: customersResponse, isLoading: loadingCustomers } = useCustomers(
     {
@@ -61,6 +63,7 @@ const InvoiceFilterModal: React.FC<InvoiceFilterModalProps> = ({
       maximumPrice: "",
       invoiceType: "",
       branchId: "",
+      projectId: "",
     };
     setFilters(resetFilters);
     onApplyFilters(resetFilters);
@@ -156,6 +159,17 @@ const InvoiceFilterModal: React.FC<InvoiceFilterModalProps> = ({
               onChange={(value) => setFilters(prev => ({ ...prev, branchId: value }))}
               label={isRTL ? "الفرع" : "Branch"}
             />
+            
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                {isRTL ? "المشروع" : "Project"}
+              </label>
+              <ProjectSelector
+                value={filters.projectId || "all"}
+                onChange={(value) => setFilters(prev => ({ ...prev, projectId: value === "all" ? "" : value }))}
+                placeholder={isRTL ? "كل المشاريع" : "All Projects"}
+              />
+            </div>
           </div>
 
           {/* Date Range */}

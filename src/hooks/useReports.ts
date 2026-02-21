@@ -26,7 +26,7 @@ export const useReports = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAllReports = async (period: string = "month", branchId?: string) => {
+  const fetchAllReports = async (period: string = "month", branchId?: string, projectId?: string) => {
     setIsLoading(true);
     setError(null);
 
@@ -39,12 +39,12 @@ export const useReports = () => {
         cashFlowRes,
         profitRes,
       ] = await Promise.all([
-        reportService.getStats(period, branchId),
-        reportService.getRevenue(period, branchId),
-        reportService.getTopCustomers(period, branchId),
-        reportService.getTopSuppliers(period, branchId),
-        reportService.getCashFlow(period, branchId),
-        reportService.getProfitAnalysis(period, branchId),
+        reportService.getStats(period, branchId, projectId),
+        reportService.getRevenue(period, branchId, projectId),
+        reportService.getTopCustomers(period, branchId, 5, projectId),
+        reportService.getTopSuppliers(period, branchId, 5, projectId),
+        reportService.getCashFlow(period, branchId, projectId),
+        reportService.getProfitAnalysis(period, branchId, projectId),
       ]);
 
       if (statsRes.success) setStats(statsRes.data);

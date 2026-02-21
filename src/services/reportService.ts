@@ -106,35 +106,35 @@ export const reportService = {
       params
     );
   },
-  getStats: async (period: string = "month", branchId?: string) => {
-    return apiClient.get<ReportStatsDto>(`/api/reports/stats?period=${period}${branchId ? `&branchId=${branchId}` : ""}`);
+  getStats: async (period: string = "month", branchId?: string, projectId?: string) => {
+    return apiClient.get<ReportStatsDto>(`/api/reports/stats?period=${period}${branchId ? `&branchId=${branchId}` : ""}${projectId ? `&projectId=${projectId}` : ""}`);
   },
 
-  getRevenue: async (period: string = "month", branchId?: string) => {
+  getRevenue: async (period: string = "month", branchId?: string, projectId?: string) => {
     return apiClient.get<RevenueDataPointDto[]>(
-      `/api/reports/revenue?period=${period}${branchId ? `&branchId=${branchId}` : ""}`
+      `/api/reports/revenue?period=${period}${branchId ? `&branchId=${branchId}` : ""}${projectId ? `&projectId=${projectId}` : ""}`
     );
   },
 
-  getTopCustomers: async (period: string = "month", branchId?: string, top: number = 5) => {
+  getTopCustomers: async (period: string = "month", branchId?: string, top: number = 5, projectId?: string) => {
     return apiClient.get<TopCustomerDto[]>(
-      `/api/reports/top-customers?period=${period}&top=${top}${branchId ? `&branchId=${branchId}` : ""}`
+      `/api/reports/top-customers?period=${period}&top=${top}${branchId ? `&branchId=${branchId}` : ""}${projectId ? `&projectId=${projectId}` : ""}`
     );
   },
 
-  getTopSuppliers: async (period: string = "month", branchId?: string, top: number = 5) => {
+  getTopSuppliers: async (period: string = "month", branchId?: string, top: number = 5, projectId?: string) => {
     return apiClient.get<TopSupplierDto[]>(
-      `/api/reports/top-suppliers?period=${period}&top=${top}${branchId ? `&branchId=${branchId}` : ""}`
+      `/api/reports/top-suppliers?period=${period}&top=${top}${branchId ? `&branchId=${branchId}` : ""}${projectId ? `&projectId=${projectId}` : ""}`
     );
   },
 
-  getCashFlow: async (period: string = "month", branchId?: string) => {
-    return apiClient.get<CashFlowDto>(`/api/reports/cashflow?period=${period}${branchId ? `&branchId=${branchId}` : ""}`);
+  getCashFlow: async (period: string = "month", branchId?: string, projectId?: string) => {
+    return apiClient.get<CashFlowDto>(`/api/reports/cashflow?period=${period}${branchId ? `&branchId=${branchId}` : ""}${projectId ? `&projectId=${projectId}` : ""}`);
   },
 
-  getProfitAnalysis: async (period: string = "month", branchId?: string) => {
+  getProfitAnalysis: async (period: string = "month", branchId?: string, projectId?: string) => {
     return apiClient.get<ProfitAnalysisDto>(
-      `/api/reports/profit?period=${period}${branchId ? `&branchId=${branchId}` : ""}`
+      `/api/reports/profit?period=${period}${branchId ? `&branchId=${branchId}` : ""}${projectId ? `&projectId=${projectId}` : ""}`
     );
   },
   getAccountStatement: async (filter: AccountStatementFilterDto) => {

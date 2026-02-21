@@ -77,7 +77,7 @@ export interface DashboardData {
   recentTransactions: Transaction[];
   monthlyFinancials: MonthlyFinancial[];
 }
-export const useDashboardReport = (period: string, branchId?: string) => {
+export const useDashboardReport = (period: string, branchId?: string, projectId?: string) => {
   const [data, setData] = useState<{ data: DashboardData } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -92,6 +92,9 @@ export const useDashboardReport = (period: string, branchId?: string) => {
         if (branchId) {
           url += `&branchId=${branchId}`;
         }
+        if (projectId) {
+          url += `&projectId=${projectId}`;
+        }
         const response = await apiClient.get<DashboardData>(url);
         if (response.success && response.data) {
           setData({ data: response.data });
@@ -105,7 +108,7 @@ export const useDashboardReport = (period: string, branchId?: string) => {
     };
 
     fetchDashboardData();
-  }, [period, branchId]);
+  }, [period, branchId, projectId]);
 
   return { data, isLoading, error };
 };
