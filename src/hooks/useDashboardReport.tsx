@@ -31,6 +31,7 @@ export interface DashboardStats {
   // New fields for enhanced dashboard
   currentBalance: number;
   totalCashAvailable: number;
+  totalBankAvailable: number;
   stockValue: number;
   totalReceivables: number;
   totalPayables: number;

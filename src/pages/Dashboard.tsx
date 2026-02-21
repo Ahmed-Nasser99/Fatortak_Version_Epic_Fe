@@ -20,6 +20,7 @@ import {
   Download,
   Plus,
   Building,
+  Landmark,
 } from "lucide-react";
 import BranchSelector from "../components/ui/BranchSelector";
 import ProjectSelector from "../components/ui/ProjectSelector";
@@ -147,13 +148,13 @@ const Dashboard: React.FC = () => {
           tooltip: t("tooltips.totalCashAvailable"),
         },
         {
-          title: t("stockValue"),
-          value: `${formatCurrency(stats.stockValue)}`,
-          icon: ShoppingCart,
-          bgColor: "bg-gray-50",
-          iconBg: "bg-gray-500",
+          title: isRTL ? "إجمالي الرصيد البنكي" : "Total Bank Available",
+          value: `${formatCurrency(stats.totalBankAvailable)}`,
+          icon: Landmark,
+          bgColor: "bg-blue-50",
+          iconBg: "bg-blue-500",
           iconColor: "text-white",
-          tooltip: t("tooltips.stockValue"),
+          tooltip: isRTL ? "إجمالي الأرصدة المتوفرة في البنوك" : "Total balances available in all bank accounts",
         },
         {
           title: t("totalReceivables"),
