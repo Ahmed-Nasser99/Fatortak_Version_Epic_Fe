@@ -83,22 +83,24 @@ export const invoiceService = {
       }),
     };
 
+    // Build FormData for consistent multipart/form-data submission
+    const formData = new FormData();
+    Object.keys(invoiceData).forEach((key) => {
+      const val = (invoiceData as any)[key];
+      if (val === undefined || val === null) return;
+
+      if (key === "items" || key === "installments") {
+        formData.append(key, JSON.stringify(val));
+      } else {
+        formData.append(key, val.toString());
+      }
+    });
+
     if (data.attachment) {
-      const formData = new FormData();
-      Object.keys(invoiceData).forEach(key => {
-        if (key === 'items' || key === 'installments') {
-          formData.append(key, JSON.stringify((invoiceData as any)[key]));
-        } else if ((invoiceData as any)[key] !== undefined && (invoiceData as any)[key] !== null) {
-          formData.append(key, (invoiceData as any)[key]);
-        }
-      });
       formData.append("file", data.attachment);
-      return apiClient.post<InvoiceDto>("/api/invoices", formData, {
-        "X-User-Id": localStorage.getItem("user_id") || "",
-      });
     }
 
-    return apiClient.post<InvoiceDto>("/api/invoices", invoiceData, {
+    return apiClient.post<InvoiceDto>("/api/invoices", formData, {
       "X-User-Id": localStorage.getItem("user_id") || "",
     });
   },
@@ -125,20 +127,24 @@ export const invoiceService = {
       installments: data.installments || [],
     };
 
+    // Build FormData for consistent multipart/form-data submission
+    const formData = new FormData();
+    Object.keys(updateData).forEach((key) => {
+      const val = (updateData as any)[key];
+      if (val === undefined || val === null) return;
+
+      if (key === "items" || key === "installments") {
+        formData.append(key, JSON.stringify(val));
+      } else {
+        formData.append(key, val.toString());
+      }
+    });
+
     if (data.attachment) {
-      const formData = new FormData();
-      Object.keys(updateData).forEach(key => {
-        if (key === 'items' || key === 'installments') {
-          formData.append(key, JSON.stringify((updateData as any)[key]));
-        } else if ((updateData as any)[key] !== undefined && (updateData as any)[key] !== null) {
-          formData.append(key, (updateData as any)[key]);
-        }
-      });
       formData.append("file", data.attachment);
-      return apiClient.post<InvoiceDto>(`/api/invoices/update/${id}`, formData);
     }
 
-    return apiClient.post<InvoiceDto>(`/api/invoices/update/${id}`, updateData);
+    return apiClient.post<InvoiceDto>(`/api/invoices/update/${id}`, formData);
   },
 
   // Delete invoice
