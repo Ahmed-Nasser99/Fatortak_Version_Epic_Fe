@@ -190,6 +190,24 @@ const ProjectDetails: React.FC = () => {
             Cancelled
           </Badge>
         );
+      case ProjectStatus.Settled:
+        return (
+          <Badge className="bg-cyan-50 text-cyan-700 border-cyan-100 px-3 py-1">
+            Settled
+          </Badge>
+        );
+      case ProjectStatus.Archived:
+        return (
+          <Badge className="bg-gray-50 text-gray-700 border-gray-100 px-3 py-1">
+            Archived
+          </Badge>
+        );
+      case ProjectStatus.NotStarted:
+        return (
+          <Badge className="bg-slate-50 text-slate-700 border-slate-100 px-3 py-1">
+            Not Started
+          </Badge>
+        );
       default:
         return (
           <Badge className="bg-slate-100 text-slate-700 px-3 py-1">Draft</Badge>
@@ -563,29 +581,31 @@ const ProjectDetails: React.FC = () => {
                         {salesInvoices.length} Documents
                       </Badge>
 
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={
-                          salesInvoices.length > 0 &&
-                          salesInvoices[0].status === "Paid"
-                        }
-                        onClick={() => {
-                          const unpaidInvoice = salesInvoices.find(
-                            (inv) => inv.status !== "Paid",
-                          );
-                          if (unpaidInvoice) {
-                            setSelectedInvoice(unpaidInvoice);
-                            setIsRecordPaymentOpen(true);
-                          } else {
-                            toast.info("No pending invoices to pay.");
+                      {project.status !== ProjectStatus.Completed && project.status !== ProjectStatus.Cancelled && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={
+                            salesInvoices.length > 0 &&
+                            salesInvoices[0].status === "Paid"
                           }
-                        }}
-                        className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-4 shadow-sm h-9"
-                      >
-                        <DollarSign className="w-4 h-4 text-emerald-500" />{" "}
-                        <span className="text-slate-700">Receive Payment</span>
-                      </Button>
+                          onClick={() => {
+                            const unpaidInvoice = salesInvoices.find(
+                              (inv) => inv.status !== "Paid",
+                            );
+                            if (unpaidInvoice) {
+                              setSelectedInvoice(unpaidInvoice);
+                              setIsRecordPaymentOpen(true);
+                            } else {
+                              toast.info("No pending invoices to pay.");
+                            }
+                          }}
+                          className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-4 shadow-sm h-9"
+                        >
+                          <DollarSign className="w-4 h-4 text-emerald-500" />{" "}
+                          <span className="text-slate-700">Receive Payment</span>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardHeader>
@@ -825,15 +845,17 @@ const ProjectDetails: React.FC = () => {
                         <Badge className="bg-rose-500 px-3 py-1">
                           {expenses.length} Records
                         </Badge>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setIsExpenseModalOpen(true)}
-                          className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-4 shadow-sm h-9"
-                        >
-                          <Plus className="w-4 h-4 text-rose-500" />{" "}
-                          <span className="text-slate-700">Add Expense</span>
-                        </Button>
+                        {project.status !== ProjectStatus.Completed && project.status !== ProjectStatus.Cancelled && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsExpenseModalOpen(true)}
+                            className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-4 shadow-sm h-9"
+                          >
+                            <Plus className="w-4 h-4 text-rose-500" />{" "}
+                            <span className="text-slate-700">Add Expense</span>
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardHeader>

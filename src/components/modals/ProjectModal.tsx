@@ -141,13 +141,19 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               <input
                 type="text"
                 {...formik.getFieldProps("name")}
+                disabled={project?.status !== undefined && project.status !== ProjectStatus.Draft}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                   formik.touched.name && formik.errors.name
                     ? "border-red-500"
                     : "border-gray-300 dark:border-gray-600"
-                } ${isRTL ? "text-right" : "text-left"}`}
+                } ${isRTL ? "text-right" : "text-left"} disabled:bg-gray-50 disabled:text-gray-500 cursor-not-allowed`}
                 placeholder={isRTL ? "اسم المشروع" : "Project Name"}
               />
+              {project?.status === ProjectStatus.Active && (
+                 <p className="text-amber-600 text-[10px] mt-1 italic">
+                    {isRTL ? "لا يمكن تعديل اسم مشروع نشط" : "Active project name is locked"}
+                 </p>
+              )}
               {formik.touched.name && formik.errors.name && (
                 <p className="text-red-500 text-xs mt-1">
                   {formik.errors.name}
@@ -160,11 +166,13 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 {isRTL ? "العميل" : "Client"} *
               </label>
-              <ClientSelector
-                value={formik.values.customerId || ""}
-                onChange={(value) => formik.setFieldValue("customerId", value)}
-                placeholder={isRTL ? "اختر العميل" : "Select Client"}
-              />
+              <div className={project?.status !== undefined && project.status !== ProjectStatus.Draft ? "pointer-events-none opacity-60" : ""}>
+                <ClientSelector
+                  value={formik.values.customerId || ""}
+                  onChange={(value) => formik.setFieldValue("customerId", value)}
+                  placeholder={isRTL ? "اختر العميل" : "Select Client"}
+                />
+              </div>
             </div>
 
             {/* Status */}
@@ -174,11 +182,19 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               </label>
               <select
                 {...formik.getFieldProps("status")}
+                disabled={project?.status === ProjectStatus.Completed || project.status === ProjectStatus.Cancelled}
                 className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                   isRTL ? "text-right" : "text-left"
-                }`}
+                } disabled:bg-gray-50 cursor-not-allowed`}
               >
-                {Object.values(ProjectStatus).map((status) => (
+                {Object.values(ProjectStatus)
+                  .filter(status => {
+                     if (status === ProjectStatus.Draft && project?.status) {
+                        return project.status !== ProjectStatus.Active && project.status !== ProjectStatus.Completed;
+                     }
+                     return true;
+                  })
+                  .map((status) => (
                   <option key={status} value={status}>
                     {status}
                   </option>
@@ -199,9 +215,10 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
               <input
                 type="number"
                 {...formik.getFieldProps("contractValue")}
+                disabled={project?.status !== undefined && project.status !== ProjectStatus.Draft}
                 className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                   isRTL ? "text-right" : "text-left"
-                }`}
+                } disabled:bg-gray-50 cursor-not-allowed`}
                 placeholder="0.00"
               />
                {formik.touched.contractValue && formik.errors.contractValue && (
@@ -220,9 +237,10 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
             <textarea
               rows={3}
               {...formik.getFieldProps("description")}
+              disabled={project?.status === ProjectStatus.Completed || project.status === ProjectStatus.Cancelled}
               className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
                 isRTL ? "text-right" : "text-left"
-              }`}
+              } disabled:bg-gray-50 cursor-not-allowed`}
             />
           </div>
 

@@ -566,6 +566,9 @@ export enum ProjectStatus {
   Completed = "Completed",
   OnHold = "OnHold",
   Cancelled = "Cancelled",
+  Settled = "Settled",
+  Archived = "Archived",
+  Draft = "Draft",
 }
 
 export interface ProjectFilterDto {
