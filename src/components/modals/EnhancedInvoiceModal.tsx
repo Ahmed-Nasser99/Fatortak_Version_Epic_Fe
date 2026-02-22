@@ -375,7 +375,32 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
   };
 
   const submitInvoice = async () => {
-    const { subtotal, totalDiscount, vatTotal, total } = calculateTotals();
+    const { subtotal, totalDiscount, vatTotal, total, adjustedTotal } =
+      calculateTotals();
+
+    // Account Balance Validation for Purchase Invoices
+    if (
+      !isSell &&
+      (invoiceData.status === "Paid" || invoiceData.status === "PartialPaid")
+    ) {
+      const paymentAmount =
+        invoiceData.status === "Paid" ? adjustedTotal : downPayment;
+      if (paymentAmount > 0) {
+        const selectedAccount = accounts.find(
+          (a) => a.id === invoiceData.paymentAccountId
+        );
+        if (selectedAccount && (selectedAccount.balance || 0) < paymentAmount) {
+          toast.error(
+            `${isRTL ? "رصيد غير كافٍ في" : "Insufficient funds in"} ${
+              selectedAccount.name
+            }. ${isRTL ? "المتاح" : "Available"}: ${formatNumber(
+              selectedAccount.balance || 0
+            )} EGP`
+          );
+          return;
+        }
+      }
+    }
 
     try {
       // Check if this is a partial payment invoice (either by status or having installments)
@@ -536,21 +561,49 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                     >
                       <option value="">{isRTL ? "اختر الحساب" : "Select Account"}</option>
                       {accounts
-                        .filter(acc => {
+                        .filter((acc) => {
                           if (isSell) {
                             // Sales: Cash (1000) or Bank (1100)
-                            return acc.accountCode.startsWith("1000") || acc.accountCode.startsWith("110") || acc.accountCode.startsWith("120"); // Adjusted logic to find cash/bank
+                            return (
+                              acc.accountCode.startsWith("1000") ||
+                              acc.accountCode.startsWith("110") ||
+                              acc.accountCode.startsWith("120")
+                            ); // Adjusted logic to find cash/bank
                           } else {
                             // Purchase: Cash, Bank, or Custody (1500)
-                            return acc.accountCode.startsWith("1000") || acc.accountCode.startsWith("110") || acc.accountCode.startsWith("1500");
+                            return (
+                              acc.accountCode.startsWith("1000") ||
+                              acc.accountCode.startsWith("110") ||
+                              acc.accountCode.startsWith("1500")
+                            );
                           }
                         })
                         .map((acc) => (
                           <option key={acc.id} value={acc.id}>
-                            {acc.accountCode} - {acc.name}
+                            {acc.accountCode} - {acc.name} ({formatNumber(acc.balance || 0)})
                           </option>
                         ))}
                     </select>
+                    {!isSell &&
+                      invoiceData.paymentAccountId &&
+                      (() => {
+                        const acc = accounts.find(
+                          (a) => a.id === invoiceData.paymentAccountId
+                        );
+                        const paymentAmount =
+                          invoiceData.status === "Paid"
+                            ? adjustedTotal
+                            : downPayment;
+                        if (acc && (acc.balance || 0) < paymentAmount) {
+                          return (
+                            <p className="text-xs text-red-600 font-bold mt-1.5 animate-pulse flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                              {isRTL ? "رصيد غير كافٍ" : "Insufficient balance"}
+                            </p>
+                          );
+                        }
+                        return null;
+                      })()}
                   </div>
                 )}
 

@@ -17,6 +17,7 @@ import { DollarSign, CreditCard, Wallet, Landmark, FileText, CheckSquare } from 
 import DataSourceSelector from '../ui/DataSourceSelector';
 import { useAccounts } from '../../hooks/useAccounting';
 import { formatNumber } from '../../Helpers/localization';
+import { useLanguage } from '../../contexts/LanguageContext';
 
 interface RecordPaymentModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
   const [paymentAccountId, setPaymentAccountId] = useState<string>("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const { t, isRTL } = useLanguage();
 
   const { data: accountsResponse } = useAccounts({ pageNumber: 1, pageSize: 1000 }, { isActive: true });
   const accounts = accountsResponse?.data?.data || [];
@@ -63,7 +65,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
     if (isPurchaseInvoice && paymentAccountId) {
       const selectedAccount = accounts.find(a => a.id === paymentAccountId);
       if (selectedAccount && selectedAccount.balance !== undefined && selectedAccount.balance < amount) {
-        toast.error(`Insufficient funds in ${selectedAccount.name}. Available: ${formatNumber(selectedAccount.balance)} EGP`);
+        toast.error(`${isRTL ? "رصيد غير كافٍ في" : "Insufficient funds in"} ${selectedAccount.name}. ${isRTL ? "المتاح" : "Available"}: ${formatNumber(selectedAccount.balance)} EGP`);
         return;
       }
     }
@@ -147,6 +149,18 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
                 value={paymentAccountId}
                 onChange={setPaymentAccountId}
               />
+              {isPurchaseInvoice && paymentAccountId && (() => {
+                const acc = accounts.find(a => a.id === paymentAccountId);
+                if (acc && (acc.balance || 0) < amount) {
+                  return (
+                    <p className="text-[10px] text-red-600 font-bold mt-1 animate-pulse flex items-center gap-1">
+                      <span className="w-1 h-1 bg-red-600 rounded-full"></span>
+                      {isRTL ? "رصيد غير كافٍ" : "Insufficient balance"}
+                    </p>
+                  );
+                }
+                return null;
+              })()}
             </div>
 
             <div className="space-y-2">
