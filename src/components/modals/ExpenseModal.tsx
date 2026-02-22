@@ -17,6 +17,7 @@ import { useMainBranch } from "../../hooks/useBranches";
 import ProjectSelector from "../ui/ProjectSelector";
 import CategorySelector from "../ui/CategorySelector";
 import DataSourceSelector from "../ui/DataSourceSelector";
+import { useAccounts } from "../../hooks/useAccounting";
 
 interface ExpenseModalProps {
   isOpen: boolean;
@@ -37,6 +38,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
   const roleAccess = useRoleAccess();
   const createExpenseMutation = useCreateExpense();
   const updateExpenseMutation = useUpdateExpense();
+  const { data: accountsResponse } = useAccounts({ pageNumber: 1, pageSize: 1000 }, { isActive: true });
+  const accounts = accountsResponse?.data?.data || [];
 
   const [formData, setFormData] = useState<CreateExpenseDto>({
     date: new Date().toISOString().split("T")[0],
@@ -106,6 +109,19 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
       return;
     }
 
+    // Check account balance
+    if (formData.paymentAccountId) {
+      const selectedAccount = accounts.find(a => a.id === formData.paymentAccountId);
+      if (selectedAccount && selectedAccount.balance !== undefined && selectedAccount.balance < formData.total) {
+        toast.error(
+          isRTL 
+            ? `رصيد غير كافٍ في ${selectedAccount.name}. المتاح: ${formatNumber(selectedAccount.balance)} EGP`
+            : `Insufficient funds in ${selectedAccount.name}. Available: ${formatNumber(selectedAccount.balance)} EGP`
+        );
+        return;
+      }
+    }
+
     // Check permissions
     if (expense && !roleAccess.canEdit()) {
       toast.error(t("noEditPermission"));
@@ -139,6 +155,8 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         if (result.success) {
           toast.success(t("expenseUpdatedSuccessfully"));
           onSuccess();
+        } else {
+          toast.error(result.errorMessage || t("failedToUpdateExpense"));
         }
       } else {
         // Create new expense
@@ -151,13 +169,15 @@ const ExpenseModal: React.FC<ExpenseModalProps> = ({
         if (result.success) {
           toast.success(t("expenseCreatedSuccessfully"));
           onSuccess();
+        } else {
+          toast.error(result.errorMessage || t("failedToCreateExpense"));
         }
       }
     } catch (error) {
       toast.error(
-        expense
-          ? t("failedToUpdateExpense")
-          : t("failedToCreateExpense")
+        error instanceof Error 
+          ? error.message 
+          : (expense ? t("failedToUpdateExpense") : t("failedToCreateExpense"))
       );
     }
   };

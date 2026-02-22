@@ -9,6 +9,7 @@ import {
 } from "../ui/select";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { AccountDto, AccountType } from "../../types/api";
+import { formatNumber } from "../../Helpers/localization";
 import { ChevronRight, User } from "lucide-react";
 
 interface DataSourceSelectorProps {
@@ -65,10 +66,24 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
         </SelectTrigger>
         <SelectContent>
           {cashAccounts.map(a => (
-            <SelectItem key={a.id} value={a.id}>{isRTL ? "نقدي" : "Cash"} - {a.name}</SelectItem>
+            <SelectItem key={a.id} value={a.id}>
+              <div className="flex justify-between items-center w-full min-w-[200px]">
+                <span>{isRTL ? "نقدي" : "Cash"} - {a.name}</span>
+                <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
+                  {formatNumber(a.balance)} EGP
+                </span>
+              </div>
+            </SelectItem>
           ))}
           {bankAccounts.map(a => (
-            <SelectItem key={a.id} value={a.id}>{isRTL ? "بنك" : "Bank"} - {a.name}</SelectItem>
+            <SelectItem key={a.id} value={a.id}>
+              <div className="flex justify-between items-center w-full min-w-[200px]">
+                <span>{isRTL ? "بنك" : "Bank"} - {a.name}</span>
+                <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
+                  {formatNumber(a.balance)} EGP
+                </span>
+              </div>
+            </SelectItem>
           ))}
           {employeeCustodyParent && (
             <SelectItem value="employee_adv">
@@ -95,7 +110,14 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
             </SelectTrigger>
             <SelectContent>
               {employeeAccounts.map(a => (
-                <SelectItem key={a.id} value={a.id}>{a.name}</SelectItem>
+                <SelectItem key={a.id} value={a.id}>
+                  <div className="flex justify-between items-center w-full">
+                    <span>{a.name}</span>
+                    <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
+                      {formatNumber(a.balance)} EGP
+                    </span>
+                  </div>
+                </SelectItem>
               ))}
               {employeeAccounts.length === 0 && (
                 <div className="p-2 text-xs text-slate-500 text-center">

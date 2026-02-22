@@ -14,6 +14,9 @@ import { InvoiceDto } from "../../types/api";
 import { invoiceService } from "../../services/invoiceService";
 import { toast } from "react-toastify";
 import { DollarSign, CreditCard, Wallet, Landmark, FileText, CheckSquare } from 'lucide-react';
+import DataSourceSelector from '../ui/DataSourceSelector';
+import { useAccounts } from '../../hooks/useAccounting';
+import { formatNumber } from '../../Helpers/localization';
 
 interface RecordPaymentModalProps {
   isOpen: boolean;
@@ -25,8 +28,12 @@ interface RecordPaymentModalProps {
 const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose, invoice, onSuccess }) => {
   const [amount, setAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
+  const [paymentAccountId, setPaymentAccountId] = useState<string>("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const { data: accountsResponse } = useAccounts({ pageNumber: 1, pageSize: 1000 }, { isActive: true });
+  const accounts = accountsResponse?.data?.data || [];
 
   React.useEffect(() => {
     if (invoice) {
@@ -51,11 +58,22 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
       return;
     }
 
+    // Account Balance Validation for Purchase Invoices
+    const isPurchaseInvoice = invoice.invoiceType?.toLowerCase() === "buy" || invoice.invoiceType?.toLowerCase() === "purchase";
+    if (isPurchaseInvoice && paymentAccountId) {
+      const selectedAccount = accounts.find(a => a.id === paymentAccountId);
+      if (selectedAccount && selectedAccount.balance !== undefined && selectedAccount.balance < amount) {
+        toast.error(`Insufficient funds in ${selectedAccount.name}. Available: ${formatNumber(selectedAccount.balance)} EGP`);
+        return;
+      }
+    }
+
     setLoading(true);
     try {
       const result = await invoiceService.recordPayment(invoice.id, {
         amount,
         paymentMethod,
+        paymentAccountId: paymentAccountId || undefined,
         attachment: attachment || undefined
       });
 
@@ -122,40 +140,13 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="method" className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                Payment Method
+              <Label htmlFor="account" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Payment Account
               </Label>
-              <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger id="method">
-                  <SelectValue placeholder="Select method" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Cash">
-                    <div className="flex items-center gap-2">
-                      <Wallet className="w-4 h-4" />
-                      <span>Cash</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="BankTransfer">
-                    <div className="flex items-center gap-2">
-                      <Landmark className="w-4 h-4" />
-                      <span>Bank Transfer</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="CreditCard">
-                    <div className="flex items-center gap-2">
-                      <CreditCard className="w-4 h-4" />
-                      <span>Credit Card</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="Cheque">
-                    <div className="flex items-center gap-2">
-                      <CheckSquare className="w-4 h-4" />
-                      <span>Cheque</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
+              <DataSourceSelector
+                value={paymentAccountId}
+                onChange={setPaymentAccountId}
+              />
             </div>
 
             <div className="space-y-2">
