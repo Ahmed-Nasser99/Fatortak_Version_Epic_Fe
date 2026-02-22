@@ -17,9 +17,12 @@ import {
   ChevronRight,
   Info,
   Layers,
+  FileSpreadsheet,
+  Download,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProject } from "../hooks/useProjects";
+import { projectService } from "../services/projectService";
 import { useInvoices } from "../hooks/useInvoices";
 import { useExpenses } from "../hooks/useExpenses";
 import { useJournalEntries } from "../hooks/useAccounting";
@@ -53,6 +56,7 @@ const ProjectDetails: React.FC = () => {
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
   const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<any>(null);
+  const [isExporting, setIsExporting] = useState<"pdf" | "excel" | null>(null);
 
   const {
     data: projectResponse,
@@ -117,6 +121,34 @@ const ProjectDetails: React.FC = () => {
       </motion.div>
     );
   }
+
+  const handleExportPdf = async () => {
+    if (!project) return;
+    try {
+      setIsExporting("pdf");
+      await projectService.exportProjectPdf(project.id, project.name);
+      toast.success("PDF generated successfully");
+    } catch (error) {
+      console.error("Export PDF failed:", error);
+      toast.error("Failed to generate PDF");
+    } finally {
+      setIsExporting(null);
+    }
+  };
+
+  const handleExportExcel = async () => {
+    if (!project) return;
+    try {
+      setIsExporting("excel");
+      await projectService.exportProjectExcel(project.id, project.name);
+      toast.success("Excel sheet generated successfully");
+    } catch (error) {
+      console.error("Export Excel failed:", error);
+      toast.error("Failed to generate Excel sheet");
+    } finally {
+      setIsExporting(null);
+    }
+  };
 
   const invoices = invoicesResponse?.data?.data || [];
   const salesInvoices = invoices.filter(
@@ -271,10 +303,28 @@ const ProjectDetails: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              disabled={isExporting !== null}
+              className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-4 shadow-sm"
+              onClick={handleExportPdf}
+            >
+              <FileText className={`w-4 h-4 text-rose-500 ${isExporting === "pdf" ? "animate-pulse" : ""}`} />
+              <span className="text-slate-700">{isExporting === "pdf" ? "Exporting..." : "Export PDF"}</span>
+            </Button>
+            <Button
+              variant="outline"
+              disabled={isExporting !== null}
+              className="gap-2 rounded-xl border-slate-200 hover:bg-slate-50 px-4 shadow-sm"
+              onClick={handleExportExcel}
+            >
+              <FileSpreadsheet className={`w-4 h-4 text-emerald-500 ${isExporting === "excel" ? "animate-pulse" : ""}`} />
+              <span className="text-slate-700">{isExporting === "excel" ? "Exporting..." : "Export Excel"}</span>
+            </Button>
             {project.status !== ProjectStatus.Active &&
               project.status !== ProjectStatus.Completed && (
                 <Button
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 rounded-xl px-6 shadow-md shadow-indigo-200"
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 rounded-xl px-4 shadow-md shadow-indigo-200"
                   onClick={() =>
                     navigate(`/projects/new-with-contract?edit=${project.id}`)
                   }

@@ -61,7 +61,6 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
     }
 
     // Account Balance Validation for Purchase Invoices
-    const isPurchaseInvoice = invoice.invoiceType?.toLowerCase() === "buy" || invoice.invoiceType?.toLowerCase() === "purchase";
     if (isPurchaseInvoice && paymentAccountId) {
       const selectedAccount = accounts.find(a => a.id === paymentAccountId);
       if (selectedAccount && selectedAccount.balance !== undefined && selectedAccount.balance < amount) {
@@ -96,6 +95,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
   if (!invoice) return null;
 
   const remainingBalance = invoice.total - ((invoice as any).amountPaid || 0);
+  const isPurchaseInvoice = invoice.invoiceType?.toLowerCase() === "buy" || invoice.invoiceType?.toLowerCase() === "purchase";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

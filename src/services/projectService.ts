@@ -59,4 +59,30 @@ export const projectService = {
   createProjectWithContract: async (data: CreateProjectWithContractCommand) => {
     return apiClient.post<ProjectDto>("/api/projects/with-contract", data);
   },
+
+  // Export project to PDF
+  exportProjectPdf: async (id: string, projectName: string) => {
+    const blob = await apiClient.getBlob(`/api/projects/${id}/export/pdf`);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Quotation_${projectName.replace(/\s+/g, '_')}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  },
+
+  // Export project to Excel
+  exportProjectExcel: async (id: string, projectName: string) => {
+    const blob = await apiClient.getBlob(`/api/projects/${id}/export/excel`);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `Project_${projectName.replace(/\s+/g, '_')}.xlsx`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  },
 };
