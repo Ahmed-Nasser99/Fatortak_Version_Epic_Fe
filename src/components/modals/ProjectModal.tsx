@@ -45,7 +45,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
       description: project?.description || "",
       customerId: project?.customerId || "",
       status: project?.status || ProjectStatus.Active,
-      contractValue: project?.contractValue || "",
+      contractValue: (project?.contractValue as any) || "",
+      discount: (project?.discount as any) || "",
     },
     enableReinitialize: true,
     validationSchema,
@@ -54,7 +55,8 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
         // Sanitize data
         const values = {
           ...formValues,
-          contractValue: formValues.contractValue === "" || formValues.contractValue === undefined || formValues.contractValue === null ? null : Number(formValues.contractValue),
+          contractValue: (formValues.contractValue as any) === "" || formValues.contractValue === undefined || formValues.contractValue === null ? null : Number(formValues.contractValue),
+          discount: (formValues.discount as any) === "" || formValues.discount === undefined || formValues.discount === null ? 0 : Number(formValues.discount),
         };
 
         let result;
@@ -224,6 +226,27 @@ const ProjectModal: React.FC<ProjectModalProps> = ({
                {formik.touched.contractValue && formik.errors.contractValue && (
                 <p className="text-red-500 text-xs mt-1">
                   {formik.errors.contractValue}
+                </p>
+              )}
+            </div>
+
+            {/* Discount */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {isRTL ? "الخصم" : "Discount"}
+              </label>
+              <input
+                type="number"
+                {...formik.getFieldProps("discount")}
+                disabled={project?.status !== undefined && project.status !== ProjectStatus.Draft}
+                className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white ${
+                  isRTL ? "text-right" : "text-left"
+                } disabled:bg-gray-50 cursor-not-allowed`}
+                placeholder="0.00"
+              />
+               {formik.touched.discount && formik.errors.discount && (
+                <p className="text-red-500 text-xs mt-1">
+                  {formik.errors.discount}
                 </p>
               )}
             </div>

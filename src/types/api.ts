@@ -540,6 +540,7 @@ export interface ProjectDto {
   totalCollected: number;
   totalPaid: number;
   netProfit: number;
+  discount: number;
   projectLines: ProjectLineDto[];
   updatedAt: string;
 }
@@ -550,6 +551,7 @@ export interface CreateProjectDto {
   customerId?: string;
   status?: ProjectStatus;
   contractValue: number;
+  discount?: number;
 }
 
 export interface UpdateProjectDto {
@@ -558,6 +560,7 @@ export interface UpdateProjectDto {
   customerId?: string;
   status?: ProjectStatus;
   contractValue?: number;
+  discount?: number;
 }
 
 export enum ProjectStatus {
@@ -576,6 +579,16 @@ export interface ProjectFilterDto {
   status?: ProjectStatus;
   clientName?: string;
   customerId?: string;
+}
+
+export interface CreateProjectWithContractCommand {
+  projectName: string;
+  clientId: string;
+  paymentTerms?: string;
+  notes?: string;
+  lines: Partial<ProjectLineDto>[];
+  activateImmediately: boolean;
+  discount?: number;
 }
 
 

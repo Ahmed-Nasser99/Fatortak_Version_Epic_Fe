@@ -286,17 +286,29 @@ const ProjectDetails: React.FC = () => {
         </div>
 
         {/* Hero Financials */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mt-8">
           <ExecutiveStat
             title="Contract Value"
             value={project.contractValue}
             icon={Briefcase}
           />
           <ExecutiveStat
+            title="Discount"
+            value={project.discount || 0}
+            icon={TrendingUp}
+            className="text-rose-600"
+          />
+          <ExecutiveStat
+            title="Net Value"
+            value={project.contractValue - (project.discount || 0)}
+            icon={DollarSign}
+          />
+          <ExecutiveStat
             title="Total Paid"
             value={collectedAmount}
             icon={TrendingUp}
             detail={
+// ... existing code ...
               <div className="space-y-1.5">
                 <div className="flex justify-between text-[10px] font-bold text-slate-400 uppercase">
                   <span>Invoiced</span>

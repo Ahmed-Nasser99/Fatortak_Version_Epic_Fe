@@ -43,7 +43,7 @@ import {
   SelectValue,
 } from "../components/ui/select";
 import { formatCurrency } from "../Helpers/formatCurrency";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import { AccountDto } from "../types/api";
 
 const Custody: React.FC = () => {
@@ -108,10 +108,21 @@ const Custody: React.FC = () => {
       return;
     }
 
+    const amountNum = parseFloat(amount);
+    const sourceAcc = cashBankAccounts.find(a => a.id === sourceAccountId);
+    
+    if (sourceAcc && (sourceAcc.balance || 0) < amountNum) {
+      toast.error(isRTL 
+        ? `رصيد غير كافٍ في ${sourceAcc.name}. الرصيد المتاح: ${formatCurrency(sourceAcc.balance || 0)}`
+        : `Insufficient funds in ${sourceAcc.name}. Available balance: ${formatCurrency(sourceAcc.balance || 0)}`
+      );
+      return;
+    }
+
     try {
       await giveCustodyMutation.mutateAsync({
         accountId: selectedAccount.id,
-        amount: parseFloat(amount),
+        amount: amountNum,
         sourceAccountId,
         description: description || (isRTL ? `صرف عهدة - ${selectedAccount.name}` : `Give custody - ${selectedAccount.name}`),
       });
@@ -144,10 +155,21 @@ const Custody: React.FC = () => {
       return;
     }
 
+    const amountNum = parseFloat(amount);
+    const sourceAcc = cashBankAccounts.find(a => a.id === sourceAccountId);
+
+    if (sourceAcc && (sourceAcc.balance || 0) < amountNum) {
+      toast.error(isRTL 
+        ? `رصيد غير كافٍ في ${sourceAcc.name}. الرصيد المتاح: ${formatCurrency(sourceAcc.balance || 0)}`
+        : `Insufficient funds in ${sourceAcc.name}. Available balance: ${formatCurrency(sourceAcc.balance || 0)}`
+      );
+      return;
+    }
+
     try {
       await replenishCustodyMutation.mutateAsync({
         accountId: selectedAccount.id,
-        amount: parseFloat(amount),
+        amount: amountNum,
         sourceAccountId,
         description: description || (isRTL ? `تعزيز عهدة - ${selectedAccount.name}` : `Replenish custody - ${selectedAccount.name}`),
       });
@@ -406,7 +428,12 @@ const Custody: React.FC = () => {
                   <SelectContent>
                     {cashBankAccounts.map((acc) => (
                       <SelectItem key={acc.id} value={acc.id}>
-                        {acc.accountCode} - {acc.name}
+                        <div className="flex justify-between items-center w-full gap-8">
+                          <span>{acc.accountCode} - {acc.name}</span>
+                          <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                            ({formatCurrency(acc.balance || 0)})
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -470,7 +497,12 @@ const Custody: React.FC = () => {
                   <SelectContent>
                     {cashBankAccounts.map((acc) => (
                       <SelectItem key={acc.id} value={acc.id}>
-                        {acc.accountCode} - {acc.name}
+                        <div className="flex justify-between items-center w-full gap-8">
+                          <span>{acc.accountCode} - {acc.name}</span>
+                          <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                            ({formatCurrency(acc.balance || 0)})
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -534,7 +566,12 @@ const Custody: React.FC = () => {
                   <SelectContent>
                     {cashBankAccounts.map((acc) => (
                       <SelectItem key={acc.id} value={acc.id}>
-                        {acc.accountCode} - {acc.name}
+                        <div className="flex justify-between items-center w-full gap-8">
+                          <span>{acc.accountCode} - {acc.name}</span>
+                          <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                            ({formatCurrency(acc.balance || 0)})
+                          </span>
+                        </div>
                       </SelectItem>
                     ))}
                   </SelectContent>

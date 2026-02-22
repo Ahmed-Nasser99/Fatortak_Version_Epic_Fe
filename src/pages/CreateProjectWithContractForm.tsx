@@ -66,6 +66,7 @@ const CreateProjectWithContractForm = () => {
   const [vatRate, setVatRate] = useState(0.14); 
   const [includeVat, setIncludeVat] = useState(true);
   const [vatAmount, setVatAmount] = useState(0);
+  const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
 
   const { data: currentCompany } = useCurrentCompany();
@@ -88,8 +89,8 @@ const CreateProjectWithContractForm = () => {
     setSubtotal(newSubtotal);
     const calculatedVat = includeVat ? newSubtotal * vatRate : 0;
     setVatAmount(calculatedVat);
-    setTotal(newSubtotal + calculatedVat);
-  }, [lines, includeVat, vatRate]);
+    setTotal((newSubtotal + calculatedVat) - discount);
+  }, [lines, includeVat, vatRate, discount]);
 
   const fetchCustomers = async () => {
     try {
@@ -160,7 +161,8 @@ const CreateProjectWithContractForm = () => {
         paymentTerms,
         notes: combinedNotes,
         lines,
-        activateImmediately: activate
+        activateImmediately: activate,
+        discount: discount
       };
 
       const result = await projectService.createProjectWithContract(payload);
@@ -409,6 +411,29 @@ const CreateProjectWithContractForm = () => {
                 <td className="py-2 px-4 text-right align-middle">
                   <span className={`font-bold transition-opacity ${includeVat ? 'opacity-100' : 'opacity-20'}`}>
                     {vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </td>
+                <td className="no-print"></td>
+              </tr>
+
+              <tr>
+                <td colSpan={5} className="py-2 px-4 text-right align-middle">
+                  <div className="flex items-center justify-end gap-3">
+                    <span className="text-sm font-bold text-gray-500 uppercase whitespace-nowrap">
+                      Discount
+                    </span>
+                  </div>
+                </td>
+                <td className="py-2 px-4 text-right align-middle">
+                  <input
+                    type="number"
+                    value={discount}
+                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                    className="w-full bg-[#fef2f2] border border-rose-100 rounded px-2 py-1 text-sm text-right font-bold text-rose-600 outline-none focus:border-rose-400 no-print"
+                    placeholder="0.00"
+                  />
+                  <span className="hidden print:inline font-bold text-rose-600">
+                    -{discount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                   </span>
                 </td>
                 <td className="no-print"></td>

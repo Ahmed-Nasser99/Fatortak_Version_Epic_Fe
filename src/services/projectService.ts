@@ -6,6 +6,7 @@ import {
   ProjectFilterDto,
   PagedResponseDto,
   PaginationDto,
+  CreateProjectWithContractCommand,
 } from "../types/api";
 
 export const projectService = {
@@ -55,7 +56,7 @@ export const projectService = {
   },
   
   // Create project with contract setup
-  createProjectWithContract: async (data: any) => {
+  createProjectWithContract: async (data: CreateProjectWithContractCommand) => {
     return apiClient.post<ProjectDto>("/api/projects/with-contract", data);
   },
 };

@@ -273,8 +273,13 @@ export const useGiveCustodyByAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: GiveCustodyByAccountDto) =>
-      accountingService.giveCustodyByAccount(data),
+    mutationFn: async (data: GiveCustodyByAccountDto) => {
+      const result = await accountingService.giveCustodyByAccount(data);
+      if (!result.success) {
+        throw new Error(result.errorMessage || "Failed to give custody");
+      }
+      return result.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["journalEntries"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
@@ -290,8 +295,13 @@ export const useReturnCustodyByAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: ReturnCustodyByAccountDto) =>
-      accountingService.returnCustodyByAccount(data),
+    mutationFn: async (data: ReturnCustodyByAccountDto) => {
+      const result = await accountingService.returnCustodyByAccount(data);
+      if (!result.success) {
+        throw new Error(result.errorMessage || "Failed to return custody");
+      }
+      return result.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["journalEntries"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
@@ -307,8 +317,13 @@ export const useReplenishCustodyByAccount = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: ReplenishCustodyByAccountDto) =>
-      accountingService.replenishCustodyByAccount(data),
+    mutationFn: async (data: ReplenishCustodyByAccountDto) => {
+      const result = await accountingService.replenishCustodyByAccount(data);
+      if (!result.success) {
+        throw new Error(result.errorMessage || "Failed to replenish custody");
+      }
+      return result.data;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["journalEntries"] });
       queryClient.invalidateQueries({ queryKey: ["accounts"] });
