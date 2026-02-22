@@ -45,6 +45,9 @@ import { useDashboardReport } from "../hooks/useDashboardReport";
 import EnhancedInvoiceModal from "../components/modals/EnhancedInvoiceModal";
 import CustomerModal from "../components/modals/CustomerModal";
 import ItemModal from "../components/modals/ItemModal";
+import ExpenseModal from "../components/modals/ExpenseModal";
+import RecordPaymentModal from "../components/modals/RecordPaymentModal";
+import { useInvoices } from "../hooks/useInvoices";
 import { useNavigate } from "react-router-dom";
 import { useRoleAccess } from "@/hooks/useRoleAccess";
 import { formatCurrency } from "@/Helpers/formatCurrency";
@@ -61,9 +64,24 @@ const Dashboard: React.FC = () => {
   const [showCustomerModal, setShowCustomerModal] = React.useState(false);
   const [isSupplier, setIsSupplier] = React.useState(false);
   const [showItemModal, setShowItemModal] = React.useState(false);
+  const [showExpenseModal, setShowExpenseModal] = React.useState(false);
+  const [showRecordPaymentModal, setShowRecordPaymentModal] = React.useState(false);
   const [period, setPeriod] = React.useState("month");
   const [filterBranchId, setFilterBranchId] = React.useState("");
   const [filterProjectId, setFilterProjectId] = React.useState("all");
+
+  // Fetch invoices to find sales invoice for selected project
+  const { data: projInvoicesResponse } = useInvoices(
+    { pageNumber: 1, pageSize: 20 },
+    { projectId: filterProjectId === "all" ? undefined : filterProjectId }
+  );
+
+  const salesInvoice = projInvoicesResponse?.data?.data?.find(
+    (inv: any) =>
+      inv.invoiceType?.toLowerCase() === "sell" ||
+      inv.invoiceType?.toLowerCase() === "sales" ||
+      inv.invoiceType?.toLowerCase() === "sale"
+  );
 
   // Fetch real data from API
   const { data: userProfileResponse } = useCurrentUserProfile();
@@ -290,6 +308,32 @@ const Dashboard: React.FC = () => {
               onChange={setFilterProjectId}
               className="w-48"
             />
+
+            {filterProjectId !== "all" && (
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setShowExpenseModal(true)}
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl gap-2 h-10 shadow-sm"
+                >
+                  <DollarSign className="w-4 h-4 text-rose-500" />
+                  <span className="hidden md:inline">
+                    {isRTL ? "إضافة مصروف" : "Add Expense"}
+                  </span>
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={!salesInvoice || salesInvoice.status === "Paid"}
+                  onClick={() => setShowRecordPaymentModal(true)}
+                  className="bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-xl gap-2 h-10 shadow-sm"
+                >
+                  <CreditCard className="w-4 h-4 text-emerald-500" />
+                  <span className="hidden md:inline">
+                    {isRTL ? "تحصيل دفعة" : "Record Payment"}
+                  </span>
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -707,6 +751,18 @@ const Dashboard: React.FC = () => {
           onSuccess={() => {
             setShowItemModal(false);
           }}
+        />
+        <ExpenseModal
+          isOpen={showExpenseModal}
+          onClose={() => setShowExpenseModal(false)}
+          onSuccess={() => setShowExpenseModal(false)}
+          initialProjectId={filterProjectId !== "all" ? filterProjectId : undefined}
+        />
+        <RecordPaymentModal
+          isOpen={showRecordPaymentModal}
+          invoice={salesInvoice}
+          onClose={() => setShowRecordPaymentModal(false)}
+          onSuccess={() => setShowRecordPaymentModal(false)}
         />
       </div>
     </div>
