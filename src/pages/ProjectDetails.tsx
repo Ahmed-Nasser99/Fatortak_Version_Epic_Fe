@@ -253,16 +253,17 @@ const ProjectDetails: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {project.status !== ProjectStatus.Active && (
-              <Button
-                className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 rounded-xl px-6 shadow-md shadow-indigo-200"
-                onClick={() =>
-                  navigate(`/projects/new-with-contract?edit=${project.id}`)
-                }
-              >
-                Edit Project
-              </Button>
-            )}
+            {project.status !== ProjectStatus.Active &&
+              project.status !== ProjectStatus.Completed && (
+                <Button
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 rounded-xl px-6 shadow-md shadow-indigo-200"
+                  onClick={() =>
+                    navigate(`/projects/new-with-contract?edit=${project.id}`)
+                  }
+                >
+                  Edit Project
+                </Button>
+              )}
           </div>
         </div>
 
@@ -565,6 +566,10 @@ const ProjectDetails: React.FC = () => {
                       <Button
                         variant="outline"
                         size="sm"
+                        disabled={
+                          salesInvoices.length > 0 &&
+                          salesInvoices[0].status === "Paid"
+                        }
                         onClick={() => {
                           const unpaidInvoice = salesInvoices.find(
                             (inv) => inv.status !== "Paid",
@@ -812,7 +817,8 @@ const ProjectDetails: React.FC = () => {
                           Direct Project Expenses
                         </CardTitle>
                         <CardDescription>
-                          Costs associated with procurement, labor, and logistics.
+                          Costs associated with procurement, labor, and
+                          logistics.
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-3">
@@ -839,7 +845,9 @@ const ProjectDetails: React.FC = () => {
                             <th className="py-5 px-6">Date</th>
                             <th className="py-5 px-4">Cost Center</th>
                             <th className="py-5 px-4">Activity / Note</th>
-                            <th className="py-5 px-6 text-right">Debit Amount</th>
+                            <th className="py-5 px-6 text-right">
+                              Debit Amount
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-100">
@@ -930,7 +938,9 @@ const ProjectDetails: React.FC = () => {
                                 <td className="py-5 px-6">
                                   <span
                                     className="font-bold text-amber-600 group-hover:underline cursor-pointer"
-                                    onClick={() => navigate(`/invoice/${inv.id}`)}
+                                    onClick={() =>
+                                      navigate(`/invoice/${inv.id}`)
+                                    }
                                   >
                                     {inv.invoiceNumber}
                                   </span>
@@ -945,7 +955,10 @@ const ProjectDetails: React.FC = () => {
                                   {formatNumber((inv as any).amountPaid || 0)}
                                 </td>
                                 <td className="py-5 px-4">
-                                  <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-100">
+                                  <Badge
+                                    variant="outline"
+                                    className="bg-amber-50 text-amber-700 border-amber-100"
+                                  >
                                     {inv.status}
                                   </Badge>
                                 </td>
@@ -970,7 +983,8 @@ const ProjectDetails: React.FC = () => {
                           Payments to Suppliers
                         </h3>
                         <p className="text-sm text-slate-500 font-medium tracking-tight">
-                          History of outbound payments made against purchase invoices.
+                          History of outbound payments made against purchase
+                          invoices.
                         </p>
                       </div>
                     </div>
@@ -1010,7 +1024,10 @@ const ProjectDetails: React.FC = () => {
                       <tbody className="divide-y divide-slate-100">
                         {supplierPayments.length === 0 ? (
                           <tr>
-                            <td colSpan={4} className="py-20 text-center text-slate-400 italic">
+                            <td
+                              colSpan={4}
+                              className="py-20 text-center text-slate-400 italic"
+                            >
                               No outbound payments recorded yet.
                             </td>
                           </tr>
