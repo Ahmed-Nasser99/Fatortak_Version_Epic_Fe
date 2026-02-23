@@ -16,11 +16,20 @@ import Projects from "./pages/Projects";
 import Suppliers from "./pages/Suppliers";
 import Items from "./pages/Items";
 import Expenses from "./pages/Expenses";
-import Reports from "./pages/Reports";
-import ProjectSheetReport from "./pages/Reports/ProjectSheetReport";
-import TreasuryReport from "./pages/Reports/TreasuryReport";
-import SupplierLedgerReport from "./pages/Reports/SupplierLedgerReport";
-import EmployeeCustodyReport from "./pages/Reports/EmployeeCustodyReport";
+
+import TrialBalance from "./pages/Reports/TrialBalance";
+import GeneralLedger from "./pages/Reports/GeneralLedger";
+import IncomeStatement from "./pages/Reports/IncomeStatement";
+import BalanceSheet from "./pages/Reports/BalanceSheet";
+import CashFlowReport from "./pages/Reports/CashFlowReport";
+import ARAging from "./pages/Reports/ARAging";
+import APAging from "./pages/Reports/APAging";
+import CustomerStatement from "./pages/Reports/CustomerStatement";
+import VendorStatement from "./pages/Reports/VendorStatement";
+import SalesReport from "./pages/Reports/SalesReport";
+import ProjectProfitability from "./pages/Reports/ProjectProfitability";
+import ProjectCostBreakdown from "./pages/Reports/ProjectCostBreakdown";
+import CashBankReport from "./pages/Reports/CashBankReport";
 import Team from "./pages/Team";
 import Settings from "./pages/Settings";
 import UserProfile from "./pages/UserProfile";
@@ -48,19 +57,13 @@ import DailyAttendanceReport from "./pages/DailyAttendanceReport";
 import MonthlyAttendanceReport from "./pages/MonthlyAttendanceReport";
 import Payroll from "./pages/Payroll";
 import InvoiceTemplateDemo from "./pages/InvoiceTemplate/InvoiceTemplateDemo";
-import SalesInvoiceReport from "./pages/Reports/SalesInvoiceReport";
-import ExpensesReport from "./pages/Reports/ExpensesReport";
-import ClientAccountStatementReport from "./pages/Reports/ClientAccountStatementReport";
-import SupplierAccountStatementReport from "./pages/Reports/SupplierAccountStatementReport";
-import TransactionReport from "./pages/Reports/TransactionReport";
+
 
 // 🆕 NEW IMPORTS - Stock Reports
-import CurrentStockReport from "./pages/Reports/CurrentStockReport";
-import ItemMovementReport from "./pages/Reports/ItemMovementReport";
-import ItemProfitabilityReport from "./pages/Reports/ItemProfitabilityReport";
+
 import ChartOfAccounts from "./pages/ChartOfAccounts";
 import JournalEntries from "./pages/JournalEntries";
-import FinancialReports from "./pages/FinancialReports";
+
 import ExpenseCategories from "./pages/ExpenseCategories";
 import Custody from "./pages/Custody";
 import CreateProjectWithContractForm from "./pages/CreateProjectWithContractForm";
@@ -138,44 +141,27 @@ function AppContent() {
           <Route path="expense-categories" element={<ExpenseCategories />} />
           <Route path="journal-entries" element={<JournalEntries />} />
           <Route path="custody" element={<Custody />} />
-          <Route path="financial-reports" element={<FinancialReports />} />
-          <Route path="items" element={<Items />} />
+
+          {/* Revamped Reports */}
+
+          <Route path="reports/trial-balance" element={<TrialBalance />} />
+          <Route path="reports/ledger" element={<GeneralLedger />} />
+          <Route path="reports/income-statement" element={<IncomeStatement />} />
+          <Route path="reports/balance-sheet" element={<BalanceSheet />} />
+          <Route path="reports/cash-flow" element={<CashFlowReport />} />
+          <Route path="reports/cash-bank-movements" element={<CashBankReport />} />
+          <Route path="reports/ar-aging" element={<ARAging />} />
+          <Route path="reports/ap-aging" element={<APAging />} />
+          <Route path="reports/customer-statement" element={<CustomerStatement />} />
+          <Route path="reports/vendor-statement" element={<VendorStatement />} />
+          <Route path="reports/sales" element={<SalesReport />} />
+          <Route path="reports/project-profitability" element={<ProjectProfitability />} />
+          <Route path="reports/project-cost-breakdown" element={<ProjectCostBreakdown />} />
           <Route path="expenses" element={<Expenses />} />
-          <Route path="reports" element={<Reports />} />
-          <Route
-            path="reports/salesInvoices"
-            element={<SalesInvoiceReport />}
-          />
-          <Route path="reports/expenses" element={<ExpensesReport />} />
-          <Route
-            path="reports/clientAccountStatement"
-            element={<ClientAccountStatementReport />}
-          />
-          <Route
-            path="reports/supplierAccountStatement"
-            element={<SupplierAccountStatementReport />}
-          />
-          <Route path="reports/transactions" element={<TransactionReport />} />
+
 
           {/* 🆕 NEW ROUTES - Stock Reports */}
-          <Route
-            path="reports/current-stock"
-            element={<CurrentStockReport />}
-          />
-          <Route
-            path="reports/item-movement"
-            element={<ItemMovementReport />}
-          />
-          <Route
-            path="reports/item-profitability"
-            element={<ItemProfitabilityReport />}
-          />
 
-          <Route path="reports" element={<Reports />} />
-          <Route path="reports/project-sheet" element={<ProjectSheetReport />} />
-          <Route path="reports/treasury" element={<TreasuryReport />} />
-          <Route path="reports/supplier-ledger" element={<SupplierLedgerReport />} />
-          <Route path="reports/employee-custody" element={<EmployeeCustodyReport />} />
           <Route path="team" element={<Team />} />
           <Route path="settings" element={<Settings />} />
           <Route path="employees" element={<Employees />} />
