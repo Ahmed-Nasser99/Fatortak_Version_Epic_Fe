@@ -222,6 +222,11 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       path: "/reports-group",
       subItems: [
         {
+          name: isRTL ? "حركة الصندوق والبنوك" : "Cash & Bank Movements",
+          path: "/reports/cash-bank-movements",
+          icon: Landmark,
+        },
+        {
           name: isRTL ? "ميزان المراجعة" : "Trial Balance",
           path: "/reports/trial-balance",
           icon: Calculator,
@@ -275,11 +280,6 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           name: isRTL ? "ربحية المشاريع" : "Project Profitability",
           path: "/reports/project-profitability",
           icon: FolderKanban,
-        },
-        {
-          name: isRTL ? "حركة الصندوق والبنوك" : "Cash & Bank Movements",
-          path: "/reports/cash-bank-movements",
-          icon: Landmark,
         },
       ],
     },
