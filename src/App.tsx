@@ -133,6 +133,7 @@ function AppContent() {
           <Route path="sell-invoices" element={<SellInvoices />} />
           <Route path="buy-invoices" element={<BuyInvoices />} />
           <Route path="clients" element={<Clients />} />
+           <Route path="items" element={<Items />} />
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetails />} />
           <Route path="projects/new-with-contract" element={<CreateProjectWithContractForm />} />
