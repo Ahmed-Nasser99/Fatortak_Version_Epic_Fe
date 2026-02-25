@@ -194,7 +194,9 @@ const ProjectDetails: React.FC = () => {
     invoicedAmount > 0 ? (netProfit / invoicedAmount) * 100 : 0;
   const collectionPercentage =
     invoicedAmount > 0 ? (collectedAmount / invoicedAmount) * 100 : 0;
-  // progressPercentage removed as well if unused
+  
+  const netValue = project.contractValue - (project.discount || 0);
+  const totalRemaining = Math.max(0, netValue - collectedAmount);
 
   const getStatusBadge = (status: ProjectStatus) => {
     switch (status) {
@@ -371,6 +373,18 @@ const ProjectDetails: React.FC = () => {
                     className="bg-emerald-500 h-full rounded-full"
                   />
                 </div>
+              </div>
+            }
+          />
+          <ExecutiveStat
+            title="Total Remaining"
+            value={totalRemaining}
+            icon={Receipt}
+            detail={
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full inline-flex tracking-wider uppercase">
+                  Pending Collection
+                </span>
               </div>
             }
           />

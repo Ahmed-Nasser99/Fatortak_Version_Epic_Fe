@@ -665,6 +665,20 @@ const SellInvoices: React.FC = () => {
                           isRTL ? "right" : "left"
                         } text-sm font-semibold text-muted-foreground`}
                       >
+                        {isRTL ? "المدفوع" : "Paid"}
+                      </th>
+                      <th
+                        className={`px-6 py-4 text-${
+                          isRTL ? "right" : "left"
+                        } text-sm font-semibold text-muted-foreground`}
+                      >
+                        {isRTL ? "المتبقي" : "Remaining"}
+                      </th>
+                      <th
+                        className={`px-6 py-4 text-${
+                          isRTL ? "right" : "left"
+                        } text-sm font-semibold text-muted-foreground`}
+                      >
                         {t("status")}
                       </th>
                       <th
@@ -737,6 +751,18 @@ const SellInvoices: React.FC = () => {
                               {formatCurrency(invoice.totalDiscount)}{" "}
                               {invoice.currency || "EGP"}
                             </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-emerald-600 dark:text-emerald-400">
+                            {formatCurrency(invoice.amountPaid || 0)}{" "}
+                            {invoice.currency || "EGP"}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="font-medium text-rose-600 dark:text-rose-400">
+                            {formatCurrency(invoice.remainingAmount)}{" "}
+                            {invoice.currency || "EGP"}
                           </div>
                         </td>
                         <td className="px-6 py-4">

@@ -416,6 +416,16 @@ const Projects: React.FC = () => {
                       <th
                         className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}
                       >
+                        {isRTL ? "المدفوع" : "Paid"}
+                      </th>
+                      <th
+                        className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}
+                      >
+                        {isRTL ? "المتبقي" : "Remaining"}
+                      </th>
+                      <th
+                        className={`px-6 py-5 text-${isRTL ? "right" : "left"} text-xs font-bold text-gray-400 uppercase tracking-wider`}
+                      >
                         {isRTL ? "الحالة" : "Status"}
                       </th>
                       <th
@@ -449,6 +459,12 @@ const Projects: React.FC = () => {
                           {project.contractValue
                             ? formatNumber(project.contractValue)
                             : "-"}
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-emerald-600 dark:text-emerald-400">
+                          {formatNumber(project.totalCollected || 0)}
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-rose-600 dark:text-rose-400">
+                          {formatNumber((project.contractValue || 0) - (project.totalCollected || 0))}
                         </td>
                         <td className="px-6 py-4">
                           <div className="w-[140px]">

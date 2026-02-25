@@ -196,13 +196,32 @@ const Dashboard: React.FC = () => {
           iconColor: "text-white",
           tooltip: t("tooltips.totalPayables"),
         },
+        {
+          title: isRTL ? "إجمالي العهد المالية" : "Total Custody",
+          value: `${formatCurrency(stats.totalCustody)}`,
+          icon: Users,
+          bgColor: "bg-purple-50",
+          iconBg: "bg-purple-500",
+          iconColor: "text-white",
+          tooltip: isRTL
+            ? "إجمالي العهد المالية للموظفين"
+            : "Total employee custody",
+        },
+        {
+          title: isRTL ? "شيكات تحت التحصيل" : "Cheques Under Collection",
+          value: `${formatCurrency(stats.totalChequesUnderCollection)}`,
+          icon: CreditCard,
+          bgColor: "bg-teal-50",
+          iconBg: "bg-teal-500",
+          iconColor: "text-white",
+          tooltip: isRTL
+            ? "إجمالي الشيكات تحت التحصيل"
+            : "Total cheques waiting for collection",
+        },
       ]
     : [];
 
-  // Calculate liquidity percentage for AI insight
-  const liquidityPercentage = stats?.totalPayables
-    ? Math.round((stats.totalCashAvailable / stats.totalPayables) * 100)
-    : 0;
+
 
   const getStatusColor = (status: string) => {
     switch (status?.toLowerCase()) {
@@ -572,23 +591,39 @@ const Dashboard: React.FC = () => {
                   })}
                 </div>
 
-                {/* AI Insight */}
-                <div className="p-4 bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-2">
-                    {t("liquidityInsight", {
-                      percentage: liquidityPercentage,
-                      status:
-                        liquidityPercentage >= 100
-                          ? t("excellentStatus")
-                          : liquidityPercentage >= 50
-                            ? t("goodStatus")
-                            : t("lowStatus"),
-                    })}
-                  </p>
-                  <div className="flex items-center gap-2 text-xs text-green-700">
-                    <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                    <span className="font-medium">{t("aiInsight")}</span>
-                  </div>
+                {/* Final Row: Custody & Cheques */}
+                <div className="grid grid-cols-2 gap-4">
+                  {businessHealthStats.slice(4, 6).map((stat, index) => {
+                    const Icon = stat.icon;
+                    return (
+                      <TooltipProvider key={index}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div
+                              className={`flex items-start gap-3 p-3 ${stat.bgColor} dark:bg-slate-700/50 rounded-lg cursor-help`}
+                            >
+                              <div
+                                className={`w-10 h-10 ${stat.iconBg} rounded-full flex items-center justify-center flex-shrink-0`}
+                              >
+                                <Icon className={`w-5 h-5 ${stat.iconColor}`} />
+                              </div>
+                              <div>
+                                <div className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+                                  {stat.title}
+                                </div>
+                                <div className="text-lg font-bold text-gray-900 dark:text-white">
+                                  {stat.value}
+                                </div>
+                              </div>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>{stat.tooltip}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    );
+                  })}
                 </div>
               </CardContent>
             </Card>
