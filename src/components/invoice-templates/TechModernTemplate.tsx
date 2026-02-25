@@ -267,7 +267,7 @@ const TechModernTemplate: React.FC<TemplateProps> = ({
               </div>
             </div>
             <button
-              onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+              onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${invoice.attachmentUrl}`, '_blank')}
               className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-mono uppercase tracking-widest rounded-lg transition-all border border-blue-400/50 shadow-[0_0_15px_rgba(37,99,235,0.3)]"
             >
               {isRTL ? "فتح" : "Open"}

@@ -227,7 +227,7 @@ const ElegantScriptTemplate: React.FC<TemplateProps> = ({
                 {invoice.attachmentUrl.split('/').pop()}
               </p>
               <button
-                onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+                onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${invoice.attachmentUrl}`, '_blank')}
                 className={`w-full py-3 bg-gradient-to-r ${colors.gradient} text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all uppercase tracking-widest text-sm`}
               >
                 {isRTL ? "عرض الملف" : "Review File"}

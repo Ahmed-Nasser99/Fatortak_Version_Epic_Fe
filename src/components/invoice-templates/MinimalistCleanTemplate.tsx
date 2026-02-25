@@ -196,7 +196,7 @@ const MinimalistCleanTemplate: React.FC<TemplateProps> = ({
               </span>
             </div>
             <button
-              onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+              onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${invoice.attachmentUrl}`, '_blank')}
               className="text-xs uppercase tracking-widest text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors border-b border-gray-300 dark:border-gray-700 pb-1"
             >
               {isRTL ? "عرض الملف" : "View File"}

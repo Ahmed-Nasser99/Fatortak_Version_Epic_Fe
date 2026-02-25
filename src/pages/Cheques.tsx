@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { format } from "date-fns";
-import { Copy, Eye, MoreHorizontal, FileText, CheckCircle, XCircle, Search, RefreshCw, BadgeDollarSign, Wallet } from "lucide-react";
+import { Copy, Eye, MoreHorizontal, FileText, CheckCircle, XCircle, Search, RefreshCw, BadgeDollarSign, Wallet, Paperclip } from "lucide-react";
 import { toast } from "react-toastify";
 import { chequeService, ChequeDto, ChequeFilterDto } from "../services/chequeService";
 import { Button } from "../components/ui/button";
@@ -147,6 +147,7 @@ export default function Cheques() {
                     <th className="px-6 py-4">Cheque Details</th>
                     <th className="px-6 py-4">Invoice</th>
                     <th className="px-6 py-4">Due Date</th>
+                    <th className="px-6 py-4 text-center">Attachment</th>
                     <th className="px-6 py-4 text-right">Amount</th>
                     <th className="px-6 py-4 text-center">Status</th>
                     <th className="px-6 py-4 text-right">Actions</th>
@@ -178,6 +179,19 @@ export default function Cheques() {
                       </td>
                       <td className="px-6 py-4 text-slate-600">
                         {format(new Date(cheque.dueDate), "MMM dd, yyyy")}
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        {cheque.attachmentUrl && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${cheque.attachmentUrl}`, '_blank')}
+                            className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 data-[state=open]:bg-indigo-50 rounded-lg p-2 h-auto"
+                            title="View Attachment"
+                          >
+                            <Paperclip className="w-4 h-4" />
+                          </Button>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <span className="font-medium text-slate-900">

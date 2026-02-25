@@ -837,7 +837,7 @@ const JournalEntryDetailModal: React.FC<JournalEntryDetailModalProps> = ({
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${entry.attachmentUrl}`, '_blank')}
+                    onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${entry.attachmentUrl}`, '_blank')}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     {isRTL ? "عرض" : "View"}

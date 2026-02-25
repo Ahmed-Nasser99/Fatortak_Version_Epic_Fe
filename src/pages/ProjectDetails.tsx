@@ -19,6 +19,7 @@ import {
   Layers,
   FileSpreadsheet,
   Download,
+  Paperclip,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useProject } from "../hooks/useProjects";
@@ -831,6 +832,9 @@ const ProjectDetails: React.FC = () => {
                         <th className="py-5 px-4 uppercase tracking-wider text-[10px]">
                           Reference / Note
                         </th>
+                        <th className="py-5 px-4 text-center uppercase tracking-wider text-[10px]">
+                          Attachment
+                        </th>
                         <th className="py-5 px-6 text-right uppercase tracking-wider text-[10px]">
                           Amount Received
                         </th>
@@ -879,6 +883,18 @@ const ProjectDetails: React.FC = () => {
                               <p className="text-xs font-medium text-slate-600 leading-relaxed italic">
                                 {p.description || "Customer payment collection"}
                               </p>
+                            </td>
+                            <td className="py-5 px-4 text-center">
+                              {p.attachmentUrl && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${p.attachmentUrl}`, '_blank')}
+                                  className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 data-[state=open]:bg-indigo-50 rounded-lg p-2 h-auto"
+                                >
+                                  <Paperclip className="w-4 h-4" />
+                                </Button>
+                              )}
                             </td>
                             <td className="py-5 px-6 text-right">
                               <div className="flex flex-col items-end">
@@ -943,6 +959,7 @@ const ProjectDetails: React.FC = () => {
                             <th className="py-5 px-6">Date</th>
                             <th className="py-5 px-4">Cost Center</th>
                             <th className="py-5 px-4">Activity / Note</th>
+                            <th className="py-5 px-4 text-center">Attachment</th>
                             <th className="py-5 px-6 text-right">
                               Debit Amount
                             </th>
@@ -977,6 +994,18 @@ const ProjectDetails: React.FC = () => {
                                 </td>
                                 <td className="py-5 px-4 text-slate-500 italic max-w-xs truncate">
                                   {exp.notes || "Project related expense"}
+                                </td>
+                                <td className="py-5 px-4 text-center">
+                                  {exp.attachmentUrl && (
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${exp.attachmentUrl}`, '_blank')}
+                                      className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 data-[state=open]:bg-indigo-50 rounded-lg p-2 h-auto"
+                                    >
+                                      <Paperclip className="w-4 h-4" />
+                                    </Button>
+                                  )}
                                 </td>
                                 <td className="py-5 px-6 text-right font-black font-mono tracking-tighter text-rose-600">
                                   {formatNumber(exp.total)} EGP
@@ -1114,6 +1143,9 @@ const ProjectDetails: React.FC = () => {
                           <th className="py-5 px-4 uppercase tracking-wider text-[10px]">
                             Reference / Note
                           </th>
+                          <th className="py-5 px-4 text-center uppercase tracking-wider text-[10px]">
+                            Attachment
+                          </th>
                           <th className="py-5 px-6 text-right uppercase tracking-wider text-[10px]">
                             Amount Paid
                           </th>
@@ -1123,7 +1155,7 @@ const ProjectDetails: React.FC = () => {
                         {supplierPayments.length === 0 ? (
                           <tr>
                             <td
-                              colSpan={4}
+                              colSpan={5}
                               className="py-20 text-center text-slate-400 italic"
                             >
                               No outbound payments recorded yet.
@@ -1152,6 +1184,18 @@ const ProjectDetails: React.FC = () => {
                                 <p className="text-xs font-medium text-slate-600 italic">
                                   {p.description || "Project related payment"}
                                 </p>
+                              </td>
+                              <td className="py-5 px-4 text-center">
+                                {p.attachmentUrl && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${p.attachmentUrl}`, '_blank')}
+                                    className="text-indigo-600 hover:text-indigo-700 hover:bg-indigo-50 data-[state=open]:bg-indigo-50 rounded-lg p-2 h-auto"
+                                  >
+                                    <Paperclip className="w-4 h-4" />
+                                  </Button>
+                                )}
                               </td>
                               <td className="py-5 px-6 text-right">
                                 <span className="font-black font-mono text-lg text-rose-600 tracking-tighter">

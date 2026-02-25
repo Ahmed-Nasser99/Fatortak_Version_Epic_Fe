@@ -14,8 +14,8 @@ import {
   DollarSign,
   Package,
   Phone,
-  MapPin,
   Mail,
+  Paperclip,
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { invoiceTemplates } from "@/components/invoice-templates";
@@ -354,6 +354,15 @@ const PublicInvoicePage = () => {
               <Share2 className="w-5 h-5" />
               <span>{t("share")}</span>
             </button>
+            {invoice?.attachmentUrl && (
+              <button
+                onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${invoice.attachmentUrl}`, '_blank')}
+                className="flex items-center space-x-2 px-6 py-3 bg-white text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
+              >
+                <Paperclip className="w-5 h-5" />
+                <span>{isRTL ? "عرض المرفق" : "View Attachment"}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

@@ -282,7 +282,7 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
                           variant="outline"
                           size="sm"
                           className="flex items-center space-x-2 text-blue-600 border-blue-100 hover:bg-blue-50 dark:border-blue-900 dark:hover:bg-blue-900/20"
-                          onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${installment.attachmentUrl}`, '_blank')}
+                          onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${installment.attachmentUrl}`, '_blank')}
                         >
                           <Paperclip className="w-4 h-4" />
                           <span>{isRTL ? "عرض الإيصال" : "View Receipt"}</span>
@@ -317,6 +317,15 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
               <Download className="w-5 h-5" />
               <span>{t("download")}</span>
             </button>
+            {invoice.attachmentUrl && (
+              <button
+                onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${invoice.attachmentUrl}`, '_blank')}
+                className="flex items-center space-x-2 px-6 py-3 bg-white text-indigo-600 border border-indigo-200 rounded-xl hover:bg-indigo-50 transition-all duration-200 shadow-sm hover:shadow-md transform hover:scale-105"
+              >
+                <Paperclip className="w-5 h-5" />
+                <span>{isRTL ? "عرض المرفق" : "View Attachment"}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

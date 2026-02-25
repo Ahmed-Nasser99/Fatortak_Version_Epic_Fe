@@ -14,6 +14,7 @@ export interface ChequeDto {
   paymentAccountId?: string;
   paymentAccountName?: string;
   createdAt: string;
+  attachmentUrl?: string;
 }
 
 export interface ChequeFilterDto {

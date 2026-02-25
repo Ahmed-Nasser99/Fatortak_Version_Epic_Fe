@@ -182,7 +182,7 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
       path: "/projects",
     },
     { name: t("suppliers") || "Suppliers", icon: Truck, path: "/suppliers" },
-    { name: t("items") || "Items", icon: Package, path: "/items" },
+    // { name: t("items") || "Items", icon: Package, path: "/items" },
     // {
     //   name: t("hr") || "HR Management",
     //   icon: UserCog,

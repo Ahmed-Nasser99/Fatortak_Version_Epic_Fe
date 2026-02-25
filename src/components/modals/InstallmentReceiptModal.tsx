@@ -356,7 +356,7 @@ const InstallmentReceiptModal: React.FC<InstallmentReceiptModalProps> = ({
                     variant="outline"
                     size="sm"
                     className="bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700 border-blue-200 dark:border-blue-800"
-                    onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${installment.attachmentUrl}`, '_blank')}
+                    onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${installment.attachmentUrl}`, '_blank')}
                   >
                     <Eye className="w-4 h-4 mr-2 text-blue-600 dark:text-blue-400" />
                     <span className="text-blue-600 dark:text-blue-400">{isRTL ? "عرض" : "View"}</span>

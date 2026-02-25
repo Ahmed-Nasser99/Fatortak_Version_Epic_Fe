@@ -236,7 +236,7 @@ const BoldCorporateTemplate: React.FC<TemplateProps> = ({
                 </div>
               </div>
               <button
-                onClick={() => window.open(`${import.meta.env.VITE_API_BASE_URL || ''}/${invoice.attachmentUrl}`, '_blank')}
+                onClick={() => window.open(`${import.meta.env.VITE_API_URL || 'https://localhost:44338'}/${invoice.attachmentUrl}`, '_blank')}
                 className={`px-8 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 font-black uppercase tracking-widest rounded-xl hover:scale-105 transition-all shadow-xl`}
               >
                 {isRTL ? "فتح" : "Open"}
