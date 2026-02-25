@@ -241,6 +241,15 @@ export const invoiceService = {
     if (data.paymentAccountId) {
       formData.append("paymentAccountId", data.paymentAccountId);
     }
+    if (data.chequeNumber) {
+      formData.append("chequeNumber", data.chequeNumber);
+    }
+    if (data.chequeBankName) {
+      formData.append("chequeBankName", data.chequeBankName);
+    }
+    if (data.chequeDueDate) {
+      formData.append("chequeDueDate", data.chequeDueDate);
+    }
     return apiClient.post<boolean>(`/api/invoices/${id}/payments`, formData);
   },
 };

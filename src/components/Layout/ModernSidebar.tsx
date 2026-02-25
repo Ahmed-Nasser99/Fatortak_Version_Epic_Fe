@@ -90,7 +90,8 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
     if (
       pathname.includes("/chart-of-accounts") ||
       pathname.includes("/journal-entries") ||
-      pathname.includes("/financial-reports")
+      pathname.includes("/financial-reports") ||
+      pathname.includes("/cheques")
     ) {
       setOpenSubmenus((prev) => ({ ...prev, "/accounting": true }));
     }
@@ -161,6 +162,11 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
           name: isRTL ? "قيود اليومية" : "Journal Entries",
           path: "/journal-entries",
           icon: FileText,
+        },
+        {
+          name: isRTL ? "الشيكات" : "Cheques",
+          path: "/cheques",
+          icon: Wallet,
         },
       ],
     },

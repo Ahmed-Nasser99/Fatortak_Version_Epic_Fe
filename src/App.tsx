@@ -62,6 +62,7 @@ import InvoiceTemplateDemo from "./pages/InvoiceTemplate/InvoiceTemplateDemo";
 // 🆕 NEW IMPORTS - Stock Reports
 
 import ChartOfAccounts from "./pages/ChartOfAccounts";
+import Cheques from "./pages/Cheques";
 import JournalEntries from "./pages/JournalEntries";
 
 import ExpenseCategories from "./pages/ExpenseCategories";
@@ -141,6 +142,7 @@ function AppContent() {
           <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
           <Route path="expense-categories" element={<ExpenseCategories />} />
           <Route path="journal-entries" element={<JournalEntries />} />
+          <Route path="cheques" element={<Cheques />} />
           <Route path="custody" element={<Custody />} />
 
           {/* Revamped Reports */}

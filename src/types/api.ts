@@ -118,8 +118,11 @@ export interface UpdateInvoiceStatusDto {
 export interface RecordPaymentDto {
   amount: number;
   paymentMethod?: string;
-  attachment?: File;
   paymentAccountId?: string;
+  attachment?: string | File | null;
+  chequeNumber?: string;
+  chequeBankName?: string;
+  chequeDueDate?: string;
 }
 
 // User related DTOs

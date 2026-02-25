@@ -39,7 +39,7 @@ const Login: React.FC = () => {
 
   const handleSubmit = async (
     values: typeof initialValues,
-    { setSubmitting, setErrors }: any
+    { setSubmitting, setErrors }: any,
   ) => {
     setIsLoading(true);
     setSubmitting(true);
@@ -357,7 +357,7 @@ const Login: React.FC = () => {
               </Formik>
 
               {/* Register Link */}
-              <div
+              {/* <div
                 className={`text-center pt-4 border-t border-slate-200 dark:border-slate-700 ${
                   isRTL ? "text-right" : ""
                 }`}
@@ -371,7 +371,7 @@ const Login: React.FC = () => {
                     {t("createAccount")}
                   </Link>
                 </p>
-              </div>
+              </div> */}
               <div className={`text-center ${isRTL ? "text-right" : ""}`}>
                 <Link
                   to="/forgot-password"

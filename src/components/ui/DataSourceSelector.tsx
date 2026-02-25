@@ -17,6 +17,7 @@ interface DataSourceSelectorProps {
   onChange: (value: string) => void;
   className?: string;
   placeholder?: string;
+  paymentMethod?: string;
 }
 
 const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
@@ -24,6 +25,7 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   onChange,
   className,
   placeholder,
+  paymentMethod,
 }) => {
   const { t, isRTL } = useLanguage();
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
@@ -47,6 +49,9 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   const bankAccounts = accounts.filter(
     (a) => a.accountCode.startsWith("1100") && a.isPostable,
   );
+  const chequeAccounts = accounts.filter(
+    (a) => a.accountCode === "1600" && a.isPostable,
+  );
   const employeeCustodyParent = accounts.find((a) => a.accountCode === "1500");
   const employeeAccounts = accounts.filter(
     (a) => a.parentAccountId === employeeCustodyParent?.id,
@@ -62,6 +67,8 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
       return `${isRTL ? "نقدي" : "Cash"} - ${account.name}`;
     if (bankAccounts.includes(account))
       return `${isRTL ? "بنك" : "Bank"} - ${account.name}`;
+    if (chequeAccounts.includes(account))
+      return `${isRTL ? "شيكات تحت التحصيل" : "Cheques"} - ${account.name}`;
     return account.name;
   };
 
@@ -108,7 +115,7 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
           )}
         </SelectTrigger>
         <SelectContent>
-          {cashAccounts.map((a) => (
+          {(!paymentMethod || paymentMethod === "Cash") && cashAccounts.map((a) => (
             <SelectItem key={a.id} value={a.id}>
               <div className="flex justify-between items-center w-full min-w-[200px]">
                 <span>
@@ -120,7 +127,7 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               </div>
             </SelectItem>
           ))}
-          {bankAccounts.map((a) => (
+          {(!paymentMethod || paymentMethod === "Bank") && bankAccounts.map((a) => (
             <SelectItem key={a.id} value={a.id}>
               <div className="flex justify-between items-center w-full min-w-[200px]">
                 <span>
@@ -132,19 +139,33 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               </div>
             </SelectItem>
           ))}
-          <SelectItem
-            key="cheque"
-            value="__cheque__"
-            disabled={bankAccounts.length === 0}
-          >
-            <div className="flex justify-between items-center w-full min-w-[200px]">
-              <span>{isRTL ? "شيك" : "Cheque"}</span>
-              <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
-                {formatNumber(bankAccounts[0]?.balance || 0)} EGP
-              </span>
-            </div>
-          </SelectItem>
-          {employeeCustodyParent && (
+          {(!paymentMethod || paymentMethod === "Cheque") && chequeAccounts.map((a) => (
+            <SelectItem key={a.id} value={a.id}>
+              <div className="flex justify-between items-center w-full min-w-[200px]">
+                <span>
+                  {isRTL ? "شيكات تحت التحصيل" : "Cheques"} - {a.name}
+                </span>
+                <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
+                  {formatNumber(a.balance)} EGP
+                </span>
+              </div>
+            </SelectItem>
+          ))}
+          {!paymentMethod && (
+            <SelectItem
+              key="cheque"
+              value="__cheque__"
+              disabled={bankAccounts.length === 0}
+            >
+              <div className="flex justify-between items-center w-full min-w-[200px]">
+                <span>{isRTL ? "شيك" : "Cheque"}</span>
+                <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
+                  {formatNumber(bankAccounts[0]?.balance || 0)} EGP
+                </span>
+              </div>
+            </SelectItem>
+          )}
+          {(!paymentMethod || paymentMethod === "EmployeeAdvance") && employeeCustodyParent && (
             <SelectItem value="employee_adv">
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />

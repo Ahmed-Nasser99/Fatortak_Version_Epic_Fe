@@ -30,6 +30,9 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
   const [amount, setAmount] = useState<number>(0);
   const [paymentMethod, setPaymentMethod] = useState<string>("Cash");
   const [paymentAccountId, setPaymentAccountId] = useState<string>("");
+  const [chequeNumber, setChequeNumber] = useState<string>("");
+  const [chequeBankName, setChequeBankName] = useState<string>("");
+  const [chequeDueDate, setChequeDueDate] = useState<string>("");
   const [attachment, setAttachment] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const { t, isRTL } = useLanguage();
@@ -71,12 +74,20 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
 
     setLoading(true);
     try {
-      const result = await invoiceService.recordPayment(invoice.id, {
+      const payload: any = {
         amount,
         paymentMethod,
         paymentAccountId: paymentAccountId || undefined,
         attachment: attachment || undefined
-      });
+      };
+
+      if (paymentMethod === "Cheque") {
+        payload.chequeNumber = chequeNumber;
+        payload.chequeBankName = chequeBankName;
+        payload.chequeDueDate = chequeDueDate ? new Date(chequeDueDate).toISOString() : undefined;
+      }
+
+      const result = await invoiceService.recordPayment(invoice.id, payload);
 
       if (result.success) {
         toast.success("Payment recorded successfully");
@@ -142,12 +153,77 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
             </div>
 
             <div className="space-y-2">
+              <Label htmlFor="paymentMethod" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                Payment Method
+              </Label>
+              <Select 
+                value={paymentMethod} 
+                onValueChange={(val) => {
+                  setPaymentMethod(val);
+                  setPaymentAccountId(""); // Clear the payment account when the method changes so the user selects a new valid one
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select payment method" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Cash">Cash</SelectItem>
+                  <SelectItem value="Bank">Bank Transfer</SelectItem>
+                  {!isPurchaseInvoice && <SelectItem value="Cheque">Cheque</SelectItem>}
+                  <SelectItem value="EmployeeAdvance">Employee Advance</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {paymentMethod === "Cheque" && (
+              <div className="space-y-4 p-4 bg-indigo-50/50 rounded-xl border border-indigo-100">
+                <div className="space-y-2">
+                  <Label htmlFor="chequeNumber" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Cheque Number
+                  </Label>
+                  <Input
+                    id="chequeNumber"
+                    value={chequeNumber}
+                    onChange={(e) => setChequeNumber(e.target.value)}
+                    placeholder="Enter cheque number"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="chequeBankName" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Bank Name
+                  </Label>
+                  <Input
+                    id="chequeBankName"
+                    value={chequeBankName}
+                    onChange={(e) => setChequeBankName(e.target.value)}
+                    placeholder="Enter bank name"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="chequeDueDate" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                    Due Date
+                  </Label>
+                  <Input
+                    id="chequeDueDate"
+                    type="date"
+                    value={chequeDueDate}
+                    onChange={(e) => setChequeDueDate(e.target.value)}
+                    required
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-2">
               <Label htmlFor="account" className="text-xs font-bold uppercase tracking-wider text-slate-500">
                 Payment Account
               </Label>
               <DataSourceSelector
                 value={paymentAccountId}
                 onChange={setPaymentAccountId}
+                paymentMethod={paymentMethod}
               />
               {isPurchaseInvoice && paymentAccountId && (() => {
                 const acc = accounts.find(a => a.id === paymentAccountId);
