@@ -59,6 +59,7 @@ import { formatDate, formatNumber } from "@/Helpers/localization";
 import IntegratedInstallmentsManager from "@/components/modals/InstallmentsManager";
 import { toast } from "react-toastify";
 import { useCurrentCompany } from "@/hooks/useCompanies";
+import RecordPaymentModal from "@/components/modals/RecordPaymentModal";
 
 const BuyInvoices: React.FC = () => {
   const roleAccess = useRoleAccess();
@@ -67,15 +68,17 @@ const BuyInvoices: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(
-    null
+    null,
   );
   const [statusFilter, setStatusFilter] = useState("");
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [viewInvoiceId, setViewInvoiceId] = useState<string | null>(null);
+  const [salesInvoice, setSalesInvoice] = useState(null);
   const [editInvoiceId, setEditInvoiceId] = useState<string | null>(null);
   const [statusDropdownOpen, setStatusDropdownOpen] = useState<string | null>(
-    null
+    null,
   );
+  const [showRecordPaymentModal, setShowRecordPaymentModal] = useState(false);
   const [deleteInvoiceId, setDeleteInvoiceId] = useState<string | null>(null);
   const [filters, setFilters] = useState<InvoiceFilterDto>({
     invoiceType: "Buy",
@@ -143,7 +146,7 @@ const BuyInvoices: React.FC = () => {
     }
 
     return allStatuses.filter(
-      (s) => s.toLowerCase() !== currentStatus?.toLowerCase()
+      (s) => s.toLowerCase() !== currentStatus?.toLowerCase(),
     );
   };
 
@@ -161,7 +164,7 @@ const BuyInvoices: React.FC = () => {
 
   const handleSendInvoice = async (
     invoiceId: string,
-    customerEmail: string
+    customerEmail: string,
   ) => {
     try {
       const result = await sendInvoiceMutation.mutateAsync({
@@ -244,7 +247,7 @@ const BuyInvoices: React.FC = () => {
     // For mobile devices, try to open WhatsApp app directly
     const isMobile =
       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-        navigator.userAgent
+        navigator.userAgent,
       );
 
     if (isMobile) {
@@ -767,14 +770,14 @@ const BuyInvoices: React.FC = () => {
                                   variant="ghost"
                                   disabled={roleAccess.canEdit() === false}
                                   className={`h-auto p-2 ${getStatusColor(
-                                    invoice.status
+                                    invoice.status,
                                   )} border hover:opacity-80`}
                                 >
                                   <div className="flex items-center space-x-2">
                                     {getStatusIcon(invoice.status)}
                                     <span className="text-xs font-medium">
                                       {t(
-                                        `${invoice.status.toLowerCase()}Status`
+                                        `${invoice.status.toLowerCase()}Status`,
                                       )}
                                     </span>
                                     <MoreVertical className="w-3 h-3" />
@@ -798,7 +801,7 @@ const BuyInvoices: React.FC = () => {
                                         {t(`${status.toLowerCase()}Status`)}
                                       </span>
                                     </DropdownMenuItem>
-                                  )
+                                  ),
                                 )}
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -856,6 +859,19 @@ const BuyInvoices: React.FC = () => {
                                 >
                                   <Calendar className="w-4 h-4 mx-2 text-purple-600" />{" "}
                                   {t("viewInstallments")}
+                                </DropdownMenuItem>
+                              )}
+                              {(invoice?.status == "partPaid" ||
+                                invoice?.status == "PartialPaid") && (
+                                <DropdownMenuItem
+                                  dir={isRTL ? "rtl" : "ltr"}
+                                  onClick={() => {
+                                    setSalesInvoice(invoice);
+                                    setShowRecordPaymentModal(true);
+                                  }}
+                                >
+                                  <DollarSign className="w-3 h-3 mr-1" />
+                                  {t("recordPayment")}
                                 </DropdownMenuItem>
                               )}
 
@@ -970,6 +986,21 @@ const BuyInvoices: React.FC = () => {
                       <Download className="w-3 h-3 mr-1" />
                       {t("download")}
                     </Button>
+                    {(invoice?.status == "partPaid" ||
+                      invoice?.status == "PartialPaid") && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSalesInvoice(invoice);
+                          setShowRecordPaymentModal(true);
+                        }}
+                        className="flex-1 min-w-0"
+                      >
+                        <DollarSign className="w-3 h-3 mr-1" />
+                        {t("recordPayment")}
+                      </Button>
+                    )}
                     {invoice?.hasInstallments && (
                       <Button
                         variant="outline"
@@ -1098,6 +1129,19 @@ const BuyInvoices: React.FC = () => {
           invoices.find((inv) => inv.id === deleteInvoiceId)?.invoiceNumber
         }
         isLoading={deleteInvoiceMutation.isPending}
+      />
+      <RecordPaymentModal
+        isOpen={showRecordPaymentModal}
+        invoice={salesInvoice}
+        onClose={() => {
+          setShowRecordPaymentModal(false);
+          setSalesInvoice(null);
+        }}
+        onSuccess={() => {
+          setShowRecordPaymentModal(false);
+          setSalesInvoice(null);
+          window.location.reload(); // Reload to reflect payment changes, can be optimized to just refetch data
+        }}
       />
     </div>
   );

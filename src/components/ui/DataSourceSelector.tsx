@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAccounts, useAccountHierarchy } from "../../hooks/useAccounting";
 import {
   Select,
@@ -52,15 +52,39 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
     (a) => a.parentAccountId === employeeCustodyParent?.id,
   );
 
+  const getDisplayLabel = (val: string) => {
+    if (isCheque) return isRTL ? "شيك" : "Cheque"; // ← check this first
+    if (isEmployeeAccountSelected)
+      return isRTL ? "عقـد عهدة موظف" : "Employee Advance";
+    const account = accounts.find((a) => a.id === val);
+    if (!account) return null;
+    if (cashAccounts.includes(account))
+      return `${isRTL ? "نقدي" : "Cash"} - ${account.name}`;
+    if (bankAccounts.includes(account))
+      return `${isRTL ? "بنك" : "Bank"} - ${account.name}`;
+    return account.name;
+  };
+
+  const [isCheque, setIsCheque] = useState(false);
+
   const handleParentSelect = (val: string) => {
     if (val === "employee_adv") {
+      setIsCheque(false);
       setSelectedParentId("employee_adv");
+    } else if (val === "__cheque__") {
+      setIsCheque(true);
+      setSelectedParentId(null);
+      onChange(bankAccounts[0]?.id);
     } else {
+      setIsCheque(false);
       setSelectedParentId(null);
       onChange(val);
     }
   };
-
+  // Reset isCheque if value is cleared externally
+  useEffect(() => {
+    if (!value) setIsCheque(false);
+  }, [value]);
   const selectedAccount = accounts.find((a) => a.id === value);
   const isEmployeeAccountSelected =
     selectedAccount?.parentAccountId === employeeCustodyParent?.id;
@@ -74,12 +98,14 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
         <SelectTrigger
           className={`${className} ${isRTL ? "text-right" : "text-left"}`}
         >
-          <SelectValue
-            placeholder={
-              placeholder ||
-              (isRTL ? "اختر مصدر الدفع" : "Select Payment Source")
-            }
-          />
+          {value ? (
+            <span>{getDisplayLabel(value)}</span>
+          ) : (
+            <span className="text-muted-foreground">
+              {placeholder ||
+                (isRTL ? "اختر مصدر الدفع" : "Select Payment Source")}
+            </span>
+          )}
         </SelectTrigger>
         <SelectContent>
           {cashAccounts.map((a) => (
@@ -108,7 +134,7 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
           ))}
           <SelectItem
             key="cheque"
-            value={bankAccounts[0]?.id}
+            value="__cheque__"
             disabled={bankAccounts.length === 0}
           >
             <div className="flex justify-between items-center w-full min-w-[200px]">

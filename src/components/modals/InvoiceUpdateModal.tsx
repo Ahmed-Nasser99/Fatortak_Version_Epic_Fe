@@ -10,7 +10,11 @@ import {
   Calendar,
 } from "lucide-react";
 import { format } from "date-fns";
-import { formatNumber, formatDate, parseLocalDate } from "@/Helpers/localization";
+import {
+  formatNumber,
+  formatDate,
+  parseLocalDate,
+} from "@/Helpers/localization";
 import { DatePicker } from "../ui/date-picker";
 import { useLanguage } from "../../contexts/LanguageContext";
 import { useCustomers } from "../../hooks/useCustomers";
@@ -86,14 +90,16 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
   const [showInstallmentSection, setShowInstallmentSection] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
 
-  const { data: customersResponse } = useCustomers({
-    pageNumber: 1,
-    pageSize: 100,
-  },
+  const { data: customersResponse } = useCustomers(
+    {
+      pageNumber: 1,
+      pageSize: 100,
+    },
     {
       isSupplier: !isSell,
       isActive: true,
-    });
+    },
+  );
   const { data: itemsResponse } = useItems({ pageNumber: 1, pageSize: 100 });
 
   const customers = customersResponse?.success
@@ -103,9 +109,10 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
 
   const statusOptions = [
     { value: "Draft", label: t("draftStatus") || "Draft" },
-    { value: "Pending", label: t("pendingStatus") || "Pending" },
+    // { value: "Pending", label: t("pendingStatus") || "Pending" },
     { value: "Paid", label: t("paidStatus") || "Paid" },
-    { value: "PartialPaid", label: t("partialPaidStatus") || "Partial Paid" },
+    // { value: "PartialPaid", label: t("partialPaidStatus") || "Partial Paid" },
+    { value: "partPaid", label: t("partialPaidStatus") || "Part Paid" },
   ];
 
   function formatBackendDate(dateStr: string) {
@@ -161,7 +168,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
             item.quantity || 1,
             item.unitPrice || 0,
             item.vatRate || 0,
-            (item.discount || 0) * 100
+            (item.discount || 0) * 100,
           ),
         }));
         setInvoiceItems(existingItems);
@@ -173,7 +180,10 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
     const fetchAccounts = async () => {
       setLoadingAccounts(true);
       try {
-        const result = await accountingService.getAccounts({ pageNumber: 1, pageSize: 1000 });
+        const result = await accountingService.getAccounts({
+          pageNumber: 1,
+          pageSize: 1000,
+        });
         if (result.success && result.data?.data) {
           setAccounts(result.data.data);
         }
@@ -188,7 +198,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
 
   useEffect(() => {
     setShowInstallmentSection(
-      invoiceData.status === "PartialPaid" || numberOfInstallments > 0
+      invoiceData.status === "PartialPaid" || numberOfInstallments > 0,
     );
   }, [invoiceData.status, numberOfInstallments]);
 
@@ -196,7 +206,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
     quantity: number,
     unitPrice: number,
     vatRate: number,
-    discount: number
+    discount: number,
   ) => {
     const subtotal = quantity * unitPrice;
     const discountAmount = subtotal * (discount / 100);
@@ -208,7 +218,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
   const calculateTotals = () => {
     const subtotal = invoiceItems.reduce(
       (sum, item) => sum + item.quantity * item.unitPrice,
-      0
+      0,
     );
     const totalDiscount = invoiceItems.reduce((sum, item) => {
       const itemSubtotal = item.quantity * item.unitPrice;
@@ -286,7 +296,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
         1,
         item.unitPrice || 0,
         item.vatRate || 0.14,
-        (item.discount || 0) * 100
+        (item.discount || 0) * 100,
       ),
     };
 
@@ -302,22 +312,22 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
             updatedItem.quantity,
             updatedItem.unitPrice,
             updatedItem.vatRate,
-            updatedItem.discount
+            updatedItem.discount,
           );
           return updatedItem;
         }
         return item;
-      })
+      }),
     );
   };
 
   const handleUpdateInstallment = (
     index: number,
     field: string,
-    value: any
+    value: any,
   ) => {
     setInstallments((prev) =>
-      prev.map((inst, i) => (i === index ? { ...inst, [field]: value } : inst))
+      prev.map((inst, i) => (i === index ? { ...inst, [field]: value } : inst)),
     );
   };
 
@@ -346,7 +356,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
 
     if (invoiceItems.length === 0) {
       toast.error(
-        t("pleaseAddAtLeastOneItem") || "Please add at least one item"
+        t("pleaseAddAtLeastOneItem") || "Please add at least one item",
       );
       return;
     }
@@ -355,13 +365,13 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
       const { adjustedTotal } = calculateTotals();
       const installmentsTotal = installments.reduce(
         (sum, inst) => sum + inst.amount,
-        0
+        0,
       );
 
       if (Math.abs(installmentsTotal + downPayment - adjustedTotal) > 0.01) {
         toast.error(
           t("installmentsMustEqualTotal") ||
-            "Installments plus down payment must equal the total amount"
+            "Installments plus down payment must equal the total amount",
         );
         return;
       }
@@ -419,7 +429,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
 
       if (result.success) {
         toast.success(
-          t("invoiceUpdatedSuccessfully") || "Invoice updated successfully"
+          t("invoiceUpdatedSuccessfully") || "Invoice updated successfully",
         );
         onSave();
         setShowPreviewModal(false);
@@ -468,63 +478,72 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Invoice Info */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                {t("status")}
+              </label>
+              <select
+                value={invoiceData.status}
+                onChange={(e) =>
+                  setInvoiceData((prev) => ({
+                    ...prev,
+                    status: e.target.value,
+                  }))
+                }
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              >
+                {statusOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </div>
 
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    {t("status")}
-                  </label>
-                  <select
-                    value={invoiceData.status}
-                    onChange={(e) =>
-                      setInvoiceData((prev) => ({
-                        ...prev,
-                        status: e.target.value,
-                      }))
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  >
-                    {statusOptions.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
+            {(invoiceData.status === "Paid" ||
+              invoiceData.status === "PartialPaid") && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  {isRTL ? "حساب الدفع" : "Payment Account"} *
+                </label>
+                <select
+                  value={invoiceData.paymentAccountId}
+                  onChange={(e) =>
+                    setInvoiceData((prev) => ({
+                      ...prev,
+                      paymentAccountId: e.target.value,
+                    }))
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  required
+                >
+                  <option value="">
+                    {isRTL ? "اختر الحساب" : "Select Account"}
+                  </option>
+                  {accounts
+                    .filter((acc) => {
+                      if (isSell) {
+                        return (
+                          acc.accountCode.startsWith("1000") ||
+                          acc.accountCode.startsWith("110") ||
+                          acc.accountCode.startsWith("120")
+                        );
+                      } else {
+                        return (
+                          acc.accountCode.startsWith("1000") ||
+                          acc.accountCode.startsWith("110") ||
+                          acc.accountCode.startsWith("1500")
+                        );
+                      }
+                    })
+                    .map((acc) => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.accountCode} - {acc.name}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                {(invoiceData.status === "Paid" || invoiceData.status === "PartialPaid") && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {isRTL ? "حساب الدفع" : "Payment Account"} *
-                    </label>
-                    <select
-                      value={invoiceData.paymentAccountId}
-                      onChange={(e) =>
-                        setInvoiceData((prev) => ({
-                          ...prev,
-                          paymentAccountId: e.target.value,
-                        }))
-                      }
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      required
-                    >
-                      <option value="">{isRTL ? "اختر الحساب" : "Select Account"}</option>
-                      {accounts
-                        .filter(acc => {
-                          if (isSell) {
-                            return acc.accountCode.startsWith("1000") || acc.accountCode.startsWith("110") || acc.accountCode.startsWith("120");
-                          } else {
-                            return acc.accountCode.startsWith("1000") || acc.accountCode.startsWith("110") || acc.accountCode.startsWith("1500");
-                          }
-                        })
-                        .map((acc) => (
-                          <option key={acc.id} value={acc.id}>
-                            {acc.accountCode} - {acc.name}
-                          </option>
-                        ))}
-                    </select>
-                  </div>
-                )}
+                </select>
+              </div>
+            )}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -557,11 +576,13 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
               />
             </div>
             <div className="md:col-span-4">
-               <BranchSelector
-                  value={invoiceData.branchId}
-                  onChange={(value) => setInvoiceData(prev => ({ ...prev, branchId: value }))}
-                  label={isRTL ? "الفرع" : "Branch"}
-                />
+              <BranchSelector
+                value={invoiceData.branchId}
+                onChange={(value) =>
+                  setInvoiceData((prev) => ({ ...prev, branchId: value }))
+                }
+                label={isRTL ? "الفرع" : "Branch"}
+              />
             </div>
           </div>
 
@@ -613,8 +634,8 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
               <SearchableDropdown
                 options={items?.map((item) => {
                   const price = isSell
-                    ? item.unitPrice ?? 0
-                    : item.purchaseUnitPrice ?? 0;
+                    ? (item.unitPrice ?? 0)
+                    : (item.purchaseUnitPrice ?? 0);
                   const qty = item.quantity ?? 0;
                   const label = isRTL
                     ? `${item.name} • ${
@@ -688,7 +709,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                             handleUpdateItem(
                               item.id,
                               "quantity",
-                              parseInt(e.target.value) || 1
+                              parseInt(e.target.value) || 1,
                             )
                           }
                           className="w-20 px-3 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
@@ -704,7 +725,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                             handleUpdateItem(
                               item.id,
                               "unitPrice",
-                              parseFloat(e.target.value) || 0
+                              parseFloat(e.target.value) || 0,
                             )
                           }
                           className="w-24 px-3 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
@@ -721,7 +742,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                             handleUpdateItem(
                               item.id,
                               "discount",
-                              parseFloat(e.target.value) || 0
+                              parseFloat(e.target.value) || 0,
                             )
                           }
                           className="w-20 px-3 py-2 text-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
@@ -734,7 +755,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                             handleUpdateItem(
                               item.id,
                               "vatRate",
-                              parseFloat(e.target.value)
+                              parseFloat(e.target.value),
                             )
                           }
                           className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700"
@@ -851,7 +872,10 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                     value={downPayment}
                     onChange={(e) =>
                       setDownPayment(
-                        Math.min(parseFloat(e.target.value) || 0, adjustedTotal)
+                        Math.min(
+                          parseFloat(e.target.value) || 0,
+                          adjustedTotal,
+                        ),
                       )
                     }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
@@ -869,7 +893,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                     value={numberOfInstallments}
                     onChange={(e) =>
                       setNumberOfInstallments(
-                        Math.min(parseInt(e.target.value) || 0, 60)
+                        Math.min(parseInt(e.target.value) || 0, 60),
                       )
                     }
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg"
@@ -923,17 +947,17 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                         #{index + 1}
                       </span>
                       <div className="flex-1">
-                          <DatePicker
-                              date={parseLocalDate(installment.dueDate)}
-                              setDate={(date) =>
-                                handleUpdateInstallment(
-                                  index,
-                                  "dueDate",
-                                  date ? format(date, "yyyy-MM-dd") : ""
-                                )
-                              }
-                              className="w-full h-8 text-sm"
-                          />
+                        <DatePicker
+                          date={parseLocalDate(installment.dueDate)}
+                          setDate={(date) =>
+                            handleUpdateInstallment(
+                              index,
+                              "dueDate",
+                              date ? format(date, "yyyy-MM-dd") : "",
+                            )
+                          }
+                          className="w-full h-8 text-sm"
+                        />
                       </div>
                       <input
                         type="number"
@@ -944,7 +968,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                           handleUpdateInstallment(
                             index,
                             "amount",
-                            parseFloat(e.target.value) || 0
+                            parseFloat(e.target.value) || 0,
                           )
                         }
                         className="w-24 px-2 py-1 border rounded text-sm text-right"

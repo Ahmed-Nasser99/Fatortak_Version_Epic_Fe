@@ -29,7 +29,11 @@ import PartialPaymentPreviewModal from "./PartialPaymentPreviewModal";
 import { toast } from "react-toastify";
 import BranchSelector from "../ui/BranchSelector";
 import { useMainBranch } from "../../hooks/useBranches";
-import { formatNumber, formatDate, parseLocalDate } from "@/Helpers/localization";
+import {
+  formatNumber,
+  formatDate,
+  parseLocalDate,
+} from "@/Helpers/localization";
 import { DatePicker } from "../ui/date-picker";
 import ProjectSelector from "../ui/ProjectSelector";
 
@@ -81,7 +85,6 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     paymentAccountId: "",
   });
 
-
   const [attachment, setAttachment] = useState<File | null>(null);
 
   const [invoiceItems, setInvoiceItems] = useState<InvoiceItem[]>([]);
@@ -100,7 +103,10 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
 
   useEffect(() => {
     if (mainBranchResult?.data && !invoiceData.branchId) {
-      setInvoiceData(prev => ({ ...prev, branchId: mainBranchResult.data.id }));
+      setInvoiceData((prev) => ({
+        ...prev,
+        branchId: mainBranchResult.data.id,
+      }));
     }
   }, [mainBranchResult, isOpen]);
 
@@ -113,7 +119,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     {
       isSupplier: !isSell,
       isActive: true,
-    }
+    },
   );
   const { data: itemsResponse, isLoading: loadingItems } = useItems(
     {
@@ -122,7 +128,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     },
     {
       isActive: true,
-    }
+    },
   );
 
   const customers = customersResponse?.success
@@ -132,9 +138,10 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
 
   const statusOptions = [
     { value: "Draft", label: t("draftStatus") || "Draft" },
-    { value: "Pending", label: t("pendingStatus") || "Pending" },
+    // { value: "Pending", label: t("pendingStatus") || "Pending" },
     { value: "Paid", label: t("paidStatus") || "Paid" },
-    { value: "PartialPaid", label: t("partialPaidStatus") || "Partial Paid" },
+    // { value: "PartialPaid", label: t("partialPaidStatus") || "Partial Paid" },
+    { value: "partPaid", label: t("partPaidStatus") || "Part Paid" },
   ];
 
   useEffect(() => {
@@ -147,9 +154,12 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         ...prev,
         dueDate: format(dueDate, "yyyy-MM-dd"),
       }));
-      
+
       if (initialData?.projectId) {
-        setInvoiceData((prev) => ({ ...prev, projectId: initialData.projectId }));
+        setInvoiceData((prev) => ({
+          ...prev,
+          projectId: initialData.projectId,
+        }));
       }
     }
   }, [isOpen, initialData]);
@@ -158,7 +168,10 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     const fetchAccounts = async () => {
       setLoadingAccounts(true);
       try {
-        const result = await accountingService.getAccounts({ pageNumber: 1, pageSize: 1000 });
+        const result = await accountingService.getAccounts({
+          pageNumber: 1,
+          pageSize: 1000,
+        });
         if (result.success && result.data?.data) {
           setAccounts(result.data.data);
         }
@@ -174,7 +187,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
   useEffect(() => {
     // Show installment section if status is PartialPaid or if numberOfInstallments > 0
     setShowInstallmentSection(
-      invoiceData.status === "PartialPaid" || numberOfInstallments > 0
+      invoiceData.status === "PartialPaid" || numberOfInstallments > 0,
     );
 
     // Auto-generate installments when numberOfInstallments changes
@@ -187,7 +200,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
     quantity: number,
     unitPrice: number,
     vatRate: number,
-    discount: number
+    discount: number,
   ) => {
     const subtotal = quantity * unitPrice;
     const discountAmount = subtotal * (discount / 100);
@@ -199,7 +212,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
   const calculateTotals = () => {
     const subtotal = invoiceItems.reduce(
       (sum, item) => sum + item.quantity * item.unitPrice,
-      0
+      0,
     );
     const totalDiscount = invoiceItems.reduce((sum, item) => {
       const itemSubtotal = item.quantity * item.unitPrice;
@@ -282,7 +295,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         1,
         isSell ? item.unitPrice || 0 : item.purchaseUnitPrice || 0,
         item.vatRate || 0.14,
-        (item.discount || 0) * 100
+        (item.discount || 0) * 100,
       ),
     };
 
@@ -298,22 +311,22 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
             updatedItem.quantity,
             updatedItem.unitPrice,
             updatedItem.vatRate,
-            updatedItem.discount
+            updatedItem.discount,
           );
           return updatedItem;
         }
         return item;
-      })
+      }),
     );
   };
 
   const handleUpdateInstallment = (
     index: number,
     field: string,
-    value: any
+    value: any,
   ) => {
     setInstallments((prev) =>
-      prev.map((inst, i) => (i === index ? { ...inst, [field]: value } : inst))
+      prev.map((inst, i) => (i === index ? { ...inst, [field]: value } : inst)),
     );
   };
 
@@ -347,7 +360,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
 
     if (invoiceItems.length === 0) {
       toast.error(
-        t("pleaseAddAtLeastOneItem") || "Please add at least one item"
+        t("pleaseAddAtLeastOneItem") || "Please add at least one item",
       );
       return;
     }
@@ -356,13 +369,13 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
       const { adjustedTotal } = calculateTotals();
       const installmentsTotal = installments.reduce(
         (sum, inst) => sum + inst.amount,
-        0
+        0,
       );
 
       if (Math.abs(installmentsTotal + downPayment - adjustedTotal) > 0.01) {
         toast.error(
           t("installmentsMustEqualTotal") ||
-            "Installments plus down payment must equal the total amount"
+            "Installments plus down payment must equal the total amount",
         );
         return;
       }
@@ -387,15 +400,15 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         invoiceData.status === "Paid" ? adjustedTotal : downPayment;
       if (paymentAmount > 0) {
         const selectedAccount = accounts.find(
-          (a) => a.id === invoiceData.paymentAccountId
+          (a) => a.id === invoiceData.paymentAccountId,
         );
         if (selectedAccount && (selectedAccount.balance || 0) < paymentAmount) {
           toast.error(
             `${isRTL ? "رصيد غير كافٍ في" : "Insufficient funds in"} ${
               selectedAccount.name
             }. ${isRTL ? "المتاح" : "Available"}: ${formatNumber(
-              selectedAccount.balance || 0
-            )} EGP`
+              selectedAccount.balance || 0,
+            )} EGP`,
           );
           return;
         }
@@ -443,7 +456,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
 
       if (result.success) {
         toast.success(
-          t("invoiceCreatedSuccessfully") || "Invoice created successfully"
+          t("invoiceCreatedSuccessfully") || "Invoice created successfully",
         );
 
         // Reset form
@@ -519,8 +532,6 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                 {t("invoiceDetails") || "Invoice Details"}
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-
                 <div className="space-y-2">
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                     {t("status") || "Status"}
@@ -543,7 +554,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                   </select>
                 </div>
 
-                {(invoiceData.status === "Paid" || invoiceData.status === "PartialPaid") && (
+                {(invoiceData.status === "Paid" ||
+                  invoiceData.status === "PartialPaid") && (
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                       {isRTL ? "حساب الدفع" : "Payment Account"} *
@@ -559,7 +571,9 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                       className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm transition-all duration-200"
                       required
                     >
-                      <option value="">{isRTL ? "اختر الحساب" : "Select Account"}</option>
+                      <option value="">
+                        {isRTL ? "اختر الحساب" : "Select Account"}
+                      </option>
                       {accounts
                         .filter((acc) => {
                           if (isSell) {
@@ -580,7 +594,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                         })
                         .map((acc) => (
                           <option key={acc.id} value={acc.id}>
-                            {acc.accountCode} - {acc.name} ({formatNumber(acc.balance || 0)})
+                            {acc.accountCode} - {acc.name} (
+                            {formatNumber(acc.balance || 0)})
                           </option>
                         ))}
                     </select>
@@ -588,7 +603,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                       invoiceData.paymentAccountId &&
                       (() => {
                         const acc = accounts.find(
-                          (a) => a.id === invoiceData.paymentAccountId
+                          (a) => a.id === invoiceData.paymentAccountId,
                         );
                         const paymentAmount =
                           invoiceData.status === "Paid"
@@ -641,7 +656,9 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                 <div className="lg:col-span-1">
                   <BranchSelector
                     value={invoiceData.branchId}
-                    onChange={(value) => setInvoiceData(prev => ({ ...prev, branchId: value }))}
+                    onChange={(value) =>
+                      setInvoiceData((prev) => ({ ...prev, branchId: value }))
+                    }
                     label={isRTL ? "الفرع" : "Branch"}
                   />
                 </div>
@@ -651,7 +668,9 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                   </label>
                   <ProjectSelector
                     value={invoiceData.projectId}
-                    onChange={(value) => setInvoiceData(prev => ({ ...prev, projectId: value }))}
+                    onChange={(value) =>
+                      setInvoiceData((prev) => ({ ...prev, projectId: value }))
+                    }
                     className="w-full"
                   />
                 </div>
@@ -743,8 +762,8 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                   <SearchableDropdown
                     options={items?.map((item) => {
                       const price = isSell
-                        ? item.unitPrice ?? 0
-                        : item.purchaseUnitPrice ?? 0;
+                        ? (item.unitPrice ?? 0)
+                        : (item.purchaseUnitPrice ?? 0);
 
                       const qty = item.quantity ?? 0;
 
@@ -830,7 +849,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                                 handleUpdateItem(
                                   item.id,
                                   "quantity",
-                                  Number.parseInt(e.target.value) || 1
+                                  Number.parseInt(e.target.value) || 1,
                                 )
                               }
                               className="w-20 px-3 py-2 text-center border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all duration-200"
@@ -846,7 +865,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                                 handleUpdateItem(
                                   item.id,
                                   "unitPrice",
-                                  Number.parseFloat(e.target.value) || 0
+                                  Number.parseFloat(e.target.value) || 0,
                                 )
                               }
                               className="w-28 px-3 py-2 text-center border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all duration-200"
@@ -864,7 +883,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                                   handleUpdateItem(
                                     item.id,
                                     "discount",
-                                    Number.parseFloat(e.target.value) || 0
+                                    Number.parseFloat(e.target.value) || 0,
                                   )
                                 }
                                 className="w-20 px-3 py-2 text-center border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all duration-200 pr-6"
@@ -881,7 +900,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                                 handleUpdateItem(
                                   item.id,
                                   "vatRate",
-                                  Number.parseFloat(e.target.value)
+                                  Number.parseFloat(e.target.value),
                                 )
                               }
                               className="w-20 px-2 py-1 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all duration-200"
@@ -893,7 +912,10 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                           </td>
                           <td className="px-6 py-4 text-center">
                             <span className="text-sm font-bold text-green-600 dark:text-green-400">
-                              {formatNumber(item.total, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              {formatNumber(item.total, {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
                             </span>
                           </td>
                           <td className="px-6 py-4 text-center">
@@ -952,7 +974,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                             handleUpdateItem(
                               item.id,
                               "quantity",
-                              Number.parseInt(e.target.value) || 1
+                              Number.parseInt(e.target.value) || 1,
                             )
                           }
                           className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all duration-200"
@@ -971,7 +993,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                             handleUpdateItem(
                               item.id,
                               "unitPrice",
-                              Number.parseFloat(e.target.value) || 0
+                              Number.parseFloat(e.target.value) || 0,
                             )
                           }
                           className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all duration-200"
@@ -992,7 +1014,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                               handleUpdateItem(
                                 item.id,
                                 "discount",
-                                Number.parseFloat(e.target.value) || 0
+                                Number.parseFloat(e.target.value) || 0,
                               )
                             }
                             className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all duration-200 pr-8"
@@ -1013,7 +1035,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                           handleUpdateItem(
                             item.id,
                             "vatRate",
-                            Number.parseFloat(e.target.value)
+                            Number.parseFloat(e.target.value),
                           )
                         }
                         className="w-full px-3 py-2 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 transition-all duration-200"
@@ -1038,18 +1060,25 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                 <div className="flex items-center gap-4">
                   <div className="flex-1">
                     <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                       {isRTL ? "إرفاق ملف" : "Attach File"} (PDF, JPEG, PNG, etc.)
+                      {isRTL ? "إرفاق ملف" : "Attach File"} (PDF, JPEG, PNG,
+                      etc.)
                     </label>
                     <div className="relative group">
                       <input
                         type="file"
-                        onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                        onChange={(e) =>
+                          setAttachment(e.target.files?.[0] || null)
+                        }
                         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                       />
                       <div className="flex items-center gap-3 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl group-hover:border-indigo-500 transition-all duration-200 bg-white dark:bg-gray-800">
                         <Paperclip className="w-5 h-5 text-gray-400 group-hover:text-indigo-500" />
                         <span className="text-gray-600 dark:text-gray-400 truncate">
-                          {attachment ? attachment.name : (isRTL ? "اختر ملفاً..." : "Choose a file...")}
+                          {attachment
+                            ? attachment.name
+                            : isRTL
+                              ? "اختر ملفاً..."
+                              : "Choose a file..."}
                         </span>
                       </div>
                     </div>
@@ -1070,96 +1099,127 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                   <div className="flex items-center gap-2 p-3 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl border border-indigo-100 dark:border-indigo-800 animate-fade-in">
                     <FileText className="w-5 h-5 text-indigo-600" />
                     <span className="text-sm font-medium text-indigo-700 dark:text-indigo-300">
-                      {attachment.name} ({(attachment.size / 1024).toFixed(1)} KB)
+                      {attachment.name} ({(attachment.size / 1024).toFixed(1)}{" "}
+                      KB)
                     </span>
                   </div>
                 )}
               </div>
             </div>
 
-              {/* Totals Section */}
-              <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg text-gray-600 dark:text-gray-400">
-                      {t("subtotal") || "Subtotal"}:
-                    </span>
-                    <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {formatNumber(subtotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg text-gray-600 dark:text-gray-400">
-                      {t("totalDiscount") || "Total Discount"}:
-                    </span>
-                    <span className="text-lg font-semibold text-red-600 dark:text-red-400">
-                      - {formatNumber(totalDiscount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-lg text-gray-600 dark:text-gray-400">
-                      {t("vatLabel") || "VAT"}:
-                    </span>
-                    <span className="text-lg font-semibold text-gray-900 dark:text-white">
-                      {formatNumber(vatTotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-4">
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">
-                      {t("baseTotal") || "Base Total"}:
-                    </span>
-                    <span className="text-lg font-bold text-gray-900 dark:text-white">
-                      {formatNumber(total, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </span>
-                  </div>
-                  {showInstallmentSection && (
-                    <>
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg text-gray-600 dark:text-gray-400">
-                          {t("benefits") || "Benefits/Interest"}:
-                        </span>
-                        <span className="text-lg font-semibold text-green-600 dark:text-green-400">
-                          + {formatNumber(benefits, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg text-gray-600 dark:text-gray-400">
-                          {t("downPayment") || "Down Payment"}:
-                        </span>
-                        <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
-                          - {formatNumber(downPayment, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-lg text-gray-600 dark:text-gray-400">
-                          {t("remainingAmount") || "Remaining Amount"}:
-                        </span>
-                        <span className="text-lg font-semibold text-orange-600 dark:text-orange-400">
-                          {formatNumber(remainingAmount, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                          {t("adjustedTotal") || "Adjusted Total"}:
-                        </span>
-                        <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
-                          {formatNumber(adjustedTotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </span>
-                      </div>
-                    </>
-                  )}
-                  {!showInstallmentSection && (
-                    <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-4">
-                      <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {t("total") || "Total"}:
+            {/* Totals Section */}
+            <div className="mt-8 bg-white dark:bg-gray-800 rounded-2xl p-6 border border-gray-200 dark:border-gray-700 shadow-lg">
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <span className="text-lg text-gray-600 dark:text-gray-400">
+                    {t("subtotal") || "Subtotal"}:
+                  </span>
+                  <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {formatNumber(subtotal, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg text-gray-600 dark:text-gray-400">
+                    {t("totalDiscount") || "Total Discount"}:
+                  </span>
+                  <span className="text-lg font-semibold text-red-600 dark:text-red-400">
+                    -{" "}
+                    {formatNumber(totalDiscount, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-lg text-gray-600 dark:text-gray-400">
+                    {t("vatLabel") || "VAT"}:
+                  </span>
+                  <span className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {formatNumber(vatTotal, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-4">
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    {t("baseTotal") || "Base Total"}:
+                  </span>
+                  <span className="text-lg font-bold text-gray-900 dark:text-white">
+                    {formatNumber(total, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
+                </div>
+                {showInstallmentSection && (
+                  <>
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg text-gray-600 dark:text-gray-400">
+                        {t("benefits") || "Benefits/Interest"}:
                       </span>
-                      <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                        {formatNumber(total, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      <span className="text-lg font-semibold text-green-600 dark:text-green-400">
+                        +{" "}
+                        {formatNumber(benefits, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
                       </span>
                     </div>
-                  )}
-                </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg text-gray-600 dark:text-gray-400">
+                        {t("downPayment") || "Down Payment"}:
+                      </span>
+                      <span className="text-lg font-semibold text-blue-600 dark:text-blue-400">
+                        -{" "}
+                        {formatNumber(downPayment, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg text-gray-600 dark:text-gray-400">
+                        {t("remainingAmount") || "Remaining Amount"}:
+                      </span>
+                      <span className="text-lg font-semibold text-orange-600 dark:text-orange-400">
+                        {formatNumber(remainingAmount, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-4">
+                      <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        {t("adjustedTotal") || "Adjusted Total"}:
+                      </span>
+                      <span className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                        {formatNumber(adjustedTotal, {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </span>
+                    </div>
+                  </>
+                )}
+                {!showInstallmentSection && (
+                  <div className="flex justify-between items-center border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {t("total") || "Total"}:
+                    </span>
+                    <span className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      {formatNumber(total, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                )}
               </div>
+            </div>
 
             {showInstallmentSection && (
               <div className="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 rounded-2xl p-6 border border-gray-200 dark:border-gray-700">
@@ -1186,7 +1246,11 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                       className="w-full px-4 py-3 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm transition-all duration-200"
                     />
                     <div className="text-xs text-gray-500 dark:text-gray-400">
-                      {t("max")}: {formatNumber(adjustedTotal, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      {t("max")}:{" "}
+                      {formatNumber(adjustedTotal, {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
                     </div>
                   </div>
 
@@ -1281,7 +1345,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                                       handleUpdateInstallment(
                                         index,
                                         "dueDate",
-                                        e.target.value
+                                        e.target.value,
                                       )
                                     }
                                     className="pl-10 pr-3 py-2 border-2 border-purple-200 dark:border-purple-700 rounded-lg text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-200"
@@ -1302,7 +1366,7 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                                       handleUpdateInstallment(
                                         index,
                                         "amount",
-                                        Number.parseFloat(e.target.value) || 0
+                                        Number.parseFloat(e.target.value) || 0,
                                       )
                                     }
                                     className="w-32 pl-10 pr-3 py-2 border-2 border-purple-200 dark:border-purple-700 rounded-lg text-sm text-right bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:border-purple-500 focus:ring-2 focus:ring-purple-200 dark:focus:ring-purple-800 transition-all duration-200 font-semibold"
@@ -1333,7 +1397,10 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
                                   : t("notSet") || "Not set"}
                               </span>
                               <span className="font-semibold">
-                                {formatNumber(installment?.amount || 0, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                {formatNumber(installment?.amount || 0, {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
                               </span>
                             </div>
                           </div>
