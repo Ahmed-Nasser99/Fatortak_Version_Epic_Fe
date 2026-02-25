@@ -72,9 +72,9 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
     setActiveItem(pathname);
 
     // Automatically open HR submenu if any HR route is active
-    if (pathname.includes("/hr/")) {
-      setOpenSubmenus((prev) => ({ ...prev, hr: true }));
-    }
+    // if (pathname.includes("/hr/")) {
+    //   setOpenSubmenus((prev) => ({ ...prev, hr: true }));
+    // }
 
     // Automatically open Reports submenu if any report route is active
     if (pathname.includes("/reports/")) {
@@ -177,45 +177,45 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
     },
     { name: t("suppliers") || "Suppliers", icon: Truck, path: "/suppliers" },
     { name: t("items") || "Items", icon: Package, path: "/items" },
-    {
-      name: t("hr") || "HR Management",
-      icon: UserCog,
-      path: "/hr",
-      subItems: [
-        {
-          name: t("employees") || "Employees",
-          path: "/employees",
-          icon: Users,
-        },
-        {
-          name: t("departments") || "Departments",
-          path: "/departments",
-          icon: Building2,
-        },
-        {
-          name: t("attendances") || "Attendances",
-          path: "/attendances",
-          icon: CalendarCheck,
-        },
-        { name: t("payroll") || "Payroll", path: "/payroll", icon: DollarSign },
-        {
-          name: t("reports") || "Reports",
-          path: "/hr/reports",
-          subItems: [
-            {
-              name: t("dailyAttendanceReport") || "Daily Attendance Report",
-              path: "/daily-attendance",
-              icon: CalendarDays,
-            },
-            {
-              name: t("monthlyAttendanceReport") || "Monthly Attendance Report",
-              path: "/monthly-attendance",
-              icon: Calendar,
-            },
-          ],
-        },
-      ],
-    },
+    // {
+    //   name: t("hr") || "HR Management",
+    //   icon: UserCog,
+    //   path: "/hr",
+    //   subItems: [
+    //     {
+    //       name: t("employees") || "Employees",
+    //       path: "/employees",
+    //       icon: Users,
+    //     },
+    //     {
+    //       name: t("departments") || "Departments",
+    //       path: "/departments",
+    //       icon: Building2,
+    //     },
+    //     {
+    //       name: t("attendances") || "Attendances",
+    //       path: "/attendances",
+    //       icon: CalendarCheck,
+    //     },
+    //     { name: t("payroll") || "Payroll", path: "/payroll", icon: DollarSign },
+    //     {
+    //       name: t("reports") || "Reports",
+    //       path: "/hr/reports",
+    //       subItems: [
+    //         {
+    //           name: t("dailyAttendanceReport") || "Daily Attendance Report",
+    //           path: "/daily-attendance",
+    //           icon: CalendarDays,
+    //         },
+    //         {
+    //           name: t("monthlyAttendanceReport") || "Monthly Attendance Report",
+    //           path: "/monthly-attendance",
+    //           icon: Calendar,
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // },
     {
       name: t("reports") || "Reports",
       icon: BarChart3,
@@ -302,12 +302,12 @@ const ModernSidebar: React.FC<ModernSidebarProps> = ({
     },
     { name: t("team") || "Team", icon: UserCheck, path: "/team" },
     { name: t("settings") || "Settings", icon: Settings, path: "/settings" },
-    {
-      name: t("invoiceScanner") || "Invoice Scanner",
-      icon: ScanText,
-      path: "/ocr-invoice",
-    },
-    { name: t("aiChat") || "AI Chat", icon: MessageSquare, path: "/ai-chat" },
+    // {
+    //   name: t("invoiceScanner") || "Invoice Scanner",
+    //   icon: ScanText,
+    //   path: "/ocr-invoice",
+    // },
+    // { name: t("aiChat") || "AI Chat", icon: MessageSquare, path: "/ai-chat" },
   ];
 
   const handleLogout = async () => {

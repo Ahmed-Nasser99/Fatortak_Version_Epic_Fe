@@ -453,42 +453,47 @@ const Projects: React.FC = () => {
                         <td className="px-6 py-4">
                           <div className="w-[140px]">
                             <Select
-                                value={project.status}
-                                onValueChange={(value) =>
-                                  handleStatusChange(
-                                    project.id,
-                                    value as ProjectStatus,
-                                  )
-                                }
-                                disabled={
-                                  updateStatusMutation.isPending || 
-                                  project.status === ProjectStatus.Completed || 
-                                  project.status === ProjectStatus.Cancelled
-                                }
+                              value={project.status}
+                              onValueChange={(value) =>
+                                handleStatusChange(
+                                  project.id,
+                                  value as ProjectStatus,
+                                )
+                              }
+                              disabled={
+                                updateStatusMutation.isPending ||
+                                project.status === ProjectStatus.Completed ||
+                                project.status === ProjectStatus.Cancelled
+                              }
+                            >
+                              <SelectTrigger
+                                className={`h-8 ${getStatusColor(project.status)} border-2 font-medium`}
                               >
-                                <SelectTrigger
-                                  className={`h-8 ${getStatusColor(project.status)} border-2 font-medium`}
-                                >
-                                  <SelectValue>
-                                    {getStatusLabel(project.status)}
-                                  </SelectValue>
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {Object.values(ProjectStatus)
-                                    .filter(status => {
-                                      // Prevent moving back to Draft if Active or Completed
-                                      if (status === ProjectStatus.Draft) {
-                                        return project.status !== ProjectStatus.Active && project.status !== ProjectStatus.Completed;
-                                      }
-                                      return true;
-                                    })
-                                    .map((status) => (
-                                      <SelectItem key={status} value={status}>
-                                        {getStatusLabel(status)}
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                              </Select>
+                                <SelectValue>
+                                  {getStatusLabel(project.status)}
+                                </SelectValue>
+                              </SelectTrigger>
+                              <SelectContent>
+                                {Object.values(ProjectStatus)
+                                  .filter((status) => {
+                                    // Prevent moving back to Draft if Active or Completed
+                                    if (status === ProjectStatus.Draft) {
+                                      return (
+                                        project.status !==
+                                          ProjectStatus.Active &&
+                                        project.status !==
+                                          ProjectStatus.Completed
+                                      );
+                                    }
+                                    return true;
+                                  })
+                                  .map((status) => (
+                                    <SelectItem key={status} value={status}>
+                                      {getStatusLabel(status)}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
                           </div>
                         </td>
                         <td className="px-6 py-4 text-sm text-muted-foreground">
@@ -508,25 +513,45 @@ const Projects: React.FC = () => {
                               <Eye className="w-4 h-4" />
                             </Button>
                             <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEditProject(project)}
-                                className="text-primary hover:text-primary/80"
-                                disabled={project.status === ProjectStatus.Completed || project.status === ProjectStatus.Cancelled}
-                                title={project.status === ProjectStatus.Completed || project.status === ProjectStatus.Cancelled ? (isRTL ? "لا يمكن تعديل مشروع منتهي" : "Cannot edit closed project") : ""}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteProject(project.id)}
-                                className="text-destructive hover:text-destructive/80"
-                                disabled={project.status === ProjectStatus.Completed || project.status === ProjectStatus.Cancelled}
-                                title={project.status === ProjectStatus.Completed || project.status === ProjectStatus.Cancelled ? (isRTL ? "لا يمكن حذف مشروع منتهي" : "Cannot delete closed project") : ""}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditProject(project)}
+                              className="text-primary hover:text-primary/80"
+                              disabled={
+                                project.status === ProjectStatus.Completed ||
+                                project.status === ProjectStatus.Cancelled
+                              }
+                              title={
+                                project.status === ProjectStatus.Completed ||
+                                project.status === ProjectStatus.Cancelled
+                                  ? isRTL
+                                    ? "لا يمكن تعديل مشروع منتهي"
+                                    : "Cannot edit closed project"
+                                  : ""
+                              }
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDeleteProject(project.id)}
+                              className="text-destructive hover:text-destructive/80"
+                              disabled={
+                                project.status === ProjectStatus.Completed ||
+                                project.status === ProjectStatus.Cancelled
+                              }
+                              title={
+                                project.status === ProjectStatus.Completed ||
+                                project.status === ProjectStatus.Cancelled
+                                  ? isRTL
+                                    ? "لا يمكن حذف مشروع منتهي"
+                                    : "Cannot delete closed project"
+                                  : ""
+                              }
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
                           </div>
                         </td>
                       </tr>
@@ -554,8 +579,8 @@ const Projects: React.FC = () => {
                           handleStatusChange(project.id, value as ProjectStatus)
                         }
                         disabled={
-                          updateStatusMutation.isPending || 
-                          project.status === ProjectStatus.Completed || 
+                          updateStatusMutation.isPending ||
+                          project.status === ProjectStatus.Completed ||
                           project.status === ProjectStatus.Cancelled
                         }
                       >
@@ -568,9 +593,12 @@ const Projects: React.FC = () => {
                         </SelectTrigger>
                         <SelectContent>
                           {Object.values(ProjectStatus)
-                            .filter(status => {
+                            .filter((status) => {
                               if (status === ProjectStatus.Draft) {
-                                return project.status !== ProjectStatus.Active && project.status !== ProjectStatus.Completed;
+                                return (
+                                  project.status !== ProjectStatus.Active &&
+                                  project.status !== ProjectStatus.Completed
+                                );
                               }
                               return true;
                             })
@@ -603,7 +631,10 @@ const Projects: React.FC = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => handleEditProject(project)}
-                      disabled={project.status === ProjectStatus.Completed || project.status === ProjectStatus.Cancelled}
+                      disabled={
+                        project.status === ProjectStatus.Completed ||
+                        project.status === ProjectStatus.Cancelled
+                      }
                     >
                       <Edit className="w-3 h-3" />
                     </Button>
@@ -612,7 +643,10 @@ const Projects: React.FC = () => {
                       size="sm"
                       onClick={() => handleDeleteProject(project.id)}
                       className="text-destructive"
-                      disabled={project.status === ProjectStatus.Completed || project.status === ProjectStatus.Cancelled}
+                      disabled={
+                        project.status === ProjectStatus.Completed ||
+                        project.status === ProjectStatus.Cancelled
+                      }
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>
@@ -663,7 +697,7 @@ const Projects: React.FC = () => {
                 {isRTL ? "لا يوجد مشاريع" : "No projects found"}
               </h3>
               <Button
-                onClick={handleNewProject}
+                onClick={() => navigate("new-with-contract")}
                 className="bg-gradient-to-r from-purple-600 to-purple-500"
               >
                 <Plus className="w-4 h-4 mr-2" />

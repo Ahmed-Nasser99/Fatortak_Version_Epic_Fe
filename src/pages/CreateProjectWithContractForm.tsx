@@ -1,31 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
-import { 
-  Plus, 
-  Trash2, 
-  ChevronLeft, 
-  Save, 
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Plus,
+  Trash2,
+  ChevronLeft,
+  Save,
   Rocket,
   Printer,
   Phone,
   Mail,
   User,
   Layout,
-  FileText
-} from 'lucide-react';
-import { projectService } from '../services/projectService';
-import { customerService } from '../services/customerService';
-import { useCurrentCompany } from '../hooks/useCompanies';
-import { ProjectStatus, CustomerDto } from '../types/api';
-import { API_BASE_URL } from '../services/api';
-import { toast } from 'react-toastify';
+  FileText,
+} from "lucide-react";
+import { projectService } from "../services/projectService";
+import { customerService } from "../services/customerService";
+import { useCurrentCompany } from "../hooks/useCompanies";
+import { ProjectStatus, CustomerDto } from "../types/api";
+import { API_BASE_URL } from "../services/api";
+import { toast } from "react-toastify";
 
-const UNIT_OPTIONS = ['M2', 'NO', 'LM', 'SET', 'JOB', 'KG', 'TON'];
+const UNIT_OPTIONS = ["M2", "NO", "LM", "SET", "JOB", "KG", "TON"];
 const TAX_OPTIONS = [
-  { label: 'No Tax (0%)', value: 0 },
-  { label: 'VAT 5%', value: 0.05 },
-  { label: 'VAT 10%', value: 0.1 },
-  { label: 'VAT 14%', value: 0.14 }
+  { label: "No Tax (0%)", value: 0 },
+  { label: "VAT 5%", value: 0.05 },
+  { label: "VAT 10%", value: 0.1 },
+  { label: "VAT 14%", value: 0.14 },
 ];
 
 interface ProjectLineForm {
@@ -38,68 +38,79 @@ interface ProjectLineForm {
 const CreateProjectWithContractForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const queryClientId = searchParams.get('clientId');
+  const queryClientId = searchParams.get("clientId");
   const [loading, setLoading] = useState(false);
   const [customers, setCustomers] = useState<CustomerDto[]>([]);
-  
+
   // Document Metadata State
-  const [projectName, setProjectName] = useState('');
-  const [clientId, setClientId] = useState('');
-  const [clientEmail, setClientEmail] = useState('');
-  const [clientPhone, setClientPhone] = useState('');
-  const [quotationType, setQuotationType] = useState('Financial Offer');
-  const [quotationDate, setQuotationDate] = useState(new Date().toISOString().split('T')[0]);
-  const [paymentTerms, setPaymentTerms] = useState('60% Down payment & 20% After delivery & 10% Upon Installation');
+  const [projectName, setProjectName] = useState("");
+  const [clientId, setClientId] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [quotationType, setQuotationType] = useState("Financial Offer");
+  const [quotationDate, setQuotationDate] = useState(
+    new Date().toISOString().split("T")[0],
+  );
+  const [paymentTerms, setPaymentTerms] = useState(
+    "60% Down payment & 20% After delivery & 10% Upon Installation",
+  );
   const [conditions, setConditions] = useState<string[]>([
-    'Prices in EGP not include 14% VAT, scaffolding, any steel and civil works.',
-    'Quotation Validity : One Week',
-    'Price includes installation at (Cairo).'
+    "Prices in EGP not include 14% VAT, scaffolding, any steel and civil works.",
+    "Quotation Validity : One Week",
+    "Price includes installation at (Cairo).",
   ]);
   const [activateImmediately, setActivateImmediately] = useState(true);
-  
+
   const [lines, setLines] = useState<ProjectLineForm[]>([
-    { description: '', quantity: 1, unit: 'M2', unitPrice: 0 }
+    { description: "", quantity: 1, unit: "M2", unitPrice: 0 },
   ]);
 
   // Totals
   const [subtotal, setSubtotal] = useState(0);
-  const [vatRate, setVatRate] = useState(0.14); 
+  const [vatRate, setVatRate] = useState(0.14);
   const [includeVat, setIncludeVat] = useState(true);
   const [vatAmount, setVatAmount] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [total, setTotal] = useState(0);
 
   const { data: currentCompany } = useCurrentCompany();
-  const companyLogo = currentCompany?.data?.logoUrl 
-    ? (currentCompany.data.logoUrl.startsWith('http') 
-        ? currentCompany.data.logoUrl 
-        : `${API_BASE_URL}${currentCompany.data.logoUrl.startsWith('/') ? '' : '/'}${currentCompany.data.logoUrl}`)
+  const companyLogo = currentCompany?.data?.logoUrl
+    ? currentCompany.data.logoUrl.startsWith("http")
+      ? currentCompany.data.logoUrl
+      : `${API_BASE_URL}${currentCompany.data.logoUrl.startsWith("/") ? "" : "/"}${currentCompany.data.logoUrl}`
     : null;
-  const companyName = currentCompany?.data?.name || 'EPIC Glass and Aluminum';
-  const companyPhone = currentCompany?.data?.phone || '---';
-  const companyEmail = currentCompany?.data?.email || 'epic.contracting.eg@gmail.com';
-  const companyAddress = currentCompany?.data?.address || '(Cairo)';
+  const companyName = currentCompany?.data?.name || "EPIC Glass and Aluminum";
+  const companyPhone = currentCompany?.data?.phone || "---";
+  const companyEmail =
+    currentCompany?.data?.email || "epic.contracting.eg@gmail.com";
+  const companyAddress = currentCompany?.data?.address || "(Cairo)";
 
   useEffect(() => {
     fetchCustomers();
   }, []);
 
   useEffect(() => {
-    const newSubtotal = lines.reduce((acc, line) => acc + (line.quantity * line.unitPrice), 0);
+    const newSubtotal = lines.reduce(
+      (acc, line) => acc + line.quantity * line.unitPrice,
+      0,
+    );
     setSubtotal(newSubtotal);
     const calculatedVat = includeVat ? newSubtotal * vatRate : 0;
     setVatAmount(calculatedVat);
-    setTotal((newSubtotal + calculatedVat) - discount);
+    setTotal(newSubtotal + calculatedVat - discount);
   }, [lines, includeVat, vatRate, discount]);
 
   const fetchCustomers = async () => {
     try {
-      const result = await customerService.getCustomers({ pageNumber: 1, pageSize: 100 });
+      const result = await customerService.getCustomers({
+        pageNumber: 1,
+        pageSize: 100,
+      });
       if (result.success) {
-        setCustomers(result.data.data.filter(c => !c.isSupplier));
+        setCustomers(result.data.data.filter((c) => !c.isSupplier));
       }
     } catch (error) {
-      console.error('Error fetching customers:', error);
+      console.error("Error fetching customers:", error);
     }
   };
 
@@ -111,15 +122,18 @@ const CreateProjectWithContractForm = () => {
 
   const handleCustomerChange = (id: string) => {
     setClientId(id);
-    const customer = customers.find(c => c.id === id);
+    const customer = customers.find((c) => c.id === id);
     if (customer) {
-      setClientEmail(customer.email || '');
-      setClientPhone(customer.phoneNumber || '');
+      setClientEmail(customer.email || "");
+      setClientPhone(customer.phoneNumber || "");
     }
   };
 
   const addLine = () => {
-    setLines([...lines, { description: '', quantity: 1, unit: 'M2', unitPrice: 0 }]);
+    setLines([
+      ...lines,
+      { description: "", quantity: 1, unit: "M2", unitPrice: 0 },
+    ]);
   };
 
   const removeLine = (index: number) => {
@@ -127,15 +141,20 @@ const CreateProjectWithContractForm = () => {
     setLines(lines.filter((_, i) => i !== index));
   };
 
-  const updateLine = (index: number, field: keyof ProjectLineForm, value: any) => {
+  const updateLine = (
+    index: number,
+    field: keyof ProjectLineForm,
+    value: any,
+  ) => {
     const newLines = [...lines];
     newLines[index] = { ...newLines[index], [field]: value };
     setLines(newLines);
   };
 
   // Notes/Remarks Handlers
-  const addCondition = () => setConditions([...conditions, '']);
-  const removeCondition = (index: number) => setConditions(conditions.filter((_, i) => i !== index));
+  const addCondition = () => setConditions([...conditions, ""]);
+  const removeCondition = (index: number) =>
+    setConditions(conditions.filter((_, i) => i !== index));
   const updateCondition = (index: number, value: string) => {
     const newItems = [...conditions];
     newItems[index] = value;
@@ -143,17 +162,19 @@ const CreateProjectWithContractForm = () => {
   };
 
   const handleSubmit = async (activate: boolean) => {
-    if (!projectName || !clientId || lines.some(l => !l.description || l.quantity <= 0 || l.unitPrice <= 0)) {
-      toast.error('Please fill all required fields correctly');
+    if (
+      !projectName ||
+      !clientId ||
+      lines.some((l) => !l.description || l.quantity <= 0 || l.unitPrice <= 0)
+    ) {
+      toast.error("Please fill all required fields correctly");
       return;
     }
 
     setLoading(true);
     try {
       // Combine conditions and remarks for the backend 'notes' field
-      const combinedNotes = [
-        ...conditions.map(c => `- ${c}`)
-      ].join('\n');
+      const combinedNotes = [...conditions.map((c) => `- ${c}`)].join("\n");
 
       const payload = {
         projectName,
@@ -162,19 +183,23 @@ const CreateProjectWithContractForm = () => {
         notes: combinedNotes,
         lines,
         activateImmediately: activate,
-        discount: discount
+        discount: discount,
       };
 
       const result = await projectService.createProjectWithContract(payload);
       if (result.success) {
-        toast.success(activate ? 'Project Activated & Invoice Generated!' : 'Project Saved as Draft');
+        toast.success(
+          activate
+            ? "Project Activated & Invoice Generated!"
+            : "Project Saved as Draft",
+        );
         const newProjectId = (result.data as any).id;
         navigate(`/projects/${newProjectId}`);
       } else {
-        toast.error(result.errorMessage || 'Failed to create project');
+        toast.error(result.errorMessage || "Failed to create project");
       }
     } catch (error) {
-      toast.error('An unexpected error occurred');
+      toast.error("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
@@ -184,21 +209,14 @@ const CreateProjectWithContractForm = () => {
     <div className="max-w-5xl mx-auto my-8 bg-white shadow-2xl border border-gray-200 min-h-[1100px] flex flex-col font-sans text-gray-800">
       {/* Top Floating Actions (Not part of the document) */}
       <div className="sticky top-0 z-50 bg-gray-50/90 backdrop-blur-md p-4 border-b flex justify-between items-center no-print">
-        <button 
-          onClick={() => navigate('/projects')}
+        <button
+          onClick={() => navigate("/projects")}
           className="flex items-center gap-2 text-gray-600 hover:text-indigo-600 font-medium transition-colors"
         >
           <ChevronLeft className="w-5 h-5" />
           Back to Projects
         </button>
         <div className="flex gap-3">
-          <button
-            onClick={() => window.print()}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-white transition-all text-sm font-medium"
-          >
-            <Printer className="w-4 h-4" />
-            Print Preview
-          </button>
           <button
             onClick={() => handleSubmit(false)}
             disabled={loading}
@@ -225,9 +243,9 @@ const CreateProjectWithContractForm = () => {
           {/* Logo Section */}
           <div className="flex-1">
             {companyLogo ? (
-              <img 
-                src={companyLogo} 
-                alt={companyName} 
+              <img
+                src={companyLogo}
+                alt={companyName}
                 className="h-40 max-w-[350px] object-contain object-left"
               />
             ) : (
@@ -238,11 +256,10 @@ const CreateProjectWithContractForm = () => {
           {/* Metadata Table */}
           <div className="w-72 text-sm">
             <div className="grid grid-cols-2 gap-y-1">
-             
               <span className="text-gray-500">Date</span>
-              <input 
+              <input
                 type="date"
-                value={quotationDate} 
+                value={quotationDate}
                 onChange={(e) => setQuotationDate(e.target.value)}
                 className="font-semibold border-b border-transparent hover:border-gray-200 focus:border-indigo-500 outline-none"
               />
@@ -254,31 +271,35 @@ const CreateProjectWithContractForm = () => {
                 className="font-semibold border-b border-gray-300 hover:border-indigo-500 outline-none truncate w-full"
               >
                 <option value="">Select Client</option>
-                {customers.map(c => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
+                  </option>
                 ))}
               </select>
 
               <span className="text-gray-500">Project</span>
-              <input 
-                value={projectName} 
+              <input
+                value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
                 placeholder="Project Name..."
                 className="font-semibold border-b border-gray-300 hover:border-indigo-500 outline-none"
               />
 
               <span className="text-gray-500">email</span>
-              <span className="font-semibold truncate text-[11px] py-1">{clientEmail || '---'}</span>
+              <span className="font-semibold truncate text-[11px] py-1">
+                {clientEmail || "---"}
+              </span>
 
               <span className="text-gray-500">Cell Phone NO.</span>
-              <span className="font-semibold py-1">{clientPhone || '---'}</span>
+              <span className="font-semibold py-1">{clientPhone || "---"}</span>
 
-               <span className="text-gray-500 no-print">Tax inclusion</span>
+              <span className="text-gray-500 no-print">Tax inclusion</span>
               <div className="pt-1 no-print">
                 <label className="relative inline-flex items-center cursor-pointer scale-75 origin-left">
-                  <input 
-                    type="checkbox" 
-                    className="sr-only peer" 
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
                     checked={includeVat}
                     onChange={(e) => setIncludeVat(e.target.checked)}
                   />
@@ -293,19 +314,34 @@ const CreateProjectWithContractForm = () => {
           <table className="w-full border-collapse">
             <thead>
               <tr className="bg-[#334155] text-white">
-                <th className="border border-black px-2 py-2 text-xs w-10">Sr.</th>
-                <th className="border border-black px-4 py-2 text-xs text-left">Description</th>
-                <th className="border border-black px-2 py-2 text-xs w-16">Unit</th>
-                <th className="border border-black px-2 py-2 text-xs w-16">QTY</th>
-                <th className="border border-black px-4 py-2 text-xs w-24">Price</th>
-                <th className="border border-black px-4 py-2 text-xs w-28">TOTAL</th>
+                <th className="border border-black px-2 py-2 text-xs w-10">
+                  Sr.
+                </th>
+                <th className="border border-black px-4 py-2 text-xs text-left">
+                  Description
+                </th>
+                <th className="border border-black px-2 py-2 text-xs w-16">
+                  Unit
+                </th>
+                <th className="border border-black px-2 py-2 text-xs w-16">
+                  QTY
+                </th>
+                <th className="border border-black px-4 py-2 text-xs w-24">
+                  Price
+                </th>
+                <th className="border border-black px-4 py-2 text-xs w-28">
+                  TOTAL
+                </th>
                 <th className="border border-black w-8 no-print"></th>
               </tr>
             </thead>
             <tbody>
               {/* Optional Section Header */}
               <tr className="bg-[#cbd5e1] text-[#1e293b] font-bold text-sm">
-                <td colSpan={7} className="border border-black px-4 py-1 text-center tracking-widest uppercase">
+                <td
+                  colSpan={7}
+                  className="border border-black px-4 py-1 text-center tracking-widest uppercase"
+                >
                   PROJECT SPECIFICATIONS & WORKS
                 </td>
               </tr>
@@ -317,7 +353,9 @@ const CreateProjectWithContractForm = () => {
                   <td className="border border-black px-4 py-3 align-top">
                     <textarea
                       value={line.description}
-                      onChange={(e) => updateLine(idx, 'description', e.target.value)}
+                      onChange={(e) =>
+                        updateLine(idx, "description", e.target.value)
+                      }
                       rows={4}
                       className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm resize-none leading-relaxed"
                       placeholder="Enter detailed description..."
@@ -326,11 +364,13 @@ const CreateProjectWithContractForm = () => {
                   <td className="border border-black px-2 py-4 text-center align-middle">
                     <select
                       value={line.unit}
-                      onChange={(e) => updateLine(idx, 'unit', e.target.value)}
+                      onChange={(e) => updateLine(idx, "unit", e.target.value)}
                       className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-center font-medium appearance-none cursor-pointer"
                     >
-                      {UNIT_OPTIONS.map(opt => (
-                        <option key={opt} value={opt}>{opt}</option>
+                      {UNIT_OPTIONS.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
                       ))}
                     </select>
                   </td>
@@ -338,7 +378,13 @@ const CreateProjectWithContractForm = () => {
                     <input
                       type="number"
                       value={line.quantity}
-                      onChange={(e) => updateLine(idx, 'quantity', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateLine(
+                          idx,
+                          "quantity",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
                       className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-center font-medium"
                     />
                   </td>
@@ -346,15 +392,24 @@ const CreateProjectWithContractForm = () => {
                     <input
                       type="number"
                       value={line.unitPrice}
-                      onChange={(e) => updateLine(idx, 'unitPrice', parseFloat(e.target.value) || 0)}
+                      onChange={(e) =>
+                        updateLine(
+                          idx,
+                          "unitPrice",
+                          parseFloat(e.target.value) || 0,
+                        )
+                      }
                       className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-right font-medium"
                     />
                   </td>
                   <td className="border border-black px-4 py-4 text-right align-middle text-sm font-bold bg-[#f8fafc]">
-                    {(line.quantity * line.unitPrice).toLocaleString(undefined, { minimumFractionDigits: 0 })}
+                    {(line.quantity * line.unitPrice).toLocaleString(
+                      undefined,
+                      { minimumFractionDigits: 0 },
+                    )}
                   </td>
                   <td className="border border-black px-1 py-1 text-center align-middle no-print">
-                    <button 
+                    <button
                       onClick={() => removeLine(idx)}
                       className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
                     >
@@ -363,10 +418,13 @@ const CreateProjectWithContractForm = () => {
                   </td>
                 </tr>
               ))}
-              
+
               {/* Add Line Button Row */}
               <tr className="no-print">
-                <td colSpan={7} className="border border-black p-2 bg-[#f8fafc]">
+                <td
+                  colSpan={7}
+                  className="border border-black p-2 bg-[#f8fafc]"
+                >
                   <button
                     onClick={addLine}
                     className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-400 hover:text-indigo-600 hover:border-indigo-400 rounded-lg flex items-center justify-center gap-2 transition-all font-medium"
@@ -380,10 +438,17 @@ const CreateProjectWithContractForm = () => {
               {/* Totals Section */}
               <tr className="border-t border-gray-200">
                 <td colSpan={5} className="py-4 px-4 text-right align-middle">
-                  <span className="text-sm font-bold text-gray-500 uppercase">Sub Total</span>
+                  <span className="text-sm font-bold text-gray-500 uppercase">
+                    Sub Total
+                  </span>
                 </td>
                 <td className="py-4 px-4 text-right align-middle">
-                  <span className="font-bold text-lg">{subtotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                  <span className="font-bold text-lg">
+                    {subtotal.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>
                 </td>
                 <td className="no-print"></td>
               </tr>
@@ -391,26 +456,39 @@ const CreateProjectWithContractForm = () => {
               <tr>
                 <td colSpan={5} className="py-2 px-4 text-right align-middle">
                   <div className="flex items-center justify-end gap-3">
-                    <select 
+                    <select
                       value={vatRate}
                       onChange={(e) => setVatRate(parseFloat(e.target.value))}
                       disabled={!includeVat}
                       className="no-print text-xs border border-gray-200 rounded px-2 py-1 bg-white text-gray-500 font-medium outline-none focus:border-indigo-500 transition-all w-32 disabled:opacity-30"
                     >
-                      <option value="" disabled>Select Tax</option>
-                      {TAX_OPTIONS.map(opt => (
-                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      <option value="" disabled>
+                        Select Tax
+                      </option>
+                      {TAX_OPTIONS.map((opt) => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
                       ))}
                     </select>
-                    {!includeVat && <span className="text-gray-300 italic text-[10px] no-print">Tax Disabled</span>}
+                    {!includeVat && (
+                      <span className="text-gray-300 italic text-[10px] no-print">
+                        Tax Disabled
+                      </span>
+                    )}
                     <span className="text-sm font-bold text-gray-500 uppercase whitespace-nowrap">
                       Tax ({(vatRate * 100).toFixed(0)}%)
                     </span>
                   </div>
                 </td>
                 <td className="py-2 px-4 text-right align-middle">
-                  <span className={`font-bold transition-opacity ${includeVat ? 'opacity-100' : 'opacity-20'}`}>
-                    {vatAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  <span
+                    className={`font-bold transition-opacity ${includeVat ? "opacity-100" : "opacity-20"}`}
+                  >
+                    {vatAmount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </span>
                 </td>
                 <td className="no-print"></td>
@@ -428,12 +506,18 @@ const CreateProjectWithContractForm = () => {
                   <input
                     type="number"
                     value={discount}
-                    onChange={(e) => setDiscount(parseFloat(e.target.value) || 0)}
+                    onChange={(e) =>
+                      setDiscount(parseFloat(e.target.value) || 0)
+                    }
                     className="w-full bg-[#fef2f2] border border-rose-100 rounded px-2 py-1 text-sm text-right font-bold text-rose-600 outline-none focus:border-rose-400 no-print"
                     placeholder="0.00"
                   />
                   <span className="hidden print:inline font-bold text-rose-600">
-                    -{discount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    -
+                    {discount.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </span>
                 </td>
                 <td className="no-print"></td>
@@ -441,11 +525,16 @@ const CreateProjectWithContractForm = () => {
 
               <tr className="bg-gray-50/50">
                 <td colSpan={5} className="py-4 px-4 text-right align-middle">
-                  <span className="text-base font-black uppercase tracking-wider text-gray-900">Total</span>
+                  <span className="text-base font-black uppercase tracking-wider text-gray-900">
+                    Total
+                  </span>
                 </td>
                 <td className="py-4 px-4 text-right align-middle">
                   <span className="font-black text-xl text-black">
-                    {total.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {total.toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </span>
                 </td>
                 <td className="no-print"></td>
@@ -458,22 +547,24 @@ const CreateProjectWithContractForm = () => {
         <div className="mt-8 space-y-6">
           <div className="space-y-4">
             <div className="flex justify-between items-center no-print-section">
-              <h3 className="font-bold underline text-sm">Please note the following:</h3>
-              <button 
+              <h3 className="font-bold underline text-sm">
+                Please note the following:
+              </h3>
+              <button
                 onClick={addCondition}
                 className="no-print text-[10px] bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded border font-bold flex items-center gap-1 transition-colors"
               >
                 <Plus className="w-3 h-3" /> Add Condition
               </button>
             </div>
-            
+
             <div className="text-[12px] leading-relaxed space-y-3">
               {/* Payment Terms - Fixed label but editable value */}
               <div className="flex gap-2 group">
                 <span className="font-bold min-w-[5px]">-</span>
                 <div className="flex flex-wrap gap-1 items-center flex-grow">
                   <span className="font-bold shrink-0">Payment Terms :</span>
-                  <input 
+                  <input
                     value={paymentTerms}
                     onChange={(e) => setPaymentTerms(e.target.value)}
                     className="flex-grow border-b border-transparent hover:border-gray-300 focus:border-indigo-500 outline-none bg-transparent h-5 font-medium transition-all"
@@ -492,11 +583,11 @@ const CreateProjectWithContractForm = () => {
                     className="flex-grow border-b border-transparent hover:border-gray-200 focus:border-indigo-500 outline-none bg-transparent py-0 h-auto min-h-[1.2rem] resize-none overflow-hidden transition-all"
                     onInput={(e) => {
                       const target = e.target as HTMLTextAreaElement;
-                      target.style.height = 'auto';
-                      target.style.height = target.scrollHeight + 'px';
+                      target.style.height = "auto";
+                      target.style.height = target.scrollHeight + "px";
                     }}
                   />
-                  <button 
+                  <button
                     onClick={() => removeCondition(idx)}
                     className="no-print opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-500 transition-all"
                   >
@@ -506,12 +597,13 @@ const CreateProjectWithContractForm = () => {
               ))}
             </div>
           </div>
-
         </div>
       </div>
 
       {/* Internal CSS for printing and custom font look */}
-      <style dangerouslySetInnerHTML={{ __html: `
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
         @media print {
           .no-print { display: none !important; }
           body { background: white !important; padding: 0 !important; }
@@ -520,7 +612,9 @@ const CreateProjectWithContractForm = () => {
         }
         @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
         .font-cursive { font-family: 'Dancing Script', cursive; }
-      `}} />
+      `,
+        }}
+      />
     </div>
   );
 };

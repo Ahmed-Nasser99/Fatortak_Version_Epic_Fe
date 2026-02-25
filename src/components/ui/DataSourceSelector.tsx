@@ -28,20 +28,29 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   const { t, isRTL } = useLanguage();
   const [selectedParentId, setSelectedParentId] = useState<string | null>(null);
 
-  const { data: accountsResponse, isLoading } = useAccounts({
-    pageNumber: 1,
-    pageSize: 1000,
-  }, {
-    isActive: true,
-  });
+  const { data: accountsResponse, isLoading } = useAccounts(
+    {
+      pageNumber: 1,
+      pageSize: 1000,
+    },
+    {
+      isActive: true,
+    },
+  );
 
   const accounts = accountsResponse?.data?.data || [];
 
   // Filter for Cash (1000), Bank (1100), and Employee Custody (1500)
-  const cashAccounts = accounts.filter(a => a.accountCode.startsWith("1000") && a.isPostable);
-  const bankAccounts = accounts.filter(a => a.accountCode.startsWith("1100") && a.isPostable);
-  const employeeCustodyParent = accounts.find(a => a.accountCode === "1500");
-  const employeeAccounts = accounts.filter(a => a.parentAccountId === employeeCustodyParent?.id);
+  const cashAccounts = accounts.filter(
+    (a) => a.accountCode.startsWith("1000") && a.isPostable,
+  );
+  const bankAccounts = accounts.filter(
+    (a) => a.accountCode.startsWith("1100") && a.isPostable,
+  );
+  const employeeCustodyParent = accounts.find((a) => a.accountCode === "1500");
+  const employeeAccounts = accounts.filter(
+    (a) => a.parentAccountId === employeeCustodyParent?.id,
+  );
 
   const handleParentSelect = (val: string) => {
     if (val === "employee_adv") {
@@ -52,39 +61,63 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
     }
   };
 
-  const selectedAccount = accounts.find(a => a.id === value);
-  const isEmployeeAccountSelected = selectedAccount?.parentAccountId === employeeCustodyParent?.id;
+  const selectedAccount = accounts.find((a) => a.id === value);
+  const isEmployeeAccountSelected =
+    selectedAccount?.parentAccountId === employeeCustodyParent?.id;
 
   return (
     <div className="space-y-2">
-      <Select 
-        value={isEmployeeAccountSelected ? "employee_adv" : value} 
+      <Select
+        value={isEmployeeAccountSelected ? "employee_adv" : value}
         onValueChange={handleParentSelect}
       >
-        <SelectTrigger className={`${className} ${isRTL ? "text-right" : "text-left"}`}>
-          <SelectValue placeholder={placeholder || (isRTL ? "اختر مصدر الدفع" : "Select Payment Source")} />
+        <SelectTrigger
+          className={`${className} ${isRTL ? "text-right" : "text-left"}`}
+        >
+          <SelectValue
+            placeholder={
+              placeholder ||
+              (isRTL ? "اختر مصدر الدفع" : "Select Payment Source")
+            }
+          />
         </SelectTrigger>
         <SelectContent>
-          {cashAccounts.map(a => (
+          {cashAccounts.map((a) => (
             <SelectItem key={a.id} value={a.id}>
               <div className="flex justify-between items-center w-full min-w-[200px]">
-                <span>{isRTL ? "نقدي" : "Cash"} - {a.name}</span>
+                <span>
+                  {isRTL ? "نقدي" : "Cash"} - {a.name}
+                </span>
                 <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
                   {formatNumber(a.balance)} EGP
                 </span>
               </div>
             </SelectItem>
           ))}
-          {bankAccounts.map(a => (
+          {bankAccounts.map((a) => (
             <SelectItem key={a.id} value={a.id}>
               <div className="flex justify-between items-center w-full min-w-[200px]">
-                <span>{isRTL ? "بنك" : "Bank"} - {a.name}</span>
+                <span>
+                  {isRTL ? "بنك" : "Bank"} - {a.name}
+                </span>
                 <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
                   {formatNumber(a.balance)} EGP
                 </span>
               </div>
             </SelectItem>
           ))}
+          <SelectItem
+            key="cheque"
+            value={bankAccounts[0]?.id}
+            disabled={bankAccounts.length === 0}
+          >
+            <div className="flex justify-between items-center w-full min-w-[200px]">
+              <span>{isRTL ? "شيك" : "Cheque"}</span>
+              <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
+                {formatNumber(bankAccounts[0]?.balance || 0)} EGP
+              </span>
+            </div>
+          </SelectItem>
           {employeeCustodyParent && (
             <SelectItem value="employee_adv">
               <div className="flex items-center gap-2">
@@ -97,19 +130,25 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
       </Select>
 
       {(selectedParentId === "employee_adv" || isEmployeeAccountSelected) && (
-        <div className={`pl-4 ${isRTL ? "pr-4 pl-0" : "pl-4"} animate-in slide-in-from-top-1 duration-200`}>
+        <div
+          className={`pl-4 ${isRTL ? "pr-4 pl-0" : "pl-4"} animate-in slide-in-from-top-1 duration-200`}
+        >
           <div className="flex items-center gap-2 mb-1">
-             <ChevronRight className={`w-3 h-3 text-slate-400 ${isRTL ? "rotate-180" : ""}`} />
-             <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
-               {isRTL ? "اختر الموظف" : "Select Employee Account"}
-             </span>
+            <ChevronRight
+              className={`w-3 h-3 text-slate-400 ${isRTL ? "rotate-180" : ""}`}
+            />
+            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
+              {isRTL ? "اختر الموظف" : "Select Employee Account"}
+            </span>
           </div>
           <Select value={value} onValueChange={onChange}>
             <SelectTrigger className="h-9 text-sm">
-              <SelectValue placeholder={isRTL ? "اختر موظف" : "Select employee"} />
+              <SelectValue
+                placeholder={isRTL ? "اختر موظف" : "Select employee"}
+              />
             </SelectTrigger>
             <SelectContent>
-              {employeeAccounts.map(a => (
+              {employeeAccounts.map((a) => (
                 <SelectItem key={a.id} value={a.id}>
                   <div className="flex justify-between items-center w-full">
                     <span>{a.name}</span>
@@ -121,7 +160,9 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               ))}
               {employeeAccounts.length === 0 && (
                 <div className="p-2 text-xs text-slate-500 text-center">
-                  {isRTL ? "لا يوجد حسابات موظفين" : "No employee accounts found"}
+                  {isRTL
+                    ? "لا يوجد حسابات موظفين"
+                    : "No employee accounts found"}
                 </div>
               )}
             </SelectContent>

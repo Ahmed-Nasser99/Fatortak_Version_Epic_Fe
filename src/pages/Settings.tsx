@@ -13,8 +13,8 @@ const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState("company");
   const { isRTL, t } = useLanguage();
   const { data: currentCompany } = useCurrentCompany();
-  const showBranches = 
-    currentCompany?.data?.enableMultipleBranches === true || 
+  const showBranches =
+    currentCompany?.data?.enableMultipleBranches === true ||
     (currentCompany?.data as any)?.EnableMultipleBranches === true;
 
   const renderTabContent = () => {
@@ -23,28 +23,32 @@ const Settings: React.FC = () => {
         return <CompanySettingsForm />;
       case "user":
         return <UserSettingsForm />;
-      case "branches":
-        return <BranchSettings />;
-      case "hr":
-        return <HRSettingsForm />;
-      case "quota":
-        return <QuotaSettingsForm />;
-      case "notifications":
-      case "security":
-        return (
-          <div className="flex flex-col items-center justify-center py-20 px-4">
-            <h3 className="text-2xl font-black text-foreground mb-3 text-center uppercase tracking-widest">
-              {activeTab === "notifications"
-                ? isRTL ? "إعدادات الإشعارات" : "Notification Settings"
-                : isRTL ? "إعدادات الأمان" : "Security Settings"}
-            </h3>
-            <p className="text-muted-foreground text-center max-w-sm font-bold">
-              {isRTL
-                ? "هذه الميزة قيد التطوير وستكون متاحة قريباً."
-                : "This feature is under development and will be available soon."}
-            </p>
-          </div>
-        );
+      // case "branches":
+      //   return <BranchSettings />;
+      // case "hr":
+      //   return <HRSettingsForm />;
+      // case "quota":
+      //   return <QuotaSettingsForm />;
+      // case "notifications":
+      // case "security":
+      //   return (
+      //     <div className="flex flex-col items-center justify-center py-20 px-4">
+      //       <h3 className="text-2xl font-black text-foreground mb-3 text-center uppercase tracking-widest">
+      //         {activeTab === "notifications"
+      //           ? isRTL
+      //             ? "إعدادات الإشعارات"
+      //             : "Notification Settings"
+      //           : isRTL
+      //             ? "إعدادات الأمان"
+      //             : "Security Settings"}
+      //       </h3>
+      //       <p className="text-muted-foreground text-center max-w-sm font-bold">
+      //         {isRTL
+      //           ? "هذه الميزة قيد التطوير وستكون متاحة قريباً."
+      //           : "This feature is under development and will be available soon."}
+      //       </p>
+      //     </div>
+      //   );
       default:
         return <CompanySettingsForm />;
     }

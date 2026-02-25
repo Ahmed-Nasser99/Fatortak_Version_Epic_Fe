@@ -55,15 +55,15 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
   const { logout } = useAuth();
 
   // Notification hooks
-  const { data: notificationsData } = useNotifications(
-    { pageNumber: 1, pageSize: 5 },
-    { isRead: false }
-  );
-  const { data: unreadCount } = useUnreadNotificationsCount();
-  const { mutate: markAsRead } = useMarkAsRead();
+  // const { data: notificationsData } = useNotifications(
+  //   { pageNumber: 1, pageSize: 5 },
+  //   { isRead: false },
+  // );
+  // const { data: unreadCount } = useUnreadNotificationsCount();
+  // const { mutate: markAsRead } = useMarkAsRead();
 
-  const notifications = notificationsData?.data?.data || [];
-  const totalUnread = unreadCount?.data || 0;
+  // const notifications = notificationsData?.data?.data || [];
+  // const totalUnread = unreadCount?.data || 0;
 
   const handleProfileClick = () => {
     navigate("/profile");
@@ -159,8 +159,8 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
                     ? "الوضع الفاتح"
                     : "Light mode"
                   : isRTL
-                  ? "الوضع المظلم"
-                  : "Dark mode"
+                    ? "الوضع المظلم"
+                    : "Dark mode"
               }
             >
               {theme === "dark" ? (
@@ -180,7 +180,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
             </button>
 
             {/* Notifications */}
-            <div className="relative">
+            {/* <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2 rounded-lg text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 transition-colors relative"
@@ -192,8 +192,6 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
                   </Badge>
                 )}
               </button>
-
-              {/* Notifications Dropdown */}
               {showNotifications && (
                 <div
                   className={`absolute top-full mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 z-50 ${
@@ -233,11 +231,11 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
                           <div className="flex items-start space-x-3">
                             <div
                               className={`w-8 h-8 ${getNotificationBg(
-                                notification.notificationType || "info"
+                                notification.notificationType || "info",
                               )} rounded-full flex items-center justify-center flex-shrink-0`}
                             >
                               {getNotificationIcon(
-                                notification.notificationType || "info"
+                                notification.notificationType || "info",
                               )}
                             </div>
                             <div className="flex-1 min-w-0">
@@ -253,7 +251,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
                                   new Date(notification.createdAt),
                                   {
                                     addSuffix: true,
-                                  }
+                                  },
                                 )}
                               </div>
                             </div>
@@ -275,7 +273,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
                   </div>
                 </div>
               )}
-            </div>
+            </div> */}
 
             {/* Profile Dropdown */}
             <div className="relative">
@@ -295,7 +293,7 @@ const ModernHeader: React.FC<ModernHeaderProps> = ({
                     <AvatarFallback className="bg-purple-100 text-purple-600 text-sm">
                       {getInitials(
                         userProfile?.firstName,
-                        userProfile?.lastName
+                        userProfile?.lastName,
                       )}
                     </AvatarFallback>
                   )}

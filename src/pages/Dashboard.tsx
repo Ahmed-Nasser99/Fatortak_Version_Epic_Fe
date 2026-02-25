@@ -65,7 +65,8 @@ const Dashboard: React.FC = () => {
   const [isSupplier, setIsSupplier] = React.useState(false);
   const [showItemModal, setShowItemModal] = React.useState(false);
   const [showExpenseModal, setShowExpenseModal] = React.useState(false);
-  const [showRecordPaymentModal, setShowRecordPaymentModal] = React.useState(false);
+  const [showRecordPaymentModal, setShowRecordPaymentModal] =
+    React.useState(false);
   const [period, setPeriod] = React.useState("month");
   const [filterBranchId, setFilterBranchId] = React.useState("");
   const [filterProjectId, setFilterProjectId] = React.useState("all");
@@ -73,14 +74,14 @@ const Dashboard: React.FC = () => {
   // Fetch invoices to find sales invoice for selected project
   const { data: projInvoicesResponse } = useInvoices(
     { pageNumber: 1, pageSize: 20 },
-    { projectId: filterProjectId === "all" ? undefined : filterProjectId }
+    { projectId: filterProjectId === "all" ? undefined : filterProjectId },
   );
 
   const salesInvoice = projInvoicesResponse?.data?.data?.find(
     (inv: any) =>
       inv.invoiceType?.toLowerCase() === "sell" ||
       inv.invoiceType?.toLowerCase() === "sales" ||
-      inv.invoiceType?.toLowerCase() === "sale"
+      inv.invoiceType?.toLowerCase() === "sale",
   );
 
   // Fetch real data from API
@@ -89,6 +90,7 @@ const Dashboard: React.FC = () => {
     data: dashboardResponse,
     isLoading,
     error,
+    refetch,
   } = useDashboardReport(
     period,
     filterBranchId || undefined,
@@ -172,7 +174,9 @@ const Dashboard: React.FC = () => {
           bgColor: "bg-blue-50",
           iconBg: "bg-blue-500",
           iconColor: "text-white",
-          tooltip: isRTL ? "إجمالي الأرصدة المتوفرة في البنوك" : "Total balances available in all bank accounts",
+          tooltip: isRTL
+            ? "إجمالي الأرصدة المتوفرة في البنوك"
+            : "Total balances available in all bank accounts",
         },
         {
           title: t("totalReceivables"),
@@ -756,13 +760,18 @@ const Dashboard: React.FC = () => {
           isOpen={showExpenseModal}
           onClose={() => setShowExpenseModal(false)}
           onSuccess={() => setShowExpenseModal(false)}
-          initialProjectId={filterProjectId !== "all" ? filterProjectId : undefined}
+          initialProjectId={
+            filterProjectId !== "all" ? filterProjectId : undefined
+          }
         />
         <RecordPaymentModal
           isOpen={showRecordPaymentModal}
           invoice={salesInvoice}
           onClose={() => setShowRecordPaymentModal(false)}
-          onSuccess={() => setShowRecordPaymentModal(false)}
+          onSuccess={() => {
+            setShowRecordPaymentModal(false);
+            refetch();
+          }}
         />
       </div>
     </div>

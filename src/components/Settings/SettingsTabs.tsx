@@ -1,7 +1,16 @@
 "use client";
 
 import type React from "react";
-import { Building, User, Bell, Shield, CreditCard, Users, MapPin, ChevronRight } from "lucide-react";
+import {
+  Building,
+  User,
+  Bell,
+  Shield,
+  CreditCard,
+  Users,
+  MapPin,
+  ChevronRight,
+} from "lucide-react";
 import { useLanguage } from "../../contexts/LanguageContext";
 
 interface SettingsTabsProps {
@@ -21,10 +30,10 @@ const SettingsTabs: React.FC<SettingsTabsProps> = ({
     { id: "company", nameKey: "companySettings" },
     ...(showBranches ? [{ id: "branches", nameKey: "branches" }] : []),
     { id: "user", nameKey: "userSettings" },
-    { id: "hr", nameKey: "hrSettings" },
-    { id: "quota", nameKey: "quotaUsage" },
-    { id: "notifications", nameKey: "notifications" },
-    { id: "security", nameKey: "security" },
+    //{ id: "hr", nameKey: "hrSettings" },
+    //{ id: "quota", nameKey: "quotaUsage" },
+    //{ id: "notifications", nameKey: "notifications" },
+    //{ id: "security", nameKey: "security" },
   ];
 
   return (
