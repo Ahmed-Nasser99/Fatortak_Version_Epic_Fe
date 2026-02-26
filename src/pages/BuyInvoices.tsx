@@ -134,7 +134,7 @@ const BuyInvoices: React.FC = () => {
   const getAvailableStatusOptions = (currentStatus: string) => {
     const allStatuses = ["Draft", "Paid", "Pending", "Cancelled"];
 
-    if (currentStatus?.toLowerCase() === "Draft") {
+    if (currentStatus?.toLowerCase() === "draft") {
       return ["Cancelled", "Paid", "Pending"];
     }
     if (currentStatus?.toLowerCase() === "cancelled") {
@@ -143,6 +143,14 @@ const BuyInvoices: React.FC = () => {
 
     if (currentStatus?.toLowerCase() === "overdue") {
       return ["Paid", "Draft", "Cancelled"];
+    }
+
+    // Partially paid invoices can only be cancelled
+    if (
+      currentStatus?.toLowerCase() === "partialpaid" ||
+      currentStatus?.toLowerCase() === "partpaid"
+    ) {
+      return ["Cancelled"];
     }
 
     return allStatuses.filter(

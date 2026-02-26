@@ -397,6 +397,7 @@ export interface ExpenseDto {
   updatedAt?: Date;
   branchId?: string;
   projectId?: string;
+  projectName?: string;
   categoryId?: string;
   categoryName?: string;
   paymentAccountId?: string;

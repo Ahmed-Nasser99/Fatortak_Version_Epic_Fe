@@ -481,6 +481,12 @@ const EnhancedInvoiceModal: React.FC<EnhancedInvoiceModalProps> = ({
         setAttachment(null);
         setShowPreviewModal(false);
         onSuccess();
+      } else {
+        toast.error(
+          result.errorMessage ||
+            t("failedToCreateInvoice") ||
+            "Failed to create invoice",
+        );
       }
     } catch (error) {
       toast.error(t("failedToCreateInvoice") || "Failed to create invoice");

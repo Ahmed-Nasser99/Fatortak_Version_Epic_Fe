@@ -50,7 +50,7 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
     (a) => a.accountCode.startsWith("1100") && a.isPostable,
   );
   const chequeAccounts = accounts.filter(
-    (a) => a.accountCode === "1600" && a.isPostable,
+    (a) => (a.accountCode === "1600" || a.accountCode.startsWith("1600")) && a.isPostable,
   );
   const employeeCustodyParent = accounts.find((a) => a.accountCode === "1500");
   const employeeAccounts = accounts.filter(
@@ -58,7 +58,6 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
   );
 
   const getDisplayLabel = (val: string) => {
-    if (isCheque) return isRTL ? "شيك" : "Cheque"; // ← check this first
     if (isEmployeeAccountSelected)
       return isRTL ? "عقـد عهدة موظف" : "Employee Advance";
     const account = accounts.find((a) => a.id === val);
@@ -72,25 +71,17 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
     return account.name;
   };
 
-  const [isCheque, setIsCheque] = useState(false);
-
   const handleParentSelect = (val: string) => {
     if (val === "employee_adv") {
-      setIsCheque(false);
       setSelectedParentId("employee_adv");
-    } else if (val === "__cheque__") {
-      setIsCheque(true);
-      setSelectedParentId(null);
-      onChange(bankAccounts[0]?.id);
     } else {
-      setIsCheque(false);
       setSelectedParentId(null);
       onChange(val);
     }
   };
-  // Reset isCheque if value is cleared externally
+  // Reset selected parent if value is cleared externally
   useEffect(() => {
-    if (!value) setIsCheque(false);
+    if (!value) setSelectedParentId(null);
   }, [value]);
   const selectedAccount = accounts.find((a) => a.id === value);
   const isEmployeeAccountSelected =
@@ -139,7 +130,7 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               </div>
             </SelectItem>
           ))}
-          {(!paymentMethod || paymentMethod === "Cheque") && chequeAccounts.map((a) => (
+          {paymentMethod === "Cheque" && chequeAccounts.map((a) => (
             <SelectItem key={a.id} value={a.id}>
               <div className="flex justify-between items-center w-full min-w-[200px]">
                 <span>
@@ -151,20 +142,6 @@ const DataSourceSelector: React.FC<DataSourceSelectorProps> = ({
               </div>
             </SelectItem>
           ))}
-          {!paymentMethod && (
-            <SelectItem
-              key="cheque"
-              value="__cheque__"
-              disabled={bankAccounts.length === 0}
-            >
-              <div className="flex justify-between items-center w-full min-w-[200px]">
-                <span>{isRTL ? "شيك" : "Cheque"}</span>
-                <span className="text-xs font-mono font-bold text-emerald-600 ml-2">
-                  {formatNumber(bankAccounts[0]?.balance || 0)} EGP
-                </span>
-              </div>
-            </SelectItem>
-          )}
           {(!paymentMethod || paymentMethod === "EmployeeAdvance") && employeeCustodyParent && (
             <SelectItem value="employee_adv">
               <div className="flex items-center gap-2">

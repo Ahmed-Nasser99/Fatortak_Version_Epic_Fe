@@ -127,6 +127,14 @@ const SellInvoices: React.FC = () => {
       return ["Paid", "Draft", "Cancelled"];
     }
 
+    // Partially paid invoices can only be cancelled
+    if (
+      currentStatus?.toLowerCase() === "partialpaid" ||
+      currentStatus?.toLowerCase() === "partpaid"
+    ) {
+      return ["Cancelled"];
+    }
+
     return allStatuses.filter(
       (s) => s.toLowerCase() !== currentStatus?.toLowerCase()
     );

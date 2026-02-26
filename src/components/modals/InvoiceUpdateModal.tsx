@@ -107,13 +107,23 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
     : [];
   const items = itemsResponse?.success ? itemsResponse.data?.data || [] : [];
 
-  const statusOptions = [
-    { value: "Draft", label: t("draftStatus") || "Draft" },
-    // { value: "Pending", label: t("pendingStatus") || "Pending" },
-    { value: "Paid", label: t("paidStatus") || "Paid" },
-    // { value: "PartialPaid", label: t("partialPaidStatus") || "Partial Paid" },
-    { value: "partPaid", label: t("partialPaidStatus") || "Part Paid" },
-  ];
+  const getFilteredStatusOptions = () => {
+    const options = [
+      { value: "Draft", label: t("draftStatus") || "Draft" },
+      { value: "Paid", label: t("paidStatus") || "Paid" },
+      { value: "partPaid", label: t("partialPaidStatus") || "Part Paid" },
+      { value: "Cancelled", label: t("cancelledStatus") || "Cancelled" },
+    ];
+
+    const currentStatus = invoice?.status?.toLowerCase();
+    if (currentStatus === "partialpaid" || currentStatus === "partpaid") {
+      return [{ value: "Cancelled", label: t("cancelledStatus") || "Cancelled" }];
+    }
+
+    return options;
+  };
+
+  const filteredStatusOptions = getFilteredStatusOptions();
 
   function formatBackendDate(dateStr: string) {
     const [year, month, day] = dateStr.split("T")[0].split("-");
@@ -433,6 +443,12 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
         );
         onSave();
         setShowPreviewModal(false);
+      } else {
+        toast.error(
+          result.errorMessage ||
+            t("failedToUpdateInvoice") ||
+            "Failed to update invoice",
+        );
       }
     } catch (error) {
       toast.error(t("failedToUpdateInvoice") || "Failed to update invoice");
@@ -492,7 +508,7 @@ const InvoiceUpdateModal: React.FC<InvoiceUpdateModalProps> = ({
                 }
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-purple-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
               >
-                {statusOptions.map((option) => (
+                {filteredStatusOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>

@@ -74,10 +74,10 @@ const Expenses: React.FC = () => {
 
   const stats = {
     totalCount: expensesStats.totalCount || 0,
-    totalAmount: formatCurrency(expensesStats.totalAmount) || 0,
-    thisMonthAmount: formatCurrency(expensesStats.thisMonthAmount) || 0,
-    lastMonthAmount: formatCurrency(expensesStats.lastMonthAmount) || 0,
-    thisYearAmount: formatCurrency(expensesStats.thisYearAmount) || 0,
+    totalAmount: expensesStats.totalAmount || 0,
+    thisMonthAmount: expensesStats.thisMonthAmount || 0,
+    lastMonthAmount: expensesStats.lastMonthAmount || 0,
+    thisYearAmount: expensesStats.thisYearAmount || 0,
   };
 
   const handleCreateExpense = () => {
@@ -429,6 +429,11 @@ const Expenses: React.FC = () => {
                           <Badge variant="secondary" className="bg-orange-50 text-orange-700 border-orange-200">
                             {expense.categoryName}
                           </Badge>
+                          {expense.projectName && (
+                            <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                              {expense.projectName}
+                            </Badge>
+                          )}
                           <Badge variant="outline" className="text-[10px] uppercase font-bold tracking-wider opacity-70">
                             {expense.paymentAccountName}
                           </Badge>
@@ -481,6 +486,13 @@ const Expenses: React.FC = () => {
                           } text-sm font-bold text-gray-900 dark:text-white`}
                         >
                           {isRTL ? "التصنيف" : "Category"}
+                        </th>
+                        <th
+                          className={`px-6 py-4 ${
+                            isRTL ? "text-right" : "text-left"
+                          } text-sm font-bold text-gray-900 dark:text-white`}
+                        >
+                          {isRTL ? "المشروع" : "Project"}
                         </th>
                         <th
                           className={`px-6 py-4 ${
@@ -551,6 +563,19 @@ const Expenses: React.FC = () => {
                             <Badge variant="secondary" className="bg-orange-50 text-orange-700 border-orange-200">
                               {expense.categoryName}
                             </Badge>
+                          </td>
+                          <td
+                            className={`px-6 py-4 ${
+                              isRTL ? "text-right" : "text-left"
+                            } `}
+                          >
+                            {expense.projectName ? (
+                              <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                                {expense.projectName}
+                              </Badge>
+                            ) : (
+                              <span className="text-gray-400">-</span>
+                            )}
                           </td>
                           <td
                             className={`px-6 py-4 ${
