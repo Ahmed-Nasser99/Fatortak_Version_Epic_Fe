@@ -833,6 +833,12 @@ const ProjectDetails: React.FC = () => {
                           Reference / Note
                         </th>
                         <th className="py-5 px-4 text-center uppercase tracking-wider text-[10px]">
+                          Payment Method
+                        </th>
+                        <th className="py-5 px-4 text-center uppercase tracking-wider text-[10px]">
+                          Status
+                        </th>
+                        <th className="py-5 px-4 text-center uppercase tracking-wider text-[10px]">
                           Attachment
                         </th>
                         <th className="py-5 px-6 text-right uppercase tracking-wider text-[10px]">
@@ -883,6 +889,26 @@ const ProjectDetails: React.FC = () => {
                               <p className="text-xs font-medium text-slate-600 leading-relaxed italic">
                                 {p.description || "Customer payment collection"}
                               </p>
+                            </td>
+                            <td className="py-5 px-4 text-center">
+                              <Badge variant="outline" className="font-mono text-[10px] bg-slate-50 border-slate-200 text-slate-600">
+                                {(p as any).paymentMethod || "Cash"}
+                              </Badge>
+                            </td>
+                            <td className="py-5 px-4 text-center">
+                              <Badge 
+                                variant={
+                                  (p as any).status === 'Bounced' || (p as any).status === 'Rejected' ? 'outline' : 
+                                  'secondary'
+                                }
+                                className={
+                                  (p as any).status === 'Bounced' || (p as any).status === 'Rejected' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                                  (p as any).status === 'UnderCollection' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                                  'bg-emerald-50 text-emerald-700 border-emerald-200'
+                                }
+                              >
+                                {(p as any).status || "Completed"}
+                              </Badge>
                             </td>
                             <td className="py-5 px-4 text-center">
                               {p.attachmentUrl && (

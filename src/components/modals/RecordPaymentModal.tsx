@@ -170,7 +170,7 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
                   <SelectItem value="Cash">Cash</SelectItem>
                   <SelectItem value="Bank">Bank Transfer</SelectItem>
                   {!isPurchaseInvoice && <SelectItem value="Cheque">Cheque</SelectItem>}
-                  <SelectItem value="EmployeeAdvance">Employee Advance</SelectItem>
+                  {isPurchaseInvoice && <SelectItem value="EmployeeAdvance">Employee Advance</SelectItem>}
                 </SelectContent>
               </Select>
             </div>

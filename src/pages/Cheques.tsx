@@ -144,8 +144,10 @@ export default function Cheques() {
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 border-b border-slate-200 text-xs uppercase font-semibold text-slate-500">
                   <tr>
-                    <th className="px-6 py-4">Cheque Details</th>
+                    <th className="px-6 py-4">Cheque Number</th>
+                    <th className="px-6 py-4">Bank Name</th>
                     <th className="px-6 py-4">Invoice</th>
+                    <th className="px-6 py-4">Project Name</th>
                     <th className="px-6 py-4">Due Date</th>
                     <th className="px-6 py-4 text-center">Attachment</th>
                     <th className="px-6 py-4 text-right">Amount</th>
@@ -159,23 +161,29 @@ export default function Cheques() {
                       <td className="px-6 py-4">
                         <div className="flex flex-col">
                           <span className="font-medium text-slate-900">{cheque.chequeNumber}</span>
-                          <span className="text-xs text-slate-500">{cheque.bankName}</span>
                           {cheque.paymentAccountName && (
                             <span className="text-xs text-indigo-600 font-medium">Acc: {cheque.paymentAccountName}</span>
                           )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
+                        <span className="text-sm font-medium text-slate-700">{cheque.bankName}</span>
+                      </td>
+                      <td className="px-6 py-4">
                         <div className="flex flex-col items-start gap-1">
                           <Badge variant="secondary" className="font-mono text-xs">
                             {cheque.invoiceNumber}
                           </Badge>
-                          {cheque.projectName && (
-                            <span className="text-xs text-slate-500 line-clamp-1 max-w-[150px]" title={cheque.projectName}>
-                              {cheque.projectName}
-                            </span>
-                          )}
                         </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        {cheque.projectName ? (
+                          <span className="text-sm text-slate-600 line-clamp-2 max-w-[200px]" title={cheque.projectName}>
+                            {cheque.projectName}
+                          </span>
+                        ) : (
+                          <span className="text-sm text-slate-400 italic">---</span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-slate-600">
                         {format(new Date(cheque.dueDate), "MMM dd, yyyy")}
