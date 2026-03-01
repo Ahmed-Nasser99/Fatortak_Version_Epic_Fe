@@ -509,33 +509,75 @@ const ProjectDetails: React.FC = () => {
                               </td>
                             </tr>
                           ) : (
-                            project.projectLines.map((line, index) => (
-                              <tr
-                                key={line.id}
-                                className={`${index % 2 === 0 ? "bg-white" : "bg-slate-50/10"} hover:bg-indigo-50/30 transition-colors`}
-                              >
-                                <td className="py-4 px-6 font-medium text-slate-800">
-                                  {line.description}
-                                </td>
-                                <td className="py-4 px-3 text-center text-slate-600 font-mono">
-                                  {line.quantity}
-                                </td>
-                                <td className="py-4 px-3 text-center">
-                                  <Badge
-                                    variant="outline"
-                                    className="text-[10px] font-bold text-slate-500 bg-slate-50 border-slate-200"
-                                  >
-                                    {line.unit || "---"}
-                                  </Badge>
-                                </td>
-                                <td className="py-4 px-4 text-right text-slate-600 font-mono tracking-tighter">
-                                  {formatNumber(line.unitPrice)}
-                                </td>
-                                <td className="py-4 px-6 text-right font-bold text-indigo-900 font-mono tracking-tighter">
-                                  {formatNumber(line.lineTotal)}
-                                </td>
-                              </tr>
-                            ))
+                            (() => {
+                              const groupedMap = new Map();
+                              const sectionOrder = [];
+                              (project.projectLines || []).forEach((line) => {
+                                const secName = line.sectionName || "General Works";
+                                if (!groupedMap.has(secName)) {
+                                  groupedMap.set(secName, []);
+                                  sectionOrder.push(secName);
+                                }
+                                groupedMap.get(secName).push(line);
+                              });
+
+                              const grouped = sectionOrder.map((name) => ({
+                                sectionName: name,
+                                lines: groupedMap.get(name),
+                              }));
+                              
+                              let globalIndex = 0;
+                              return grouped.map((group, gIdx) => (
+                                <React.Fragment key={gIdx}>
+                                  <tr className="bg-[#cbd5e1] text-[#1e293b] font-bold text-sm">
+                                    <td colSpan={5} className="py-2 px-6 text-left tracking-widest uppercase">
+                                      {group.sectionName}
+                                    </td>
+                                  </tr>
+                                  {group.lines.map(line => {
+                                    const index = globalIndex++;
+                                    return (
+                                      <tr
+                                        key={line.id}
+                                        className={`${index % 2 === 0 ? "bg-white" : "bg-slate-50/10"} hover:bg-indigo-50/30 transition-colors`}
+                                      >
+                                        <td className="py-4 px-6 font-medium text-slate-800">
+                                          {line.description}
+                                        </td>
+                                        <td className="py-4 px-3 text-center text-slate-600 font-mono">
+                                          {line.quantity}
+                                        </td>
+                                        <td className="py-4 px-3 text-center">
+                                          <Badge
+                                            variant="outline"
+                                            className="text-[10px] font-bold text-slate-500 bg-slate-50 border-slate-200"
+                                          >
+                                            {line.unit || "---"}
+                                          </Badge>
+                                        </td>
+                                        <td className="py-4 px-4 text-right text-slate-600 font-mono tracking-tighter">
+                                          {formatNumber(line.unitPrice)}
+                                        </td>
+                                        <td className="py-4 px-6 text-right font-bold text-indigo-900 font-mono tracking-tighter">
+                                          {formatNumber(line.lineTotal)}
+                                        </td>
+                                      </tr>
+                                    );
+                                  })}
+                                  {/* Section Total Row */}
+                                  <tr className="bg-[#1e293b] text-white font-bold text-sm">
+                                    <td colSpan={4} className="py-2 px-6 text-right uppercase tracking-wider">
+                                      Section Total
+                                    </td>
+                                    <td className="py-2 px-6 text-right font-mono bg-[#0f172a]">
+                                      {formatNumber(
+                                        group.lines.reduce((acc, l) => acc + (l.lineTotal || 0), 0)
+                                      )}
+                                    </td>
+                                  </tr>
+                                </React.Fragment>
+                              ));
+                            })()
                           )}
                         </tbody>
                         {project.projectLines?.length > 0 && (

@@ -518,6 +518,7 @@ export interface NotificationDto {
 // Project related DTOs
 export interface ProjectLineDto {
   id: string;
+  sectionName?: string;
   description: string;
   quantity: number;
   unit?: string;

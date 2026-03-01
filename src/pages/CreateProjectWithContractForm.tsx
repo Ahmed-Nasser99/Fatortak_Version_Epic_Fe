@@ -35,6 +35,11 @@ interface ProjectLineForm {
   unitPrice: number;
 }
 
+interface ProjectSectionForm {
+  sectionName: string;
+  lines: ProjectLineForm[];
+}
+
 const CreateProjectWithContractForm = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -61,8 +66,11 @@ const CreateProjectWithContractForm = () => {
   ]);
   const [activateImmediately, setActivateImmediately] = useState(true);
 
-  const [lines, setLines] = useState<ProjectLineForm[]>([
-    { description: "", quantity: 1, unit: "M2", unitPrice: 0 },
+  const [sections, setSections] = useState<ProjectSectionForm[]>([
+    {
+      sectionName: "PROJECT SPECIFICATIONS & WORKS",
+      lines: [{ description: "", quantity: 1, unit: "M2", unitPrice: 0 }],
+    }
   ]);
 
   // Totals
@@ -90,7 +98,7 @@ const CreateProjectWithContractForm = () => {
   }, []);
 
   useEffect(() => {
-    const newSubtotal = lines.reduce(
+    const newSubtotal = sections.flatMap((s) => s.lines).reduce(
       (acc, line) => acc + line.quantity * line.unitPrice,
       0,
     );
@@ -98,7 +106,7 @@ const CreateProjectWithContractForm = () => {
     const calculatedVat = includeVat ? newSubtotal * vatRate : 0;
     setVatAmount(calculatedVat);
     setTotal(newSubtotal + calculatedVat - discount);
-  }, [lines, includeVat, vatRate, discount]);
+  }, [sections, includeVat, vatRate, discount]);
 
   const fetchCustomers = async () => {
     try {
@@ -129,26 +137,59 @@ const CreateProjectWithContractForm = () => {
     }
   };
 
-  const addLine = () => {
-    setLines([
-      ...lines,
-      { description: "", quantity: 1, unit: "M2", unitPrice: 0 },
+  const addSection = () => {
+    setSections([
+      ...sections,
+      {
+        sectionName: "NEW SECTION",
+        lines: [{ description: "", quantity: 1, unit: "M2", unitPrice: 0 }],
+      },
     ]);
   };
 
-  const removeLine = (index: number) => {
-    if (lines.length === 1) return;
-    setLines(lines.filter((_, i) => i !== index));
+  const removeSection = (secIdx: number) => {
+    if (sections.length === 1) return;
+    setSections(sections.filter((_, i) => i !== secIdx));
+  };
+
+  const updateSectionName = (secIdx: number, value: string) => {
+    const newSections = [...sections];
+    newSections[secIdx].sectionName = value;
+    setSections(newSections);
+  };
+
+  const addLine = (secIdx: number) => {
+    const newSections = [...sections];
+    newSections[secIdx].lines.push({
+      description: "",
+      quantity: 1,
+      unit: "M2",
+      unitPrice: 0,
+    });
+    setSections(newSections);
+  };
+
+  const removeLine = (secIdx: number, lineIdx: number) => {
+    const newSections = [...sections];
+    if (newSections[secIdx].lines.length === 1) return;
+    newSections[secIdx].lines = newSections[secIdx].lines.filter(
+      (_, i) => i !== lineIdx,
+    );
+    setSections(newSections);
   };
 
   const updateLine = (
-    index: number,
+    secIdx: number,
+    lineIdx: number,
     field: keyof ProjectLineForm,
     value: any,
   ) => {
-    const newLines = [...lines];
-    newLines[index] = { ...newLines[index], [field]: value };
-    setLines(newLines);
+    const newSections = [...sections];
+    newSections[secIdx].lines[lineIdx] = {
+      ...newSections[secIdx].lines[lineIdx],
+      [field]: value,
+    };
+    setSections(newSections);
   };
 
   // Notes/Remarks Handlers
@@ -165,7 +206,7 @@ const CreateProjectWithContractForm = () => {
     if (
       !projectName ||
       !clientId ||
-      lines.some((l) => !l.description || l.quantity <= 0 || l.unitPrice <= 0)
+      sections.flatMap((s) => s.lines).some((l) => !l.description || l.quantity <= 0 || l.unitPrice <= 0)
     ) {
       toast.error("Please fill all required fields correctly");
       return;
@@ -181,7 +222,7 @@ const CreateProjectWithContractForm = () => {
         clientId,
         paymentTerms,
         notes: combinedNotes,
-        lines,
+        lines: sections.flatMap((s) => s.lines.map((l) => ({ ...l, sectionName: s.sectionName || undefined }))),
         activateImmediately: activate,
         discount: discount,
       };
@@ -336,101 +377,134 @@ const CreateProjectWithContractForm = () => {
               </tr>
             </thead>
             <tbody>
-              {/* Optional Section Header */}
-              <tr className="bg-[#cbd5e1] text-[#1e293b] font-bold text-sm">
-                <td
-                  colSpan={7}
-                  className="border border-black px-4 py-1 text-center tracking-widest uppercase"
-                >
-                  PROJECT SPECIFICATIONS & WORKS
-                </td>
-              </tr>
-              {lines.map((line, idx) => (
-                <tr key={idx} className="group">
-                  <td className="border border-black px-2 py-4 text-center font-bold align-top">
-                    {idx + 1}
-                  </td>
-                  <td className="border border-black px-4 py-3 align-top">
-                    <textarea
-                      value={line.description}
-                      onChange={(e) =>
-                        updateLine(idx, "description", e.target.value)
-                      }
-                      rows={4}
-                      className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm resize-none leading-relaxed"
-                      placeholder="Enter detailed description..."
-                    />
-                  </td>
-                  <td className="border border-black px-2 py-4 text-center align-middle">
-                    <select
-                      value={line.unit}
-                      onChange={(e) => updateLine(idx, "unit", e.target.value)}
-                      className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-center font-medium appearance-none cursor-pointer"
+              {sections.map((section, secIdx) => (
+                <React.Fragment key={secIdx}>
+                  <tr className="bg-[#cbd5e1] text-[#1e293b] font-bold text-sm group">
+                    <td
+                      colSpan={6}
+                      className="border border-black px-4 py-1 text-center tracking-widest uppercase"
                     >
-                      {UNIT_OPTIONS.map((opt) => (
-                        <option key={opt} value={opt}>
-                          {opt}
-                        </option>
-                      ))}
-                    </select>
-                  </td>
-                  <td className="border border-black px-2 py-4 text-center align-middle">
-                    <input
-                      type="number"
-                      value={line.quantity}
-                      onChange={(e) =>
-                        updateLine(
-                          idx,
-                          "quantity",
-                          parseFloat(e.target.value) || 0,
-                        )
-                      }
-                      className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-center font-medium"
-                    />
-                  </td>
-                  <td className="border border-black px-4 py-4 text-right align-middle font-medium">
-                    <input
-                      type="number"
-                      value={line.unitPrice}
-                      onChange={(e) =>
-                        updateLine(
-                          idx,
-                          "unitPrice",
-                          parseFloat(e.target.value) || 0,
-                        )
-                      }
-                      className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-right font-medium"
-                    />
-                  </td>
-                  <td className="border border-black px-4 py-4 text-right align-middle text-sm font-bold bg-[#f8fafc]">
-                    {(line.quantity * line.unitPrice).toLocaleString(
-                      undefined,
-                      { minimumFractionDigits: 0 },
-                    )}
-                  </td>
-                  <td className="border border-black px-1 py-1 text-center align-middle no-print">
-                    <button
-                      onClick={() => removeLine(idx)}
-                      className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
+                      <input
+                        value={section.sectionName}
+                        onChange={(e) => updateSectionName(secIdx, e.target.value)}
+                        className="w-full bg-transparent border-none focus:ring-0 p-0 text-center font-bold text-sm uppercase placeholder-[#1e293b]"
+                        placeholder="Section Name"
+                      />
+                    </td>
+                    <td className="border border-black px-1 py-1 text-center align-middle no-print">
+                      {sections.length > 1 && (
+                        <button
+                          onClick={() => removeSection(secIdx)}
+                          className="text-gray-500 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                          title="Remove Section"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                  {section.lines.map((line, idx) => (
+                    <tr key={idx} className="group hover:bg-slate-50 transition-colors">
+                      <td className="border border-black px-2 py-4 text-center font-bold align-top">
+                        {idx + 1}
+                      </td>
+                      <td className="border border-black px-4 py-3 align-top">
+                        <textarea
+                          value={line.description}
+                          onChange={(e) =>
+                            updateLine(secIdx, idx, "description", e.target.value)
+                          }
+                          rows={4}
+                          className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm resize-none leading-relaxed"
+                          placeholder="Enter detailed description..."
+                        />
+                      </td>
+                      <td className="border border-black px-2 py-4 text-center align-middle">
+                        <select
+                          value={line.unit}
+                          onChange={(e) => updateLine(secIdx, idx, "unit", e.target.value)}
+                          className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-center font-medium appearance-none cursor-pointer"
+                        >
+                          {UNIT_OPTIONS.map((opt) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                      <td className="border border-black px-2 py-4 text-center align-middle">
+                        <input
+                          type="number"
+                          value={line.quantity}
+                          onChange={(e) =>
+                            updateLine(secIdx, idx, "quantity", parseFloat(e.target.value) || 0)
+                          }
+                          className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-center font-medium"
+                        />
+                      </td>
+                      <td className="border border-black px-4 py-4 text-right align-middle font-medium">
+                        <input
+                          type="number"
+                          value={line.unitPrice}
+                          onChange={(e) =>
+                            updateLine(secIdx, idx, "unitPrice", parseFloat(e.target.value) || 0)
+                          }
+                          className="w-full bg-transparent border-none focus:ring-0 p-0 text-sm text-right font-medium"
+                        />
+                      </td>
+                      <td className="border border-black px-4 py-4 text-right align-middle text-sm font-bold bg-[#f8fafc]">
+                        {(line.quantity * line.unitPrice).toLocaleString(undefined, { minimumFractionDigits: 0 })}
+                      </td>
+                      <td className="border border-black px-1 py-1 text-center align-middle no-print">
+                        <button
+                          onClick={() => removeLine(secIdx, idx)}
+                          className="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {/* Section Total Row */}
+                  <tr className="bg-[#1e293b] text-white font-bold text-sm">
+                    <td colSpan={5} className="border border-black px-4 py-1 text-right uppercase tracking-wider">
+                      Section Total
+                    </td>
+                    <td className="border border-black px-4 py-1 text-right bg-[#0f172a]">
+                      {section.lines
+                        .reduce((acc, l) => acc + l.quantity * l.unitPrice, 0)
+                        .toLocaleString(undefined, { minimumFractionDigits: 0 })}
+                    </td>
+                    <td className="border border-black no-print"></td>
+                  </tr>
+
+                  {/* Add Line Button Row for Section */}
+                  <tr className="no-print">
+                    <td colSpan={7} className="border border-black p-1 bg-white">
+                      <button
+                        onClick={() => addLine(secIdx)}
+                        className="w-full py-1 text-xs text-indigo-400 hover:text-indigo-600 rounded flex items-center justify-center gap-1 transition-all font-medium"
+                      >
+                        <Plus className="w-3 h-3" />
+                        Add Item to Section
+                      </button>
+                    </td>
+                  </tr>
+                </React.Fragment>
               ))}
 
-              {/* Add Line Button Row */}
+              {/* Add Section Button Row */}
               <tr className="no-print">
                 <td
                   colSpan={7}
                   className="border border-black p-2 bg-[#f8fafc]"
                 >
                   <button
-                    onClick={addLine}
+                    onClick={addSection}
                     className="w-full py-2 border-2 border-dashed border-gray-300 text-gray-400 hover:text-indigo-600 hover:border-indigo-400 rounded-lg flex items-center justify-center gap-2 transition-all font-medium"
                   >
                     <Plus className="w-4 h-4" />
-                    Add Work Item
+                    Add Work Section
                   </button>
                 </td>
               </tr>
