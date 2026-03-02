@@ -104,13 +104,11 @@ const Projects: React.FC = () => {
   const projectStats = calculateStats();
 
   const handleNewProject = () => {
-    setEditProject(null);
-    setIsModalOpen(true);
+    navigate("new-with-contract");
   };
 
   const handleEditProject = (project: any) => {
-    setEditProject(project);
-    setIsModalOpen(true);
+    navigate(`/projects/edit-with-contract/${project.id}`);
   };
 
   const handleDeleteProject = (projectId: string) => {

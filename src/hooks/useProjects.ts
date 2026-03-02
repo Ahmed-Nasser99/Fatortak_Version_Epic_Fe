@@ -5,6 +5,7 @@ import {
   UpdateProjectDto,
   ProjectFilterDto,
   PaginationDto,
+  CreateProjectWithContractCommand,
 } from "../types/api";
 
 export const useProjects = (
@@ -42,6 +43,19 @@ export const useUpdateProject = () => {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: UpdateProjectDto }) =>
       projectService.updateProject(id, data),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ["projects"] });
+      queryClient.invalidateQueries({ queryKey: ["project", id] });
+    },
+  });
+};
+
+export const useUpdateProjectWithContract = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: string; data: CreateProjectWithContractCommand }) =>
+      projectService.updateProjectWithContract(id, data),
     onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["projects"] });
       queryClient.invalidateQueries({ queryKey: ["project", id] });

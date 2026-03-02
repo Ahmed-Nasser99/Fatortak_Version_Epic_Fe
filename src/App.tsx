@@ -68,6 +68,7 @@ import JournalEntries from "./pages/JournalEntries";
 import ExpenseCategories from "./pages/ExpenseCategories";
 import Custody from "./pages/Custody";
 import CreateProjectWithContractForm from "./pages/CreateProjectWithContractForm";
+import EditProjectWithContractForm from "./pages/EditProjectWithContractForm";
 import ProjectDetails from "./pages/ProjectDetails";
 
 const queryClient = new QueryClient({
@@ -138,6 +139,7 @@ function AppContent() {
           <Route path="projects" element={<Projects />} />
           <Route path="projects/:id" element={<ProjectDetails />} />
           <Route path="projects/new-with-contract" element={<CreateProjectWithContractForm />} />
+          <Route path="projects/edit-with-contract/:id" element={<EditProjectWithContractForm />} />
           <Route path="suppliers" element={<Suppliers />} />
           <Route path="chart-of-accounts" element={<ChartOfAccounts />} />
           <Route path="expense-categories" element={<ExpenseCategories />} />

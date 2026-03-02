@@ -60,6 +60,11 @@ export const projectService = {
     return apiClient.post<ProjectDto>("/api/projects/with-contract", data);
   },
 
+  // Update project with contract setup
+  updateProjectWithContract: async (id: string, data: CreateProjectWithContractCommand) => {
+    return apiClient.post<ProjectDto>(`/api/projects/${id}/update-with-contract`, data);
+  },
+
   // Export project to PDF
   exportProjectPdf: async (id: string, projectName: string) => {
     const blob = await apiClient.getBlob(`/api/projects/${id}/export/pdf`);

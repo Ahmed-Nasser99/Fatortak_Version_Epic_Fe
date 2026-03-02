@@ -324,12 +324,12 @@ const ProjectDetails: React.FC = () => {
               <FileSpreadsheet className={`w-4 h-4 text-emerald-500 ${isExporting === "excel" ? "animate-pulse" : ""}`} />
               <span className="text-slate-700">{isExporting === "excel" ? "Exporting..." : "Export Excel"}</span>
             </Button>
-            {project.status !== ProjectStatus.Active &&
-              project.status !== ProjectStatus.Completed && (
+            {project.status !== ProjectStatus.Completed &&
+              project.status !== ProjectStatus.Cancelled && (
                 <Button
                   className="bg-indigo-600 hover:bg-indigo-700 text-white gap-2 rounded-xl px-4 shadow-md shadow-indigo-200"
                   onClick={() =>
-                    navigate(`/projects/new-with-contract?edit=${project.id}`)
+                    navigate(`/projects/edit-with-contract/${project.id}`)
                   }
                 >
                   Edit Project
