@@ -50,7 +50,7 @@ const EditProjectWithContractForm = () => {
   const [clientEmail, setClientEmail] = useState("");
   const [clientPhone, setClientPhone] = useState("");
   const [quotationDate, setQuotationDate] = useState(
-    new Date().toISOString().split("T")[0],
+    new Date().toLocaleDateString('en-CA'),
   );
   const [paymentTerms, setPaymentTerms] = useState(
     "60% Down payment & 20% After delivery & 10% Upon Installation",
@@ -98,10 +98,13 @@ const EditProjectWithContractForm = () => {
       setProjectName(p.name);
       setClientId(p.customerId || "");
       if (p.createdAt) {
-          setQuotationDate(new Date(p.createdAt).toISOString().split("T")[0]);
+          setQuotationDate(p.createdAt.split("T")[0]);
       }
       setPaymentTerms(p.paymentTerms || "");
       setDiscount(p.discount || 0);
+      
+      setIncludeVat(p.includeVat ?? false);
+      if (p.vatRate !== undefined) setVatRate(p.vatRate);
       
       if (p.notes) {
           const notesArr = p.notes.split("\n").map(n => n.startsWith("- ") ? n.substring(2) : n).filter(n => n.trim() !== "");
@@ -267,6 +270,9 @@ const EditProjectWithContractForm = () => {
         notes: combinedNotes,
         lines: sections.flatMap((s) => s.lines.map((l) => ({ ...l, sectionName: s.sectionName || undefined }) as any)),
         discount: discount,
+        createdAt: quotationDate,
+        includeVat,
+        vatRate,
       };
 
       const result = await updateProjectMutation.mutateAsync({ id: id!, data: payload as any });

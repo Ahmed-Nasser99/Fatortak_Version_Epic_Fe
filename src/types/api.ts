@@ -547,6 +547,8 @@ export interface ProjectDto {
   netProfit: number;
   discount: number;
   projectLines: ProjectLineDto[];
+  includeVat?: boolean;
+  vatRate?: number;
   updatedAt: string;
 }
 

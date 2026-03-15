@@ -119,15 +119,13 @@ const Suppliers: React.FC = () => {
         toast.success(
           isRTL
             ? "تم تحديث حالة المورد بنجاح"
-            : "Supplier status updated successfully"
+            : "Supplier status updated successfully",
         );
         refetch();
       }
     } catch (error) {
       toast.error(
-        isRTL
-          ? "فشل في تحديث حالة المورد"
-          : "Failed to update supplier status"
+        isRTL ? "فشل في تحديث حالة المورد" : "Failed to update supplier status",
       );
     }
   };
@@ -139,16 +137,12 @@ const Suppliers: React.FC = () => {
       const result = await deleteSupplierMutation.mutateAsync(deleteSupplierId);
 
       if (result.success) {
-        toast.success(
-          t("supplierDeletedSuccessfully")
-        );
+        toast.success(t("supplierDeletedSuccessfully"));
         setDeleteSupplierId(null);
         refetch();
       }
     } catch (error) {
-      toast.error(
-        isRTL ? "فشل في حذف المورد" : t("failedToDeleteSupplier")
-      );
+      toast.error(isRTL ? "فشل في حذف المورد" : t("failedToDeleteSupplier"));
     }
   };
 
@@ -586,7 +580,7 @@ const Suppliers: React.FC = () => {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Calendar className="w-4 h-4 text-muted-foreground" />
-                          {formatDate(customer.createdAt)}
+                        {formatDate(customer.createdAt)}
                       </div>
                     </div>
 
@@ -622,9 +616,9 @@ const Suppliers: React.FC = () => {
             <div className="border-t bg-muted/20 px-6 py-4">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="text-sm text-muted-foreground">
-                    {isRTL
-                      ? `عرض ${formatNumber(allCustomers.length)} من ${formatNumber(totalCount)} مورد`
-                      : `Showing ${formatNumber(allCustomers.length)} of ${formatNumber(totalCount)} suppliers`}
+                  {isRTL
+                    ? `عرض ${formatNumber(allCustomers.length)} من ${formatNumber(totalCount)} مورد`
+                    : `Showing ${formatNumber(allCustomers.length)} of ${formatNumber(totalCount)} suppliers`}
                 </div>
                 <div className="flex space-x-2">
                   <Button
@@ -689,6 +683,7 @@ const Suppliers: React.FC = () => {
 
       {editSupplierId && editSupplier && !isLoadingEditSupplier && (
         <CustomerUpdateModal
+          isSupplier={true}
           customer={editSupplier}
           onSave={() => {
             setEditSupplierId(null);

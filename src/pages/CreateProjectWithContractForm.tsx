@@ -54,7 +54,7 @@ const CreateProjectWithContractForm = () => {
   const [clientPhone, setClientPhone] = useState("");
   const [quotationType, setQuotationType] = useState("Financial Offer");
   const [quotationDate, setQuotationDate] = useState(
-    new Date().toISOString().split("T")[0],
+    new Date().toLocaleDateString('en-CA')
   );
   const [paymentTerms, setPaymentTerms] = useState(
     "60% Down payment & 20% After delivery & 10% Upon Installation",
@@ -225,6 +225,9 @@ const CreateProjectWithContractForm = () => {
         lines: sections.flatMap((s) => s.lines.map((l) => ({ ...l, sectionName: s.sectionName || undefined }))),
         activateImmediately: activate,
         discount: discount,
+        createdAt: quotationDate,
+        includeVat,
+        vatRate,
       };
 
       const result = await projectService.createProjectWithContract(payload);
