@@ -196,7 +196,8 @@ const ProjectDetails: React.FC = () => {
   const collectionPercentage =
     invoicedAmount > 0 ? (collectedAmount / invoicedAmount) * 100 : 0;
   
-  const netValue = project.contractValue - (project.discount || 0);
+  const vatAmount = project.includeVat ? project.contractValue * (project.vatRate || 0) : 0;
+  const netValue = project.contractValue - (project.discount || 0) + vatAmount;
   const totalRemaining = Math.max(0, netValue - collectedAmount);
 
   const getStatusBadge = (status: ProjectStatus) => {

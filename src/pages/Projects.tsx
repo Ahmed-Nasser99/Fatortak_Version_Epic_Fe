@@ -86,9 +86,16 @@ const Projects: React.FC = () => {
     ? projectsResponse.data?.totalCount || 0
     : 0;
 
+  const calculateProjectTotal = (p: any) => {
+    const subtotal = p.contractValue || 0;
+    const discount = p.discount || 0;
+    const vatAmount = p.includeVat ? subtotal * (p.vatRate || 0) : 0;
+    return subtotal - discount + vatAmount;
+  };
+
   const calculateStats = () => {
     const totalBudget = projects.reduce(
-      (acc: number, p: any) => acc + (p.contractValue || 0),
+      (acc: number, p: any) => acc + calculateProjectTotal(p),
       0,
     );
     const activeProjects = projects.filter(
@@ -454,15 +461,17 @@ const Projects: React.FC = () => {
                           {project.customerName || "-"}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium">
-                          {project.contractValue
-                            ? formatNumber(project.contractValue)
+                          {calculateProjectTotal(project) > 0
+                            ? formatNumber(calculateProjectTotal(project))
                             : "-"}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-emerald-600 dark:text-emerald-400">
                           {formatNumber(project.totalCollected || 0)}
                         </td>
                         <td className="px-6 py-4 text-sm font-medium text-rose-600 dark:text-rose-400">
-                          {formatNumber((project.contractValue || 0) - (project.totalCollected || 0))}
+                          {formatNumber(
+                            Math.max(0, calculateProjectTotal(project) - (project.totalCollected || 0)),
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="w-[140px]">
@@ -552,12 +561,10 @@ const Projects: React.FC = () => {
                               onClick={() => handleDeleteProject(project.id)}
                               className="text-destructive hover:text-destructive/80"
                               disabled={
-                                project.status === ProjectStatus.Completed ||
-                                project.status === ProjectStatus.Cancelled
+                                project.status === ProjectStatus.Completed
                               }
                               title={
-                                project.status === ProjectStatus.Completed ||
-                                project.status === ProjectStatus.Cancelled
+                                project.status === ProjectStatus.Completed
                                   ? isRTL
                                     ? "لا يمكن حذف مشروع منتهي"
                                     : "Cannot delete closed project"
@@ -628,8 +635,8 @@ const Projects: React.FC = () => {
                   <div className="flex justify-between text-sm">
                     <span>
                       {isRTL ? "الميزانية: " : "Budget: "}
-                      {project.contractValue
-                        ? formatNumber(project.contractValue)
+                      {calculateProjectTotal(project) > 0
+                        ? formatNumber(calculateProjectTotal(project))
                         : "-"}
                     </span>
                   </div>
@@ -657,10 +664,7 @@ const Projects: React.FC = () => {
                       size="sm"
                       onClick={() => handleDeleteProject(project.id)}
                       className="text-destructive"
-                      disabled={
-                        project.status === ProjectStatus.Completed ||
-                        project.status === ProjectStatus.Cancelled
-                      }
+                      disabled={project.status === ProjectStatus.Completed}
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>

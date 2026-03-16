@@ -94,14 +94,16 @@ const ProjectProfitability: React.FC = () => {
                   {response?.projects?.map((project: any) => (
                     <TableRow key={project.projectId}>
                       <TableCell className="font-medium">
-                        <div>{project.projectName}</div>
-                        <div className="text-xs text-gray-500 italic">{project.clientName}</div>
+                        <div className="font-bold">{project.projectName}</div>
+                      </TableCell>
+                      <TableCell className="text-gray-500 italic">
+                        {project.clientName || "-"}
                       </TableCell>
                       <TableCell className="text-right font-mono">{formatCurrency(project.contractValue)}</TableCell>
                       <TableCell className="text-right font-mono text-green-600">{formatCurrency(project.totalRevenue)}</TableCell>
                       <TableCell className="text-right font-mono text-red-600">{formatCurrency(project.totalExpenses)}</TableCell>
                       <TableCell className="text-right font-mono font-bold">{formatCurrency(project.grossProfit)}</TableCell>
-                      <TableCell className="text-right">
+                      <TableCell className="text-center">
                          <div className={`px-2 py-1 rounded text-xs font-bold inline-block ${project.profitMargin >= 20 ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                             {project.profitMargin.toFixed(1)}%
                          </div>
