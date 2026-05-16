@@ -12,6 +12,7 @@ import {
   ReturnCustodyByAccountDto,
   ReplenishCustodyByAccountDto,
   CreateCustodyAccountDto,
+  SetInitialBalanceDto,
 } from "../types/api";
 import { toast } from "sonner";
 
@@ -347,6 +348,24 @@ export const useCreateCustodyAccount = () => {
     },
     onError: (error: any) => {
       toast.error(error.message || "Failed to create custody account");
+    },
+  });
+};
+
+export const useSetInitialBalance = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: SetInitialBalanceDto) =>
+      accountingService.setInitialBalance(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["accounts"] });
+      queryClient.invalidateQueries({ queryKey: ["accountHierarchy"] });
+      queryClient.invalidateQueries({ queryKey: ["journalEntries"] });
+      toast.success("Initial balance set successfully");
+    },
+    onError: (error: any) => {
+      toast.error(error.message || "Failed to set initial balance");
     },
   });
 };

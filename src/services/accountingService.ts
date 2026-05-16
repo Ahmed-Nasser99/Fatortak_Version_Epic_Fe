@@ -19,6 +19,7 @@ import {
   ReturnCustodyByAccountDto,
   ReplenishCustodyByAccountDto,
   CreateCustodyAccountDto,
+  SetInitialBalanceDto,
 } from "../types/api";
 
 export const accountingService = {
@@ -107,20 +108,18 @@ export const accountingService = {
   },
 
   createJournalEntry: async (data: JournalEntryCreateDto) => {
+    const formData = new FormData();
+    formData.append("date", data.date);
+    if (data.description) formData.append("description", data.description);
+    formData.append("lines", JSON.stringify(data.lines));
+
     if (data.attachment) {
-      const formData = new FormData();
-      formData.append("date", data.date);
-      if (data.description) formData.append("description", data.description);
-      formData.append("lines", JSON.stringify(data.lines));
       formData.append("file", data.attachment);
-      return apiClient.post<JournalEntryDto>(
-        "/api/accounting/journal-entries",
-        formData
-      );
     }
+
     return apiClient.post<JournalEntryDto>(
       "/api/accounting/journal-entries",
-      data
+      formData
     );
   },
 
@@ -242,6 +241,13 @@ export const accountingService = {
 
   createCustodyAccount: async (data: CreateCustodyAccountDto) => {
     return apiClient.post<AccountDto>("/api/accounting/custody/accounts", data);
+  },
+
+  setInitialBalance: async (data: SetInitialBalanceDto) => {
+    return apiClient.post<JournalEntryDto>(
+      "/api/accounting/accounts/initial-balance",
+      data
+    );
   },
 };
 

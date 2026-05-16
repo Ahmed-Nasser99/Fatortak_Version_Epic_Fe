@@ -10,11 +10,30 @@ export const exportService = {
       throw new Error('Element not found for export');
     }
 
+    // `html2canvas` has known issues with Arabic/RTL bidi rendering in some cases.
+    // We force RTL semantics on the cloned DOM when the source element is RTL.
+    const isRTL =
+      element.getAttribute('dir') === 'rtl' ||
+      getComputedStyle(element).direction === 'rtl' ||
+      element.closest('[dir="rtl"]') !== null;
+
     const canvas = await html2canvas(element, {
       scale: 2,
       useCORS: true,
       allowTaint: true,
-      backgroundColor: '#ffffff'
+      backgroundColor: '#ffffff',
+      foreignObjectRendering: true,
+      onclone: (clonedDoc) => {
+        if (!isRTL) return;
+        const clonedEl = clonedDoc.getElementById(elementId);
+        if (!clonedEl) return;
+
+        clonedEl.setAttribute('dir', 'rtl');
+        // Ensure bidi algorithm runs correctly inside the render clone.
+        (clonedEl as HTMLElement).style.direction = 'rtl';
+        (clonedEl as HTMLElement).style.unicodeBidi = 'plaintext';
+        (clonedEl as HTMLElement).style.textAlign = 'right';
+      },
     });
     
     const imgData = canvas.toDataURL('image/png');

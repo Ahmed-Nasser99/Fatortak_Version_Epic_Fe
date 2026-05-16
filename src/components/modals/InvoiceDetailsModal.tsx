@@ -21,6 +21,7 @@ import { useCurrentCompany } from "../../hooks/useCompanies";
 import { formatCurrency } from "@/Helpers/formatCurrency";
 import { toast } from "react-toastify";
 import { invoiceTemplates } from "../invoice-templates";
+import { exportService } from "@/services/exportService";
 
 interface InvoiceDetailsModalProps {
   isOpen: boolean;
@@ -146,33 +147,13 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
 
   const handleDownloadPDF = async () => {
     try {
-      const { default: jsPDF } = await import("jspdf");
-      const html2canvas = await import("html2canvas");
-
       const element = document.getElementById("invoice-print-content");
       if (!element) return;
-
-      const canvas = await html2canvas.default(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-      });
-
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(
-        canvas.toDataURL("image/png"),
-        "PNG",
-        0,
-        0,
-        imgWidth,
-        imgHeight
+      // Use shared export logic (includes Arabic/RTL fixes)
+      await exportService.exportToPDF(
+        "invoice-print-content",
+        `invoice-${invoice.invoiceNumber}.pdf`
       );
-
-      pdf.save(`invoice-${invoice.invoiceNumber}.pdf`);
     } catch (error) {
       toast.error(t("pdfGenerationFailed") || "Failed to generate PDF");
     }
@@ -215,7 +196,16 @@ const InvoiceDetailsModal: React.FC<InvoiceDetailsModalProps> = ({
         </div>
 
         {/* Content for both display and print */}
-        <div id="invoice-print-content" className="p-8">
+        <div
+          id="invoice-print-content"
+          className="p-8"
+          dir={isRTL ? "rtl" : "ltr"}
+          style={
+            isRTL
+              ? { direction: "rtl", unicodeBidi: "plaintext", textAlign: "right" }
+              : undefined
+          }
+        >
           <SelectedTemplateComponent
             invoice={invoice}
             company={company}

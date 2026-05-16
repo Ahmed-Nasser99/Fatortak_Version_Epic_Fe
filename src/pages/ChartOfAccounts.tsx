@@ -9,6 +9,7 @@ import {
   ChevronRight,
   ChevronDown,
   FileText,
+  Banknote,
 } from "lucide-react";
 import { useLanguage } from "../contexts/LanguageContext";
 import {
@@ -17,6 +18,7 @@ import {
   useUpdateAccount,
   useDeleteAccount,
   useAccountHierarchy,
+  useSetInitialBalance,
 } from "../hooks/useAccounting";
 import {
   AccountDto,
@@ -66,6 +68,7 @@ const ChartOfAccounts: React.FC = () => {
   const [expandedAccounts, setExpandedAccounts] = useState<Set<string>>(
     new Set()
   );
+  const [isInitialBalanceModalOpen, setIsInitialBalanceModalOpen] = useState(false);
   const [pagination, setPagination] = useState({
     pageNumber: 1,
     pageSize: 100,
@@ -240,6 +243,20 @@ const ChartOfAccounts: React.FC = () => {
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 )}
+                {account.isPostable && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-emerald-500 hover:text-emerald-600 hover:bg-emerald-50"
+                    onClick={() => {
+                        setSelectedAccount(account);
+                        setIsInitialBalanceModalOpen(true);
+                    }}
+                    title={isRTL ? "ضبط الرصيد الافتتاحي" : "Set Initial Balance"}
+                  >
+                    <Banknote className="w-4 h-4" />
+                  </Button>
+                )}
               </div>
             </div>
           </div>
@@ -401,6 +418,24 @@ const ChartOfAccounts: React.FC = () => {
             account={selectedAccount}
             onSuccess={() => {
               setIsEditModalOpen(false);
+              setSelectedAccount(null);
+              refetch();
+            }}
+          />
+        )}
+
+        {/* Initial Balance Modal */}
+        {selectedAccount && (
+          <InitialBalanceModal
+            isOpen={isInitialBalanceModalOpen}
+            onClose={() => {
+              setIsInitialBalanceModalOpen(false);
+              setSelectedAccount(null);
+            }}
+            account={selectedAccount}
+            accounts={accounts}
+            onSuccess={() => {
+              setIsInitialBalanceModalOpen(false);
               setSelectedAccount(null);
               refetch();
             }}
@@ -699,6 +734,163 @@ const EditAccountModal: React.FC<EditAccountModalProps> = ({
               disabled={updateAccountMutation.isPending}
             >
               {updateAccountMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  {isRTL ? "جاري الحفظ..." : "Saving..."}
+                </>
+              ) : (
+                isRTL ? "حفظ" : "Save"
+              )}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Initial Balance Modal Component
+interface InitialBalanceModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  account: AccountDto;
+  accounts: AccountDto[];
+  onSuccess: () => void;
+}
+
+const InitialBalanceModal: React.FC<InitialBalanceModalProps> = ({
+  isOpen,
+  onClose,
+  account,
+  accounts,
+  onSuccess,
+}) => {
+  const { isRTL } = useLanguage();
+  const setInitialBalanceMutation = useSetInitialBalance();
+  const [formData, setFormData] = useState({
+    amount: 0,
+    date: new Date().toISOString().split("T")[0],
+    description: "",
+    sourceAccountId: "",
+  });
+
+  const cashBankAccounts = accounts.filter(
+    (a) =>
+      a.isPostable &&
+      (a.accountType === AccountType.Cash || a.accountType === AccountType.Bank) &&
+      a.id !== account.id
+  );
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const result = await setInitialBalanceMutation.mutateAsync({
+        accountId: account.id,
+        amount: formData.amount,
+        date: formData.date,
+        description: formData.description || undefined,
+        sourceAccountId: formData.sourceAccountId || undefined,
+      });
+      if (result.success) {
+        onSuccess();
+      }
+    } catch (error: any) {}
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>
+            {isRTL ? "ضبط الرصيد الافتتاحي" : "Set Initial Balance"}
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800">
+            <p className="text-xs font-semibold text-blue-600 dark:text-blue-400 mb-1">
+              {isRTL ? "الحساب المستهدف" : "Target Account"}
+            </p>
+            <p className="font-bold">{account.name}</p>
+            <p className="text-xs text-muted-foreground">{account.accountCode}</p>
+          </div>
+
+          <div>
+            <Label>{isRTL ? "المبلغ" : "Amount"} *</Label>
+            <Input
+              type="number"
+              step="0.01"
+              value={formData.amount}
+              onChange={(e) =>
+                setFormData({ ...formData, amount: parseFloat(e.target.value) })
+              }
+              required
+            />
+          </div>
+
+          <div>
+            <Label>{isRTL ? "التاريخ" : "Date"} *</Label>
+            <Input
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              required
+            />
+          </div>
+
+          <div>
+            <Label>{isRTL ? "المصدر (اختياري)" : "Source (Optional)"}</Label>
+            <Select
+              value={formData.sourceAccountId}
+              onValueChange={(val) =>
+                setFormData({ ...formData, sourceAccountId: val })
+              }
+            >
+              <SelectTrigger>
+                <SelectValue
+                  placeholder={
+                    isRTL ? "رأس المال / رصيد افتتاحي" : "Equity / Opening Balance"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="equity">
+                  {isRTL ? "رأس المال / رصيد افتتاحي" : "Equity / Opening Balance"}
+                </SelectItem>
+                {cashBankAccounts.map((acc) => (
+                  <SelectItem key={acc.id} value={acc.id}>
+                    {acc.accountCode} - {acc.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <p className="text-[10px] text-muted-foreground mt-1">
+              {isRTL
+                ? "اتركه فارغاً ليتم اعتباره رصيداً افتتاحياً من حقوق الملكية"
+                : "Leave empty to use Opening Balance Equity"}
+            </p>
+          </div>
+
+          <div>
+            <Label>{isRTL ? "الوصف" : "Description"}</Label>
+            <Input
+              value={formData.description}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
+              placeholder={isRTL ? "وصف للرصيد الافتتاحي" : "Opening balance description"}
+            />
+          </div>
+
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={onClose}>
+              {isRTL ? "إلغاء" : "Cancel"}
+            </Button>
+            <Button
+              type="submit"
+              disabled={setInitialBalanceMutation.isPending}
+              className="bg-emerald-600 hover:bg-emerald-700"
+            >
+              {setInitialBalanceMutation.isPending ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   {isRTL ? "جاري الحفظ..." : "Saving..."}

@@ -606,6 +606,9 @@ export enum AccountType {
   Equity = 3,
   Revenue = 4,
   Expense = 5,
+  Cash = 6,
+  Bank = 7,
+  Other = 8,
 }
 
 export enum JournalEntryReferenceType {
@@ -617,6 +620,7 @@ export enum JournalEntryReferenceType {
   Reversing = 6,
   Inventory = 7,
   Payroll = 8,
+  OpeningBalance = 9,
 }
 
 export interface AccountDto {
@@ -714,6 +718,7 @@ export interface JournalEntryCreateDto {
   description?: string;
   lines: JournalEntryLineCreateDto[];
   attachmentUrl?: string;
+  attachment?: File;
 }
 
 export interface JournalEntryFilterDto {
@@ -841,4 +846,12 @@ export interface ReplenishCustodyByAccountDto {
 export interface CreateCustodyAccountDto {
   name: string;
   description?: string;
+}
+
+export interface SetInitialBalanceDto {
+  accountId: string;
+  amount: number;
+  date: string;
+  description?: string;
+  sourceAccountId?: string;
 }

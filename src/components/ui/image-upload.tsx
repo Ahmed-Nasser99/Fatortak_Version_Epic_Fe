@@ -86,6 +86,14 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
 
   return (
     <div className={cn("relative", className)} dir={isRTL ? 'rtl' : 'ltr'}>
+      <input
+        ref={fileInputRef}
+        type="file"
+        className="hidden"
+        accept={accept}
+        onChange={handleChange}
+        disabled={disabled}
+      />
       {preview ? (
         <div className="relative group">
           {/* Premium Image Preview Card */}
@@ -151,15 +159,6 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
           onDrop={handleDrop}
           onClick={handleClick}
         >
-          <input
-            ref={fileInputRef}
-            type="file"
-            className="hidden"
-            accept={accept}
-            onChange={handleChange}
-            disabled={disabled}
-          />
-          
           <div className="flex flex-col items-center space-y-5">
             {/* Premium Icon */}
             <div className={cn(

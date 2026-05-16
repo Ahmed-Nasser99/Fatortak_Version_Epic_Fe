@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Search,
@@ -82,6 +82,10 @@ const JournalEntries: React.FC = () => {
     referenceType?: JournalEntryReferenceType;
     isPosted?: boolean;
   }>({});
+  
+  useEffect(() => {
+    setPagination((prev) => ({ ...prev, pageNumber: 1 }));
+  }, [searchTerm, filters]);
 
   const { data: entriesResponse, isLoading, refetch } = useJournalEntries(
     pagination,
@@ -100,7 +104,13 @@ const JournalEntries: React.FC = () => {
   const reverseEntryMutation = useReverseJournalEntry();
 
   const entries = entriesResponse?.data?.data || [];
+  const totalCount = entriesResponse?.data?.totalCount || 0;
+  const totalPages = entriesResponse?.data?.totalPages || 0;
   const accounts = accountsResponse?.data?.data || [];
+
+  const handlePageChange = (newPage: number) => {
+    setPagination((prev) => ({ ...prev, pageNumber: newPage }));
+  };
 
   const referenceTypeColors: Record<JournalEntryReferenceType, string> = {
     [JournalEntryReferenceType.Manual]: "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200",
@@ -291,111 +301,171 @@ const JournalEntries: React.FC = () => {
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>{isRTL ? "رقم القيد" : "Entry #"}</TableHead>
-                      <TableHead>{isRTL ? "التاريخ" : "Date"}</TableHead>
-                      <TableHead>{isRTL ? "النوع" : "Type"}</TableHead>
-                      <TableHead>{isRTL ? "الوصف" : "Description"}</TableHead>
-                      <TableHead className="text-right">
-                        {isRTL ? "مدين" : "Debit"}
-                      </TableHead>
-                      <TableHead className="text-right">
-                        {isRTL ? "دائن" : "Credit"}
-                      </TableHead>
-                      <TableHead>{isRTL ? "الحالة" : "Status"}</TableHead>
-                      <TableHead>{isRTL ? "الإجراءات" : "Actions"}</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {entries.length > 0 ? (
-                      entries.map((entry) => (
-                        <TableRow key={entry.id}>
-                          <TableCell className="font-mono">
-                            {entry.entryNumber}
-                          </TableCell>
-                          <TableCell>
-                            {formatDate(new Date(entry.date))}
-                          </TableCell>
-                          <TableCell>
-                            <Badge
-                              className={
-                                referenceTypeColors[entry.referenceType]
-                              }
-                            >
-                              {entry.referenceTypeName}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="max-w-xs truncate">
-                            {entry.description || "-"}
-                          </TableCell>
-                          <TableCell className="text-right font-mono">
-                            {formatCurrency(entry.totalDebit)}
-                          </TableCell>
-                          <TableCell className="text-right font-mono">
-                            {formatCurrency(entry.totalCredit)}
-                          </TableCell>
-                          <TableCell>
-                            {entry.isPosted ? (
-                              <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                <CheckCircle className="w-3 h-3 mr-1" />
-                                {isRTL ? "مرحل" : "Posted"}
-                              </Badge>
-                            ) : (
-                              <Badge variant="outline">
-                                <XCircle className="w-3 h-3 mr-1" />
-                                {isRTL ? "غير مرحل" : "Unposted"}
-                              </Badge>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleViewDetails(entry)}
+              <>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>{isRTL ? "رقم القيد" : "Entry #"}</TableHead>
+                        <TableHead>{isRTL ? "التاريخ" : "Date"}</TableHead>
+                        <TableHead>{isRTL ? "النوع" : "Type"}</TableHead>
+                        <TableHead>{isRTL ? "الوصف" : "Description"}</TableHead>
+                        <TableHead className="text-right">
+                          {isRTL ? "مدين" : "Debit"}
+                        </TableHead>
+                        <TableHead className="text-right">
+                          {isRTL ? "دائن" : "Credit"}
+                        </TableHead>
+                        <TableHead>{isRTL ? "الحالة" : "Status"}</TableHead>
+                        <TableHead>{isRTL ? "الإجراءات" : "Actions"}</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {entries.length > 0 ? (
+                        entries.map((entry) => (
+                          <TableRow key={entry.id}>
+                            <TableCell className="font-mono">
+                              {entry.entryNumber}
+                            </TableCell>
+                            <TableCell>
+                              {formatDate(new Date(entry.date))}
+                            </TableCell>
+                            <TableCell>
+                              <Badge
+                                className={
+                                  referenceTypeColors[entry.referenceType]
+                                }
                               >
-                                <Eye className="w-4 h-4" />
-                              </Button>
-                              {!entry.isPosted && (
+                                {entry.referenceTypeName}
+                              </Badge>
+                            </TableCell>
+                            <TableCell className="max-w-xs truncate">
+                              {entry.description || "-"}
+                            </TableCell>
+                            <TableCell className="text-right font-mono">
+                              {formatCurrency(entry.totalDebit)}
+                            </TableCell>
+                            <TableCell className="text-right font-mono">
+                              {formatCurrency(entry.totalCredit)}
+                            </TableCell>
+                            <TableCell>
+                              {entry.isPosted ? (
+                                <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                  {isRTL ? "مرحل" : "Posted"}
+                                </Badge>
+                              ) : (
+                                <Badge variant="outline">
+                                  <XCircle className="w-3 h-3 mr-1" />
+                                  {isRTL ? "غير مرحل" : "Unposted"}
+                                </Badge>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex gap-1">
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handlePost(entry.id)}
-                                  disabled={postEntryMutation.isPending}
+                                  onClick={() => handleViewDetails(entry)}
                                 >
-                                  <CheckCircle className="w-4 h-4 text-green-600" />
+                                  <Eye className="w-4 h-4" />
                                 </Button>
-                              )}
-                              {entry.isPosted && !entry.reversingEntryId && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleReverse(entry.id)}
-                                  disabled={reverseEntryMutation.isPending}
-                                >
-                                  <RotateCcw className="w-4 h-4 text-orange-600" />
-                                </Button>
-                              )}
-                            </div>
+                                {!entry.isPosted && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handlePost(entry.id)}
+                                    disabled={postEntryMutation.isPending}
+                                  >
+                                    <CheckCircle className="w-4 h-4 text-green-600" />
+                                  </Button>
+                                )}
+                                {entry.isPosted && !entry.reversingEntryId && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => handleReverse(entry.id)}
+                                    disabled={reverseEntryMutation.isPending}
+                                  >
+                                    <RotateCcw className="w-4 h-4 text-orange-600" />
+                                  </Button>
+                                )}
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell
+                            colSpan={8}
+                            className="text-center py-12 text-gray-500"
+                          >
+                            {isRTL ? "لا توجد قيود" : "No entries found"}
                           </TableCell>
                         </TableRow>
-                      ))
-                    ) : (
-                      <TableRow>
-                        <TableCell
-                          colSpan={8}
-                          className="text-center py-12 text-gray-500"
-                        >
-                          {isRTL ? "لا توجد قيود" : "No entries found"}
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Pagination */}
+                {totalPages > 1 && (
+                  <div className="flex items-center justify-between mt-6 border-t pt-4">
+                    <div className="text-sm text-gray-500">
+                      {isRTL
+                        ? `عرض ${entries.length} من ${totalCount} قيد`
+                        : `Showing ${entries.length} of ${totalCount} entries`}
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.pageNumber - 1)}
+                        disabled={pagination.pageNumber === 1}
+                      >
+                        {isRTL ? "السابق" : "Previous"}
+                      </Button>
+                      <div className="flex items-center gap-1">
+                        {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                          // Simple pagination logic to show around current page
+                          let pageToShow = pagination.pageNumber;
+                          if (totalPages <= 5) {
+                            pageToShow = i + 1;
+                          } else {
+                            if (pagination.pageNumber <= 3) {
+                              pageToShow = i + 1;
+                            } else if (pagination.pageNumber >= totalPages - 2) {
+                              pageToShow = totalPages - 4 + i;
+                            } else {
+                              pageToShow = pagination.pageNumber - 2 + i;
+                            }
+                          }
+
+                          return (
+                            <Button
+                              key={pageToShow}
+                              variant={pagination.pageNumber === pageToShow ? "default" : "outline"}
+                              size="sm"
+                              className="w-8 h-8 p-0"
+                              onClick={() => handlePageChange(pageToShow)}
+                            >
+                              {pageToShow}
+                            </Button>
+                          );
+                        })}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handlePageChange(pagination.pageNumber + 1)}
+                        disabled={pagination.pageNumber === totalPages}
+                      >
+                        {isRTL ? "التالي" : "Next"}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </>
             )}
           </CardContent>
         </Card>

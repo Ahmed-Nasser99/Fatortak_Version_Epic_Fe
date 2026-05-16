@@ -20,6 +20,7 @@ import {
 import { useLanguage } from "@/contexts/LanguageContext";
 import { invoiceTemplates } from "@/components/invoice-templates";
 import { formatCurrency } from "@/Helpers/formatCurrency";
+import { exportService } from "@/services/exportService";
 
 const PublicInvoicePage = () => {
   const { t, isRTL } = useLanguage();
@@ -83,33 +84,13 @@ const PublicInvoicePage = () => {
 
   const handleDownloadPDF = async () => {
     try {
-      const { default: jsPDF } = await import("jspdf");
-      const html2canvas = await import("html2canvas");
-
       const element = document.getElementById("invoice-print-content");
       if (!element) return;
-
-      const canvas = await html2canvas.default(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: "#ffffff",
-      });
-
-      const pdf = new jsPDF("p", "mm", "a4");
-      const imgWidth = 210;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      pdf.addImage(
-        canvas.toDataURL("image/png"),
-        "PNG",
-        0,
-        0,
-        imgWidth,
-        imgHeight
+      // Use shared export logic (includes Arabic/RTL fixes)
+      await exportService.exportToPDF(
+        "invoice-print-content",
+        `invoice-${invoice.invoiceNumber}.pdf`
       );
-
-      pdf.save(`invoice-${invoice.invoiceNumber}.pdf`);
     } catch (error) {
       toast.error(t("pdfGenerationFailed"));
     }
@@ -313,7 +294,16 @@ const PublicInvoicePage = () => {
         </div>
 
         {/* Content for both display and print */}
-        <div id="invoice-print-content" className="p-8">
+        <div
+          id="invoice-print-content"
+          className="p-8"
+          dir={isRTL ? "rtl" : "ltr"}
+          style={
+            isRTL
+              ? { direction: "rtl", unicodeBidi: "plaintext", textAlign: "right" }
+              : undefined
+          }
+        >
           <SelectedTemplateComponent
             invoice={invoice}
             company={invoice?.company}

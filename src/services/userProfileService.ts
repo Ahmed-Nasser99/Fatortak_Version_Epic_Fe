@@ -32,7 +32,7 @@ export const userProfileService = {
 
   // Remove profile picture
   removeProfilePicture: async () => {
-    return apiClient.delete<boolean>("/api/UserProfile/delete-profile-picture");
+    return apiClient.post<boolean>("/api/UserProfile/delete-profile-picture");
   },
 
   // Change password
