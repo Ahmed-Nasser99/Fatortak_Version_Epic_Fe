@@ -38,9 +38,12 @@ import { Label } from "../components/ui/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
+  SelectSeparator,
 } from "../components/ui/select";
 import { formatCurrency } from "../Helpers/formatCurrency";
 import { toast } from "react-toastify";
@@ -90,6 +93,18 @@ const Custody: React.FC = () => {
     return allAccounts.filter(a => a.isPostable && (a.accountCode.startsWith("10") || a.accountCode.startsWith("11")));
   }, [allAccounts]);
 
+  // Get all other postable custody accounts (excluding selected custody account)
+  const otherCustodyAccounts = useMemo(() => {
+    const parentAccount = allAccounts.find(a => a.accountCode === "1500");
+    if (!parentAccount) return [];
+
+    return allAccounts.filter(a => 
+      a.isPostable &&
+      a.parentAccountId === parentAccount.id && 
+      (!selectedAccount || a.id !== selectedAccount.id)
+    );
+  }, [allAccounts, selectedAccount]);
+
   const giveCustodyMutation = useGiveCustodyByAccount();
   const returnCustodyMutation = useReturnCustodyByAccount();
   const replenishCustodyMutation = useReplenishCustodyByAccount();
@@ -109,7 +124,7 @@ const Custody: React.FC = () => {
     }
 
     const amountNum = parseFloat(amount);
-    const sourceAcc = cashBankAccounts.find(a => a.id === sourceAccountId);
+    const sourceAcc = allAccounts.find(a => a.id === sourceAccountId);
     
     if (sourceAcc && (sourceAcc.balance || 0) < amountNum) {
       toast.error(isRTL 
@@ -156,7 +171,7 @@ const Custody: React.FC = () => {
     }
 
     const amountNum = parseFloat(amount);
-    const sourceAcc = cashBankAccounts.find(a => a.id === sourceAccountId);
+    const sourceAcc = allAccounts.find(a => a.id === sourceAccountId);
 
     if (sourceAcc && (sourceAcc.balance || 0) < amountNum) {
       toast.error(isRTL 
@@ -426,16 +441,37 @@ const Custody: React.FC = () => {
                     <SelectValue placeholder={isRTL ? "اختر الحساب المصدر" : "Select source account"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {cashBankAccounts.map((acc) => (
-                      <SelectItem key={acc.id} value={acc.id}>
-                        <div className="flex justify-between items-center w-full gap-8">
-                          <span>{acc.accountCode} - {acc.name}</span>
-                          <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
-                            ({formatCurrency(acc.balance || 0)})
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectLabel>{isRTL ? "الخزائن والبنوك" : "Cash & Banks"}</SelectLabel>
+                      {cashBankAccounts.map((acc) => (
+                        <SelectItem key={acc.id} value={acc.id}>
+                          <div className="flex justify-between items-center w-full gap-8">
+                            <span>{acc.accountCode} - {acc.name}</span>
+                            <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                              ({formatCurrency(acc.balance || 0)})
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                    {otherCustodyAccounts.length > 0 && (
+                      <>
+                        <SelectSeparator />
+                        <SelectGroup>
+                          <SelectLabel>{isRTL ? "عهد الموظفين الأخرى" : "Other Employee Custodies"}</SelectLabel>
+                          {otherCustodyAccounts.map((acc) => (
+                            <SelectItem key={acc.id} value={acc.id}>
+                              <div className="flex justify-between items-center w-full gap-8">
+                                <span>{acc.accountCode} - {acc.name}</span>
+                                <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                                  ({formatCurrency(acc.balance || 0)})
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -495,16 +531,37 @@ const Custody: React.FC = () => {
                     <SelectValue placeholder={isRTL ? "اختر حساب الإيداع" : "Select destination account"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {cashBankAccounts.map((acc) => (
-                      <SelectItem key={acc.id} value={acc.id}>
-                        <div className="flex justify-between items-center w-full gap-8">
-                          <span>{acc.accountCode} - {acc.name}</span>
-                          <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
-                            ({formatCurrency(acc.balance || 0)})
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectLabel>{isRTL ? "الخزائن والبنوك" : "Cash & Banks"}</SelectLabel>
+                      {cashBankAccounts.map((acc) => (
+                        <SelectItem key={acc.id} value={acc.id}>
+                          <div className="flex justify-between items-center w-full gap-8">
+                            <span>{acc.accountCode} - {acc.name}</span>
+                            <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                              ({formatCurrency(acc.balance || 0)})
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                    {otherCustodyAccounts.length > 0 && (
+                      <>
+                        <SelectSeparator />
+                        <SelectGroup>
+                          <SelectLabel>{isRTL ? "عهد الموظفين الأخرى" : "Other Employee Custodies"}</SelectLabel>
+                          {otherCustodyAccounts.map((acc) => (
+                            <SelectItem key={acc.id} value={acc.id}>
+                              <div className="flex justify-between items-center w-full gap-8">
+                                <span>{acc.accountCode} - {acc.name}</span>
+                                <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                                  ({formatCurrency(acc.balance || 0)})
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -564,16 +621,37 @@ const Custody: React.FC = () => {
                     <SelectValue placeholder={isRTL ? "اختر الحساب المصدر" : "Select source account"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {cashBankAccounts.map((acc) => (
-                      <SelectItem key={acc.id} value={acc.id}>
-                        <div className="flex justify-between items-center w-full gap-8">
-                          <span>{acc.accountCode} - {acc.name}</span>
-                          <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
-                            ({formatCurrency(acc.balance || 0)})
-                          </span>
-                        </div>
-                      </SelectItem>
-                    ))}
+                    <SelectGroup>
+                      <SelectLabel>{isRTL ? "الخزائن والبنوك" : "Cash & Banks"}</SelectLabel>
+                      {cashBankAccounts.map((acc) => (
+                        <SelectItem key={acc.id} value={acc.id}>
+                          <div className="flex justify-between items-center w-full gap-8">
+                            <span>{acc.accountCode} - {acc.name}</span>
+                            <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                              ({formatCurrency(acc.balance || 0)})
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                    {otherCustodyAccounts.length > 0 && (
+                      <>
+                        <SelectSeparator />
+                        <SelectGroup>
+                          <SelectLabel>{isRTL ? "عهد الموظفين الأخرى" : "Other Employee Custodies"}</SelectLabel>
+                          {otherCustodyAccounts.map((acc) => (
+                            <SelectItem key={acc.id} value={acc.id}>
+                              <div className="flex justify-between items-center w-full gap-8">
+                                <span>{acc.accountCode} - {acc.name}</span>
+                                <span className={`text-xs font-bold ${(acc.balance || 0) > 0 ? "text-emerald-600" : "text-rose-600"}`}>
+                                  ({formatCurrency(acc.balance || 0)})
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
