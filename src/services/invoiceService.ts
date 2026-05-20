@@ -250,6 +250,9 @@ export const invoiceService = {
     if (data.chequeDueDate) {
       formData.append("chequeDueDate", data.chequeDueDate);
     }
+    if (data.paymentDate) {
+      formData.append("paymentDate", data.paymentDate);
+    }
     return apiClient.post<boolean>(`/api/invoices/${id}/payments`, formData);
   },
 };

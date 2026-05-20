@@ -34,6 +34,9 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
   const [chequeBankName, setChequeBankName] = useState<string>("");
   const [chequeDueDate, setChequeDueDate] = useState<string>("");
   const [attachment, setAttachment] = useState<File | null>(null);
+  const [paymentDate, setPaymentDate] = useState<string>(() => {
+    return new Date().toISOString().split('T')[0];
+  });
   const [loading, setLoading] = useState(false);
   const { t, isRTL } = useLanguage();
 
@@ -78,7 +81,8 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
         amount,
         paymentMethod,
         paymentAccountId: paymentAccountId || undefined,
-        attachment: attachment || undefined
+        attachment: attachment || undefined,
+        paymentDate: paymentDate ? new Date(paymentDate).toISOString() : undefined
       };
 
       if (paymentMethod === "Cheque") {
@@ -150,6 +154,20 @@ const RecordPaymentModal: React.FC<RecordPaymentModalProps> = ({ isOpen, onClose
                   required
                 />
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="paymentDate" className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                {isRTL ? "تاريخ الدفع" : "Payment Date"}
+              </Label>
+              <Input
+                id="paymentDate"
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+                required
+                className="font-mono text-sm"
+              />
             </div>
 
             <div className="space-y-2">

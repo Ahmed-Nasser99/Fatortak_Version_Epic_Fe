@@ -120,6 +120,7 @@ export interface RecordPaymentDto {
   paymentMethod?: string;
   paymentAccountId?: string;
   attachment?: string | File | null;
+  paymentDate?: string;
   chequeNumber?: string;
   chequeBankName?: string;
   chequeDueDate?: string;
